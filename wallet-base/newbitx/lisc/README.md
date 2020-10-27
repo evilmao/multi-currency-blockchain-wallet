@@ -1,0 +1,3 @@
+# Lisc
+
+A config format.
