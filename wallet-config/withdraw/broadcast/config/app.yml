@@ -1,0 +1,25 @@
+# This is a sample.
+# *** DO NOT EDIT ME ***
+
+listen: ":8080"
+
+broker:
+  url: "the-url"
+  accessKey: "the-access-key"
+  privateKey: "the-private-key"
+
+btc:
+  dsn: "dsn"
+  rpcUrl: http://111:111@127.0.0.1:30304
+  verifyInterval: 1
+  rsaKey: |
+  -----BEGIN RSA PRIVATE KEY-----
+  -----END RSA PRIVATE KEY-----
+
+eth:
+  dsn: "dsn"
+  rpcUrl: http://127.0.0.1:8545
+  verifyInterval: 1
+  rsaKey: |
+  -----BEGIN RSA PRIVATE KEY-----
+  -----END RSA PRIVATE KEY-----

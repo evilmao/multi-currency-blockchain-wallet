@@ -1,0 +1,56 @@
+# This is a sample.
+# *** DO NOT EDIT ME ***
+
+currency: "eth
+updateCurrency: False
+dsn: "dsn"
+rpcUrl: "rpc-url"
+chainID: ""
+withdraw: True
+cooldown: False
+gather: False
+autoRollback: False
+claim: False
+scheduleChecker:
+  - "all"
+
+sign:
+  url: "http://127.0.0.1:8080"
+  pass: "password"
+  timeout: 5
+
+wallet:
+  broadcastUrl: "broadcast-url"
+  maxFee: 1
+  alarmTimeout: 30
+  maxAccountRemain: 10  # 10 eth, grater than value, will do cool-down tx
+  minAccountRemain: 6   # 6 eth , less than value, will alarm
+  coldAddress: ""       # cold wallet address
+
+broker:
+  url: "url"
+  accessKey: "access-key"
+  privateKey: "private-key"
+
+claimer:
+  url: ""
+  wallet: ""
+
+transfer:
+  # request api interval second
+  feeFloatUp: 0.20
+  updateFeeInterval: 30
+  feeapis:
+    btc:
+      # 使用第三方api接口实时获取 最佳交易费(适用于bitcoin-like及Monero-like) 默认使用的是比特币
+      minTxFee: 5           # 5 Sat/byte
+      maxTxFee: 100         # 100 Sat/byte
+      apiFeeUrl: "https://api.blockchain.info/mempool/fees"
+
+email:
+  errAlarmInterval: 15
+  host: "smtp.gmail.com"
+  port: "465"
+  from: "fc.notify.1@gmail.com"
+  password: "wgcfkddggccddtwj"
+  to: "faily0117@gmail.com"

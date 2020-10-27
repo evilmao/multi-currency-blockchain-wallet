@@ -1,0 +1,20 @@
+# This is a sample.
+# *** DO NOT EDIT ME ***
+
+currency: "eth"
+listen: ":8899"
+dataPath: "./"
+fileName: 
+  - "wallet.dat"
+  - "wallet2.dat"
+  - "wallet3.dat"
+
+# signer服务私钥
+rsaKey: |
+  -----BEGIN RSA PRIVATE KEY-----
+  -----END RSA PRIVATE KEY-----
+
+# broadcast服务公钥
+rsaPubKey: |
+  -----BEGIN PUBLIC KEY-----
+  -----END PUBLIC KEY-----
