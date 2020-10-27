@@ -1,0 +1,6 @@
+
+*
+!.gitignore
+!Makefile
+!make.sh
+!build_monero.sh

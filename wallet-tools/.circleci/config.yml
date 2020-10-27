@@ -1,0 +1,23 @@
+version: 2
+jobs:
+  build:
+    working_directory: /go/src/github.com/fb996de/wallet-tools
+    docker:
+      - image: circleci/golang:1.10.3
+
+    steps:
+      - checkout
+      - run:
+          name: Update apt
+          command: sudo apt update
+      - run:
+          name: Add awscli
+          command: sudo apt install awscli
+      - run:
+          name: Library
+          command: sudo apt install build-essential cmake libboost-all-dev
+      - run:
+          name: Build
+          command: |
+            cd build
+            make
