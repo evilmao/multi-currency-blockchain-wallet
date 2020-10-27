@@ -1,4 +1,4 @@
-# Binaries for programs and plugins
+GYABH# Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
@@ -13,3 +13,20 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+
+.DS_Store
+.idea
+cmd/version.go
+cmd/broadcast/import.go
+cmd/transfer/import.go
+cmd/transfer/import_claim.go
+build/bin/*
+.idea/
+.vscode/
+debug
+.circleci/all_services.sh
+services/**/bin/*
+cmd/nodeapi/import.go
+cmd/deposit/import.go
+
