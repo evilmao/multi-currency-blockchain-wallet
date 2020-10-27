@@ -151,7 +151,7 @@ make
    # trxAirDropAddress: 0
    ```
 
-3.  运行
+3. 运行
 
    ```shell
    ./syncd-eth -c path/to/app.yml
@@ -173,7 +173,6 @@ make
    eth:
    	rsaKey:---
    ```
-
 3. 运行
 
    ```shell
@@ -203,15 +202,13 @@ make
      -----END PUBLIC KEY-----
    ```
 
-3.  运行
-
+3. 运行
    ```shell
    # 1. 启动
    ./signer -c path/to/app.yml
    
    # 2. 输入生成 rsa密钥对时的密码前三位
    password: 123
-   
    ```
 
 #### 4. transfer (提现服务)
@@ -247,7 +244,6 @@ make
    ```
 
 3. 启动
-
    ```shell
    ./eth-withdraw -c path/to/app.yml
    ```
