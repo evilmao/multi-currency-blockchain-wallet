@@ -58,77 +58,74 @@ make
 生成钱包, 充值地址, sql文件, txt文件
 
 1. Generate wallet, address, sql file for deposit.
-```shell
-# 生成100个eth的普通地址和一个系统地址, 存放在当前目录下, 密码为 123456
-> ./bin/genwallet -c ETH -n 100 -N 1 -d . -p 123456
-> ll 
-eth-deposit-address-1.sql   # 充值地址, 用于deposit程序, 关联 Address表
-eth-deposit-addrs.txt       # 充值地址, 导入到交易所中数据库使用
-eth-withdraw-address-1.sql  # 提现程序使用,普通地址, 关联提现数据库Address表
-eth-withdraw-address-2.sql  # 提现程序使用, 系统地址, 关联提现数据库Address表
-wallet.dat                  # 钱包文件, 用于签名程序
-wallet.dat.meta             # 钱包文件, 用于签名    
-```
+    ```shell
+    # 生成100个eth的普通地址和一个系统地址, 存放在当前目录下, 密码为 123456
+    > ./bin/genwallet -c ETH -n 100 -N 1 -d . -p 123456
+    > ll 
+    eth-deposit-address-1.sql   # 充值地址, 用于deposit程序, 关联 Address表
+    eth-deposit-addrs.txt       # 充值地址, 导入到交易所中数据库使用
+    eth-withdraw-address-1.sql  # 提现程序使用,普通地址, 关联提现数据库Address表
+    eth-withdraw-address-2.sql  # 提现程序使用, 系统地址, 关联提现数据库Address表
+    wallet.dat                  # 钱包文件, 用于签名程序
+    wallet.dat.meta             # 钱包文件, 用于签名    
+    ```
 
 2. genrsa generate rsa key pair
 
-```shell
-> ./bin/genrsa -f broadcast,signer,transfer
-> ll
-broadcast_rsa                       # 广播服务私钥
-broadcast_rsa.public                # 广播服务公钥
-signer_rsa                          # 签名私钥
-signer_rsa.public                   # 签名公钥    
-transfer_rsa                        # 交易公钥
-transfer_rsa.public                 # 交易私钥
-```
+    ```shell
+    > ./bin/genrsa -f broadcast,signer,transfer
+    > ll
+    broadcast_rsa                       # 广播服务私钥
+    broadcast_rsa.public                # 广播服务公钥
+    signer_rsa                          # 签名私钥
+    signer_rsa.public                   # 签名公钥    
+    transfer_rsa                        # 交易公钥
+    transfer_rsa.public                 # 交易私钥
+    ```
 
 ### 三. wallet-deposit (充值程序)
 
 #### 上币配置文件修改
 
 1. 在 `build/make/` 目录下添加相应币种的 makefile 文件。
-```shll
-> ls -l
-total 72
--rw-r--r--  1 ubuntu  staff   100B  9 14 16:23 btc.mk
--rw-r--r--  1 ubuntu  staff    47B  9 14 16:23 eos.mk
--rw-r--r--  1 ubuntu  staff    72B  9 14 16:23 eth.mk
--rw-r--r--  1 ubuntu  staff   185B  9 14 16:23 iota.mk
--rwxr-xr-x  1 ubuntu  staff   563B  9 14 16:23 make.sh
--rw-r--r--  1 ubuntu  staff    62B  9 14 16:23 nodeapi.mk
--rw-r--r--  1 ubuntu  staff    51B  9 14 16:23 ripple.mk
--rw-r--r--  1 ubuntu  staff    90B  9 13 14:15 tool.mk
--rw-r--r--  1 ubuntu  staff    49B  9 14 16:23 usdt.mk
-```
+    ```shll
+    > ls -l
+    total 72
+    -rw-r--r--  1 ubuntu  staff   100B  9 14 16:23 btc.mk
+    -rw-r--r--  1 ubuntu  staff    47B  9 14 16:23 eos.mk
+    -rw-r--r--  1 ubuntu  staff    72B  9 14 16:23 eth.mk
+    -rw-r--r--  1 ubuntu  staff   185B  9 14 16:23 iota.mk
+    -rwxr-xr-x  1 ubuntu  staff   563B  9 14 16:23 make.sh
+    -rw-r--r--  1 ubuntu  staff    62B  9 14 16:23 nodeapi.mk
+    -rw-r--r--  1 ubuntu  staff    51B  9 14 16:23 ripple.mk
+    -rw-r--r--  1 ubuntu  staff    90B  9 13 14:15 tool.mk
+    -rw-r--r--  1 ubuntu  staff    49B  9 14 16:23 usdt.mk
+    ```
 2. 修改 `build/Makefile` 文件。
 
-```shell
-build: btc eth usdt ripple iota eos
-```
+    ```shell
+    build: btc eth usdt ripple iota eos
+    ```
 
 3. build
 
-安装 golang 环境, 1.13版本以上,环境变量,设置好`GOMODULE=on`
-
-```shell
-cd build
-make
-```
-或直接使用go编译
-```shell
-cd ../cmd/deposit
-go build -o deposit-eth main.go
-```
+    安装 golang 环境, 1.13版本以上,环境变量,设置好`GOMODULE=on`
+    ```shell
+    cd build
+    make
+    ```
+    或直接使用go编译
+    ```shell
+    cd ../cmd/deposit
+    go build -o deposit-eth main.go
+    ```
 
 4. 运行
 
-修改配置, 将`wallet-confi/deposit/config/app.yml`与主程序`eth`到同一目录
-```shell
-./deposit-eth -c app.yml
-```
-
-
+    修改配置, 将`wallet-confi/deposit/config/app.yml`与主程序`eth`到同一目录
+    ```shell
+    ./deposit-eth -c app.yml
+    ```
 
 ### 四. wallet-transfer (交易)
 
@@ -136,8 +133,6 @@ go build -o deposit-eth main.go
 - broadcast 交易广播
 - signer 交易签名
 - transfer (提现, 热转冷, 归集, 资产余额检查, 告警)
-
-
 
 #### 1. syncd 区块同步
 

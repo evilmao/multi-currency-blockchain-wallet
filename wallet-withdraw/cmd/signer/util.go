@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	signStr, _ := rsa.B64Encrypt("password后四位", "signer密钥对公钥")
+	signStr, _ := rsa.B64Encrypt("password后3位", "signer密钥对公钥")
 	fmt.Println(signStr)
 }
