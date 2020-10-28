@@ -8,7 +8,107 @@ upex-wallet钱包, 用于`充值`, `提现`, `热转冷`,`归集` 操作; 批量
 
 ### 一.项目结构
 ```shell
-
+.
+├── go.mod															# 第三方依赖包
+├── go.sum															# 第三方包版本管理
+├── README.MD														# README.MD
+├── vendor															# Vendor本地第三方包
+├── wallet-base														# wallet-base 基础组件
+│   ├── api
+│   ├── blockchain
+│   ├── cmd
+│   ├── currency
+│   ├── db
+│   │   └── db.go
+│   ├── jsonrpc
+│   ├── libs
+│   ├── main.go
+│   ├── models														# 数据库表结构及方法			
+│   │   ├── account.go												# account表, 地址最终余额
+│   │   ├── account_test.go											# account测试文件
+│   │   ├── address.go												# address表,充值地址
+│   │   ├── blockinfo.go											# blockinfo表,最新区块详情
+│   │   ├── currency.go												# currency表, 合约地址表
+│   │   ├── models.go												# 初始化数据库表方法
+│   │   ├── tx.go													# deposit_tx表,充值记录
+│   │   └── utxo.go													# utxo表,utxo交易记录
+│   ├── monitor														# data-dog服务监控
+│   ├── newbitx														# 依赖包
+│   ├── service														# service规范
+│   │   ├── service.go
+│   │   └── worker.go
+│   ├── util														# 工具函数
+│   └── viper														# yml文件读取配置方法
+├── wallet-config													# 配置文件
+│   ├── deposit														# depoist/syncd程序配置文件
+│   │   └── config
+│   └── withdraw													# 提现相关配置
+│       ├── broadcast												# 交易广播配置
+│       ├── signer												    # 交易签名配置
+│       └── transfer												# 提现/热转冷/归集配置
+├── wallet-deposit													# deposit主程序
+│   ├── base														# 数据库表初始化
+│   │   └── models
+│   ├── build														# make build脚本
+│   ├── cmd															# 命令行启动主程序
+│   │   ├── cmd.go
+│   │   ├── deposit													# deposit服务主程序main函数
+│   │   └── version.go
+│   ├── deposit														# 业务代码
+│   │   ├── notifier.go												# notifier服务,充值后实时与交易所进行反馈
+│   │   ├── util.go
+│   │   ├── util_test.go
+│   │   └── worker.go												# 区块同步,解析,入账
+│   ├── rpc															# rpc相关方法
+│   │   ├── blockscanrpc.go											# 定义区块扫描相关方法
+│   │   ├── cache.go												# 区块缓存处理
+│   │   ├── eth														# eth rpc相关方法实现								
+│   │   └── rpc.go													# rpc接口定义	
+│   ├── services
+│   └── syncer														# 区块同步
+│       ├── fetcher.go												# 区块获取
+│       └── syncer.go												# 同步逻辑
+├── wallet-tools													# wallet-tools主程序
+│   ├── base
+│   ├── build														# make build构建脚本
+│   └── cmd
+│       ├── cloneaccount
+│       ├── cmdserver
+│       ├── ecdsautil
+│       ├── genrsa													# 生成密钥对
+│       ├── genwallet												# 生成地址,公钥,钱包文件,sql文件
+│       ├── rundeck
+│       └── statuschecker
+└── wallet-withdraw													# withdraw主程序
+    ├── base
+    ├── broadcast													# 广播交易逻辑代码
+    ├── build														# make build脚本
+    ├── cmd															# 命令行启动程序
+    │   ├── broadcast												# broadcast main入口
+    │   ├── cmd.go													# 命令行解析实现
+    │   ├── signer													# signer main 入口
+    │   ├── syncd													# syncd main入口
+    │   ├── transfer												# transfer main入口	
+    │   └── version.go
+    ├── signer														# 交易签名逻辑
+    │   ├── client.go												# 签名机客户端调用实现逻辑
+    │   ├── client_test.go
+    │   ├── keystore.go												# 签名
+    │   └── server.go												# 签名机服务端实现
+    ├── syncd														# 区块同步逻辑
+    │   ├── notifier.go
+    │   ├── util.go
+    │   └── worker.go
+    └── transfer													# 提现闲逛逻辑
+        ├── alarm													# 告警逻辑
+        ├── checker													# 地址余额监控逻辑
+        ├── cooldown												# 热转冷转账逻辑	
+        ├── gather													# 归集逻辑
+        ├── helper.go			
+        ├── rollback												
+        ├── txbuilder												# 核心代码: 交易构建,打包
+        ├── utxofee													# 实时获取最佳手续费(btc)				
+        └── withdraw												# 提现逻辑
 ```
 
 ### 二.wallet-tools(工具)
