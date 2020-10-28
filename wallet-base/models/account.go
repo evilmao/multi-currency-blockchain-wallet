@@ -109,9 +109,9 @@ func GetMatchedAccount(amount string, addressType uint) *Account {
 }
 
 // GetAllMatchedAccounts gets matched accounts for withdraw.
-func GetAllMatchedAccounts(amount string, symbolID uint, addressType uint) []*Account {
+func GetAllMatchedAccounts(amount string, addressType uint) []*Account {
 	var accounts []*Account
-	db.Default().Where("balance > ? and symbol_id = ? and `account_type` = ?", amount, symbolID, addressType).Find(&accounts)
+	db.Default().Where("balance > ?  and `account_type` = ?", amount, addressType).Find(&accounts)
 	return accounts
 }
 

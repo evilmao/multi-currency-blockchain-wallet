@@ -80,18 +80,18 @@ func GetSpentUTXOs(spentID string) []*UTXO {
 }
 
 // GetUTXOsByAddress gets utxos by the address.
-func GetUTXOsByAddress(symbolID uint, address string) []*UTXO {
+func GetUTXOsByAddress(address string) []*UTXO {
 	var utxos []*UTXO
-	db.Default().Where("symbol_id = ? and address = ? and status = ?",
-		symbolID, address, UTXOStatusRecord).Find(&utxos)
+	db.Default().Where("address = ? and status = ?",
+		address, UTXOStatusRecord).Find(&utxos)
 	return utxos
 }
 
 // GetSmallUTXOsByAddress gets utxos that amount < maxAmount by the address.
-func GetSmallUTXOsByAddress(symbolID uint, address string, maxAmount decimal.Decimal) []*UTXO {
+func GetSmallUTXOsByAddress(address string, maxAmount decimal.Decimal) []*UTXO {
 	var utxos []*UTXO
-	db.Default().Where("symbol_id = ? and address = ? and amount < ? and status = ?",
-		symbolID, address, maxAmount, UTXOStatusRecord).Find(&utxos)
+	db.Default().Where("address = ? and amount < ? and status = ?",
+		address, maxAmount, UTXOStatusRecord).Find(&utxos)
 	return utxos
 }
 
