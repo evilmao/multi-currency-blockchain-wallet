@@ -11,6 +11,8 @@ github.com/GincoInc/jsonrpc
 ## explicit
 github.com/GincoInc/zillean
 github.com/GincoInc/zillean/proto
+# github.com/allegro/bigcache v1.2.1
+## explicit
 # github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
 ## explicit
 github.com/asaskevich/govalidator
