@@ -9,16 +9,11 @@ import (
 
 	"upex-wallet/wallet-base/cmd"
 	"upex-wallet/wallet-base/db"
+	"upex-wallet/wallet-base/newbitx/misclib/log"
+	"upex-wallet/wallet-base/newbitx/misclib/utils"
 	"upex-wallet/wallet-base/service"
 	"upex-wallet/wallet-base/util"
 	bviper "upex-wallet/wallet-base/viper"
-
-	"upex-wallet/wallet-base/newbitx/misclib/log"
-	"upex-wallet/wallet-base/newbitx/misclib/utils"
-
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/base/models"
 	lcmd "upex-wallet/wallet-withdraw/cmd"
@@ -29,6 +24,9 @@ import (
 	"upex-wallet/wallet-withdraw/transfer/txbuilder"
 	"upex-wallet/wallet-withdraw/transfer/utxofee"
 	"upex-wallet/wallet-withdraw/transfer/withdraw"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (

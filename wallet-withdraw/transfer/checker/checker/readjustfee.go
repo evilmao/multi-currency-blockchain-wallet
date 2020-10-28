@@ -95,7 +95,7 @@ func (a *FeeReadJuster) readjustFee(tx *models.Tx) error {
 		}
 	}
 
-	err = tx.Update(bmodels.M{
+	err = tx.Update(models.M{
 		"readjusted_fee": true,
 	}, nil)
 	if err != nil {

@@ -3,16 +3,13 @@ package txbuilder
 import (
 	"fmt"
 
-	"upex-wallet/wallet-base/newbitx/misclib/log"
-
-	"github.com/shopspring/decimal"
-
-	bmodels "upex-wallet/wallet-base/models"
-
 	"upex-wallet/wallet-base/currency"
-
+	bmodels "upex-wallet/wallet-base/models"
+	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-withdraw/base/models"
 	"upex-wallet/wallet-withdraw/transfer/alarm"
+
+	"github.com/shopspring/decimal"
 )
 
 var (
@@ -50,7 +47,7 @@ func (b *UTXOModelBuilder) newCreateBuildExtInfo(fromAccounts []*bmodels.Account
 			break
 		}
 		// according the address in account table select lowest required utxos
-		utxos, ok := models.SelectUTXOWithTransFee(uint(task.Code), account.Address, metaData.MaxTxInLen-utxoLen, true)
+		utxos, ok := models.SelectUTXOWithTransFee(account.Address, metaData.MaxTxInLen-utxoLen, true)
 		if !ok {
 			return nil, fmt.Errorf("Balance of %s mismatch to utxo, greater ", account.Address)
 		}
@@ -175,7 +172,7 @@ func (b *UTXOModelBuilder) buildBySuggestTransactionFee(metaData *MetaData, task
 		return nil, fmt.Errorf("transfer amount must be greater than zero")
 	}
 	// filter Accounts
-	fromAccounts := bmodels.GetAllMatchedAccounts(filterFee.String(), uint(task.Code), bmodels.AddressTypeSystem)
+	fromAccounts := bmodels.GetAllMatchedAccounts(filterFee.String(), bmodels.AddressTypeSystem)
 	// 1. sort Accounts according account.Balance
 	fromAccounts, ok := models.SortAccountsByBalance(fromAccounts)
 
@@ -250,12 +247,12 @@ func (b *UTXOModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 	buildExt := func(metaData *MetaData) (*BuildExtInfo, error) {
 		// Build from normal address.
 		filterFee := b.OneInOutPutFee(txType)
-		fromAccounts := bmodels.GetAllMatchedAccounts(filterFee.String(), uint(task.Code), bmodels.AddressTypeNormal)
+		fromAccounts := bmodels.GetAllMatchedAccounts(filterFee.String(), bmodels.AddressTypeNormal)
 		if len(fromAccounts) > 0 {
 			return createBuildExtInfo(
 				fromAccounts,
 				func(acc *bmodels.Account, limitLen int) ([]*bmodels.UTXO, decimal.Decimal, bool, error) {
-					utxos, totalIn, ok := models.SelectUTXO(uint(task.Code), acc.Address, decimal.Zero, limitLen)
+					utxos, totalIn, ok := models.SelectUTXO(acc.Address, decimal.Zero, limitLen)
 					return utxos, totalIn, ok, nil
 				},
 				metaData.MaxTxInLen,
@@ -263,14 +260,14 @@ func (b *UTXOModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 		}
 
 		// Build from system address.
-		fromAccounts = bmodels.GetAllMatchedAccounts(filterFee.String(), uint(task.Code), bmodels.AddressTypeSystem)
+		fromAccounts = bmodels.GetAllMatchedAccounts(filterFee.String(), bmodels.AddressTypeSystem)
 		if len(fromAccounts) > 0 {
 			return createBuildExtInfo(
 				fromAccounts,
 				func(acc *bmodels.Account, limitLen int) ([]*bmodels.UTXO, decimal.Decimal, bool, error) {
 					// Set maxSmallUTXOAmount = maxOutAmount * 70%.
 					maxSmallUTXOAmount := maxOutAmount.Mul(decimal.NewFromFloat(0.7))
-					utxos, totalIn, ok := models.SelectSmallUTXO(uint(task.Code), acc.Address, maxSmallUTXOAmount, limitLen)
+					utxos, totalIn, ok := models.SelectSmallUTXO(acc.Address, maxSmallUTXOAmount, limitLen)
 					return utxos, totalIn, ok, nil
 				},
 				metaData.MaxTxInLen,

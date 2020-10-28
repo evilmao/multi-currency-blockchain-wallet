@@ -259,9 +259,8 @@ func GetUnReadjustedFeeTxs(codes []int) []*Tx {
 }
 
 // SelectUTXOWithTransFee sort utxo accoring utxo.Amount
-func SelectUTXOWithTransFee(symbolID uint, address string, limitLen int, bigOrder bool) ([]*models.UTXO, bool) {
-	// 获取 address下所有的UTXO详情--utxo 切片 (数据库集)
-	utxos := models.GetUTXOsByAddress(symbolID, address)
+func SelectUTXOWithTransFee(address string, limitLen int, bigOrder bool) ([]*models.UTXO, bool) {
+	utxos := models.GetUTXOsByAddress(address)
 
 	if len(utxos) == 0 {
 		return nil, false

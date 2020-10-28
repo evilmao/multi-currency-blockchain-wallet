@@ -6,16 +6,14 @@ import (
 	"strings"
 
 	bmodels "upex-wallet/wallet-base/models"
-	"upex-wallet/wallet-base/service"
-
 	"upex-wallet/wallet-base/newbitx/misclib/log"
-
-	"github.com/jinzhu/gorm"
-
+	"upex-wallet/wallet-base/service"
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/base/models"
 	"upex-wallet/wallet-withdraw/transfer"
 	"upex-wallet/wallet-withdraw/transfer/txbuilder"
+
+	"github.com/jinzhu/gorm"
 )
 
 type Worker struct {

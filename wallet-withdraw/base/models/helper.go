@@ -67,20 +67,19 @@ func selectUTXO(utxos []*models.UTXO, amount decimal.Decimal, limitLen int, bigO
 }
 
 // SelectUTXO selects utxos to match the amount (if amount > 0) and in the limit length.
-func SelectUTXO(symbolID uint, address string, amount decimal.Decimal, limitLen int) ([]*models.UTXO, decimal.Decimal, bool) {
-	// 获取 address下所有的UTXO详情--utxo 切片 (数据库集)
-	utxos := models.GetUTXOsByAddress(symbolID, address)
+func SelectUTXO(address string, amount decimal.Decimal, limitLen int) ([]*models.UTXO, decimal.Decimal, bool) {
+	utxos := models.GetUTXOsByAddress(address)
 	return selectUTXO(utxos, amount, limitLen, true)
 }
 
 // SelectSmallUTXO selects small-utxos in [limitLen/3, limitLen] length.
-func SelectSmallUTXO(symbolID uint, address string, maxAmount decimal.Decimal, limitLen int) ([]*models.UTXO, decimal.Decimal, bool) {
+func SelectSmallUTXO(address string, maxAmount decimal.Decimal, limitLen int) ([]*models.UTXO, decimal.Decimal, bool) {
 	if maxAmount.LessThanOrEqual(decimal.Zero) {
 		return nil, decimal.Zero, false
 	}
 
 	minLen := limitLen / 3
-	utxos := models.GetSmallUTXOsByAddress(symbolID, address, maxAmount)
+	utxos := models.GetSmallUTXOsByAddress(address, maxAmount)
 
 	if len(utxos) < minLen {
 		return nil, decimal.Zero, false
