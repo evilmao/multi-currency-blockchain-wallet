@@ -9,6 +9,7 @@ require (
 	github.com/GincoInc/go-crypto v1.2.0
 	github.com/GincoInc/jsonrpc v0.0.0-20200410064044-1e3ac997f915 // indirect
 	github.com/GincoInc/zillean v0.0.0-20190306093118-d0d008ae1706
+	github.com/allegro/bigcache v1.2.1 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
 	github.com/btcsuite/btcd v0.20.1-beta // indirect
 	github.com/buger/jsonparser v1.0.0
