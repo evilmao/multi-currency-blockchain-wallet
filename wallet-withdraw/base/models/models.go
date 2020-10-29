@@ -13,11 +13,11 @@ func Init(db *gorm.DB) error {
 		&Tx{},
 		&TxIn{},
 		&AddrInfo{},
-		&ColdInfo{},
 		&BroadcastTask{},
 		&SuggestFee{},
 		&models.Address{},
 		&models.Account{},
 		&models.UTXO{},
+		// &ColdInfo{},
 	).Error
 }

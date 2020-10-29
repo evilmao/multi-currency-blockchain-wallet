@@ -53,9 +53,8 @@ func (b *Broadcaster) BroadcastTx(txInfo *txbuilder.TxInfo, task *models.Tx) err
 func CheckBalanceEnough(cfg *config.Config, txIns []*txbuilder.TxIn) error {
 	for _, in := range txIns {
 		if in.Account.Balance.LessThan(in.Cost) {
-			currency, _ := config.CC.Currency(int(in.Account.SymbolID))
-			return fmt.Errorf("balance of %s(%d) address %s not enought, need: %s, got: %s",
-				currency, in.Account.SymbolID, in.Account.Address, in.Cost, in.Account.Balance)
+			return fmt.Errorf("balance of %s address %s not enought, need: %s, got: %s",
+				in.Account.Symbol, in.Account.Address, in.Cost, in.Account.Balance)
 		}
 	}
 	return nil
@@ -67,7 +66,7 @@ func SpendTxIns(cfgCode int, sequenceID string, txIns []*txbuilder.TxIn, txNonce
 		dbIn := models.TxIn{
 			TxSequenceID: sequenceID,
 			Address:      in.Account.Address,
-			Code:         int(in.Account.SymbolID),
+			Symbol:       in.Account.Symbol,
 			Amount:       in.Cost,
 		}
 		dbIn.FirstOrCreate()
@@ -78,8 +77,8 @@ func SpendTxIns(cfgCode int, sequenceID string, txIns []*txbuilder.TxIn, txNonce
 			"op":      "sub",
 		})
 		if err != nil {
-			return fmt.Errorf("db update account (address: %s, symbolID: %d) balance failed, %v",
-				in.Account.Address, in.Account.SymbolID, err)
+			return fmt.Errorf("db update account (address: %s, symbol: %s) balance failed, %v",
+				in.Account.Address, in.Account.Symbol, err)
 		}
 
 		// Update nonce.
@@ -109,8 +108,8 @@ func SpendTxIns(cfgCode int, sequenceID string, txIns []*txbuilder.TxIn, txNonce
 				return addr.Discard()
 			})
 			if err != nil {
-				log.Errorf("db discard address (address: %s, symbolID: %d) failed, %v",
-					in.Account.Address, in.Account.SymbolID, err)
+				log.Errorf("db discard address (address: %s, symbol: %s) failed, %v",
+					in.Account.Address, in.Account.Symbol, err)
 			}
 		}
 	}

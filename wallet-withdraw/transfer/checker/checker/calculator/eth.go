@@ -52,7 +52,7 @@ func EthCalc(cfg *config.Config, txHash string) (*checker.ReadjustFeeInfo, error
 	remainGas := gasLimit.Sub(gasUsed)
 	info := &checker.ReadjustFeeInfo{
 		RemainFee: remainGas.Mul(gasPrice).Mul(decimal.New(1, -geth.Precision)),
-		FeeCode:   int(cfg.Code),
+		FeeSymbol: cfg.Currency,
 	}
 	return info, nil
 }

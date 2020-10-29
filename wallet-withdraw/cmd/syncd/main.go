@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"upex-wallet/wallet-config/deposit/config"
+	_ "upex-wallet/wallet-deposit/cmd"
 	"upex-wallet/wallet-deposit/rpc"
 	"upex-wallet/wallet-withdraw/cmd"
 )

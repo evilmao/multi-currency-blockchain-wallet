@@ -33,7 +33,6 @@ type Worker struct {
 	cfg                    *config.Config
 	rpcClient              rpc.RPC
 	currentBlock           *rpc.Block
-	notifier               *notifier
 	notifierSrv            *service.Service
 	updateMonitor          *util.UpdateMonitor
 	lastLogInsertBlockTime time.Time
@@ -78,9 +77,6 @@ func (w *Worker) Init() error {
 		}
 	}, nil)
 
-	if w.notifierSrv != nil {
-		go w.notifierSrv.Start()
-	}
 	return nil
 }
 
@@ -168,10 +164,6 @@ func (w *Worker) Work() {
 		log.Infof("%s, import new block, height: %d, hash: %s, deposit-txs: %d",
 			workerTag, w.currentBlock.Height, w.currentBlock.Hash, len(w.currentBlock.Txs))
 		w.lastLogInsertBlockTime = now
-	}
-
-	if w.notifier != nil {
-		w.notifier.tryNotify()
 	}
 
 	if w.updateMonitor != nil {

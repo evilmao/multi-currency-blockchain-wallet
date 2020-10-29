@@ -14,7 +14,7 @@ import (
 
 type ReadjustFeeInfo struct {
 	RemainFee decimal.Decimal
-	FeeCode   int
+	FeeSymbol string
 }
 
 type Calculator func(*config.Config, string) (*ReadjustFeeInfo, error)
@@ -75,17 +75,17 @@ func (a *FeeReadJuster) readjustFee(tx *models.Tx) error {
 		}
 
 		for _, in := range txIns {
-			if in.Code == info.FeeCode {
+			if in.Symbol == info.FeeSymbol {
 				acc := &bmodels.Account{
-					Address:  in.Address,
-					SymbolID: uint(in.Code),
+					Address: in.Address,
+					Symbol:  in.Symbol,
 				}
 				err = acc.ForUpdate(bmodels.M{
 					"op":      "add",
 					"balance": info.RemainFee,
 				})
 				if err != nil {
-					return fmt.Errorf("db update account (%s, %d) balance failed, %v", acc.Address, acc.SymbolID, err)
+					return fmt.Errorf("db update account (%s, %s) balance failed, %v", acc.Address, acc.Symbol, err)
 				}
 
 				log.Infof("checker, readjust tx fee, hash: %s, remainFee: %s, fromAddress: %s",

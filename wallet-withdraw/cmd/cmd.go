@@ -28,9 +28,9 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "wallet deposit syncer",
-	Short: "wallet deposit syncer",
-	Long:  `syncer fetch block from blockchain node`,
+	Use:   "wallet withdraw sync",
+	Short: "wallet withdraw sync",
+	Long:  `sync fetch block from blockchain node`,
 }
 
 func init() {
@@ -135,12 +135,12 @@ func Exec(createRPCClient rpc.RPCCreator) error {
 		go heartbeat()
 
 		// data-dog monitor and tracer.
-		go monitor.ListenAndServe(cfg.ListenAddress)
-		statusReporter := monitor.NewStatsdReporter(cfg.StatusAddress, "wallet-deposit", nil)
-		go statusReporter.Start()
-
-		tracer.Start(tracer.WithServiceName(serviceName))
-		defer tracer.Stop()
+		// go monitor.ListenAndServe(cfg.ListenAddress)
+		// statusReporter := monitor.NewStatsdReporter(cfg.StatusAddress, "wallet-deposit", nil)
+		// go statusReporter.Start()
+		//
+		// tracer.Start(tracer.WithServiceName(serviceName))
+		// defer tracer.Stop()
 
 		// initial db
 		dbInstance, err := db.New(cfg.DSN, serviceName)
@@ -158,9 +158,9 @@ func Exec(createRPCClient rpc.RPCCreator) error {
 			panic("failed to create rpc client")
 		}
 
-		syncdSrv := service.NewWithInterval(syncd.New(cfg, rpcClient), time.Millisecond)
-		defer syncdSrv.Stop()
-		if err = syncdSrv.Start(); err != nil {
+		syncSrv := service.NewWithInterval(syncd.New(cfg, rpcClient), time.Millisecond)
+		defer syncSrv.Stop()
+		if err = syncSrv.Start(); err != nil {
 			panic(err)
 		}
 	}
