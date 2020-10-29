@@ -61,8 +61,8 @@ func (w *notifier) Work() {
 		}
 	}
 
-	symbols := []string{strings.ToUpper(w.cfg.Currency)}
-	txs := models.GetUnfinishedTxs(symbols)
+	symbol := strings.ToLower(w.cfg.Currency)
+	txs := models.GetUnfinishedTxs(symbol)
 
 	for i := range txs {
 		tx := &txs[i]

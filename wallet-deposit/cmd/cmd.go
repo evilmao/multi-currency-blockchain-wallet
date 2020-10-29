@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"upex-wallet/wallet-base/db"
-	"upex-wallet/wallet-base/monitor"
 	"upex-wallet/wallet-base/service"
 	"upex-wallet/wallet-base/util"
 	"upex-wallet/wallet-config/deposit/config"
@@ -20,7 +19,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 var (
@@ -29,9 +27,9 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "wallet deposit syncer",
-	Short: "wallet deposit syncer",
-	Long:  `syncer fetch block from blockchain node`,
+	Use:   "wallet deposit sync",
+	Short: "wallet deposit sync",
+	Long:  `sync fetch block from blockchain node`,
 }
 
 func init() {
@@ -86,12 +84,12 @@ func Execute(run Runnable) error {
 		go heartbeat()
 
 		// data-dog monitor and tracer.
-		go monitor.ListenAndServe(cfg.ListenAddress)
-		statusReporter := monitor.NewStatsdReporter(cfg.StatusAddress, "wallet-deposit", nil)
-		go statusReporter.Start()
-
-		tracer.Start(tracer.WithServiceName(serviceName))
-		defer tracer.Stop()
+		// go monitor.ListenAndServe(cfg.ListenAddress)
+		// statusReporter := monitor.NewStatsdReporter(cfg.StatusAddress, "wallet-deposit", nil)
+		// go statusReporter.Start()
+		//
+		// tracer.Start(tracer.WithServiceName(serviceName))
+		// defer tracer.Stop()
 
 		// initial db
 		dbInstance, err := db.New(cfg.DSN, serviceName)
@@ -136,12 +134,12 @@ func Exec(createRPCClient rpc.RPCCreator) error {
 		go heartbeat()
 
 		// data-dog monitor and tracer.
-		go monitor.ListenAndServe(cfg.ListenAddress)
-		statusReporter := monitor.NewStatsdReporter(cfg.StatusAddress, "wallet-deposit", nil)
-		go statusReporter.Start()
-
-		tracer.Start(tracer.WithServiceName(serviceName))
-		defer tracer.Stop()
+		// go monitor.ListenAndServe(cfg.ListenAddress)
+		// statusReporter := monitor.NewStatsdReporter(cfg.StatusAddress, "wallet-deposit", nil)
+		// go statusReporter.Start()
+		//
+		// tracer.Start(tracer.WithServiceName(serviceName))
+		// defer tracer.Stop()
 
 		// initial db
 		dbInstance, err := db.New(cfg.DSN, serviceName)

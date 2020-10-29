@@ -4,9 +4,8 @@ import (
 	"strings"
 
 	"upex-wallet/wallet-base/models"
-	"upex-wallet/wallet-config/deposit/config"
-
 	"upex-wallet/wallet-base/newbitx/misclib/log"
+	"upex-wallet/wallet-config/deposit/config"
 )
 
 type Block struct {
@@ -37,7 +36,7 @@ func Register(currencyType string, creator RPCCreator) {
 		log.Errorf("rpc.Register, duplicate of %s\n", currencyType)
 		return
 	}
-
+	log.Infof("Register success:[%s]", currencyType)
 	rpcCreators[currencyType] = creator
 }
 
