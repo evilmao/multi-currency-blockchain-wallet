@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	maxBlockCount = 1000
+	maxBlockCount = 10
 )
 
 func blockInnerIdx(height uint64) uint {

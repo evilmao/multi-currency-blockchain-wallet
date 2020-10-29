@@ -37,9 +37,7 @@ type Tx struct {
 	Confirm          uint16          `gorm:"type:int" json:"confirm_times"`
 	Symbol           string          `gorm:"size:10" json:"symbol"`
 	Type             uint16          `gorm:"column:tx_type;type:tinyint" json:"tx_type"`
-	AuditRetryCount  uint16          `gorm:"type:int" json:"audit_retry_count"`
 	NotifyRetryCount uint16          `gorm:"type:int" json:"notify_retry_count"`
-	AuditStatus      uint16          `gorm:"type:tinyint" json:"audit_status"`
 	NotifyStatus     uint16          `gorm:"type:tinyint" json:"notify_status"`
 	Version          uint16          `gorm:"type:bigint;default:0" json:"version"`
 	InnerIndex       uint16          `gorm:"type:int" json:"inner_index"`
@@ -81,13 +79,8 @@ func (tx *Tx) Insert() (err error) {
 		return nil
 	}
 
-	code, ok := GetCode(tx.Symbol)
-	if !ok {
-		return fmt.Errorf("can't get code of currency %s", tx.Symbol)
-	}
-
 	var acc Account
-	err = db.Default().Where(Account{SymbolID: uint(code), Address: tx.Address}).First(&acc).Error
+	err = db.Default().Where(Account{Address: tx.Address}).First(&acc).Error
 	if err != nil && err == gorm.ErrRecordNotFound {
 		addressInfo := GetAddressInfo(nil, tx.Address)
 		if addressInfo.Address != tx.Address {
@@ -96,12 +89,12 @@ func (tx *Tx) Insert() (err error) {
 
 		zero := decimal.New(0, 0)
 		acc = Account{
-			Address:  tx.Address,
-			Balance:  &zero,
-			Nonce:    0,
-			SymbolID: uint(code),
-			Version:  addressInfo.Version,
-			Type:     addressInfo.Type,
+			Address: tx.Address,
+			Balance: &zero,
+			Nonce:   0,
+			Symbol:  tx.Symbol,
+			Version: addressInfo.Version,
+			Type:    addressInfo.Type,
 		}
 		err = acc.Insert()
 		if err != nil {
@@ -126,75 +119,6 @@ func (tx *Tx) Insert() (err error) {
 
 	return nil
 }
-
-// Insert inserts tx to transaction table.
-//func (tx *Tx) Insert() (err error) {
-//	defer func() {
-//		if err != nil {
-//			err = fmt.Errorf("insert transaction %s failed, %v",
-//				tx.Hash, err)
-//			log.Error(err)
-//		}
-//	}()
-//
-//	if TxExistedBySeqID(tx.SequenceID) {
-//		return nil
-//	}
-//
-//	err = db.Default().FirstOrCreate(tx, "sequence_id = ?", tx.SequenceID).Error
-//	if err != nil {
-//		return err
-//	}
-//
-//	if len(tx.Address) == 0 {
-//		return nil
-//	}
-//
-//	code, ok := currency.Code(tx.Symbol)
-//	if !ok {
-//		return fmt.Errorf("can't get code of currency %s", tx.Symbol)
-//	}
-//
-//	var acc Account
-//	err = db.Default().Where(Account{SymbolID: uint(code), Address: tx.Address}).First(&acc).Error
-//	if err != nil && err == gorm.ErrRecordNotFound {
-//		addressInfo := GetAddressInfo(nil, tx.Address)
-//		if addressInfo.Address != tx.Address {
-//			return fmt.Errorf("can't find address for tx %s", tx.Hash)
-//		}
-//
-//		zero := decimal.New(0, 0)
-//		acc = Account{
-//			Address:  tx.Address,
-//			Balance:  &zero,
-//			Nonce:    0,
-//			SymbolID: uint(code),
-//			Version:  addressInfo.Version,
-//			Type:     addressInfo.Type,
-//		}
-//		err = acc.Insert()
-//		if err != nil {
-//			return fmt.Errorf("db insert account failed, %v", err)
-//		}
-//	}
-//
-//	err = acc.ForUpdate(map[string]interface{}{
-//		"balance": tx.Amount,
-//		"op":      "add",
-//	})
-//	if err != nil {
-//		return fmt.Errorf("update account balance failed, %v", err)
-//	}
-//
-//	amount, _ := tx.Amount.Float64()
-//	if amount > 0 {
-//		tags := monitor.MetricsTags{"currency": tx.Symbol}
-//		monitor.MetricsHistogram("deposit_amount", amount, tags)
-//		monitor.MetricsCount("deposit_txnum", 1, tags)
-//	}
-//
-//	return nil
-//}
 
 // Update updates the tx status.
 func (tx *Tx) Update(data map[string]interface{}) error {
@@ -229,8 +153,8 @@ func (tx *Tx) DepositNotifyFormat() map[string]interface{} {
 }
 
 // GetUnfinishedTxs returns failed deposit tx.
-func GetUnfinishedTxs(symbols []string) []Tx {
-	if len(symbols) == 0 {
+func GetUnfinishedTxs(symbol string) []Tx {
+	if symbol == "" {
 		return nil
 	}
 
@@ -246,7 +170,7 @@ func GetUnfinishedTxs(symbols []string) []Tx {
 	)
 
 	db.Default().
-		Find(&txs, fmt.Sprintf("symbol in (?) and %s", conditions), symbols).
+		Find(&txs, fmt.Sprintf("symbol = ? and %s", conditions), symbol).
 		Limit(500)
 
 	// db.Default().

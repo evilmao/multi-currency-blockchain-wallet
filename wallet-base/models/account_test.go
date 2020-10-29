@@ -59,8 +59,7 @@ func testDBDecimal(t *testing.T, dsn string, testCases DBDecimalTestCases) {
 	dbInstance.Where("address=?", testAddress).Delete(&models.Account{})
 
 	acc := models.Account{
-		Address:  testAddress,
-		SymbolID: 0,
+		Address: testAddress,
 	}
 	acc.Insert()
 	defer func() {

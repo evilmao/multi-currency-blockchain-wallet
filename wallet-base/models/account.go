@@ -9,13 +9,13 @@ import (
 
 // Account represents a wrapper of address info.
 type Account struct {
-	ID       uint             `gorm:"AUTO_INCREMENT" json:"id"`
-	Address  string           `gorm:"index:idx_address_symbolid" json:"address"`
-	Nonce    uint64           `gorm:"type:bigint;default:0" json:"nonce"`
-	Balance  *decimal.Decimal `gorm:"type:decimal(32, 20);default:0" json:"balance"`
-	SymbolID uint             `gorm:"column:symbol_id;index:idx_address_symbolid" json:"symbol_id"`
-	Type     uint             `gorm:"column:account_type;type:tinyint" json:"account_type"`
-	Version  string           `gorm:"size:8" json:"version"`
+	ID      uint             `gorm:"AUTO_INCREMENT" json:"id"`
+	Address string           `gorm:"index:idx_address_symbolid" json:"address"`
+	Nonce   uint64           `gorm:"type:bigint;default:0" json:"nonce"`
+	Balance *decimal.Decimal `gorm:"type:decimal(32, 20);default:0" json:"balance"`
+	Symbol  string           `gorm:"column:symbol;size:32" json:"symbol"`
+	Type    uint             `gorm:"column:account_type;type:tinyint" json:"account_type"`
+	Version string           `gorm:"size:8" json:"version"`
 }
 
 // TableName defines the table name of account.
@@ -37,7 +37,8 @@ func (act *Account) ForUpdate(data M) error {
 		}
 	}
 
-	err := db.Default().Model(act).Where("symbol_id = ? and address = ?", act.SymbolID, act.Address).Updates(data).Error
+	delete(data, "op")
+	err := db.Default().Model(act).Where("address = ?", act.Address).Updates(data).Error
 	if err != nil {
 		return err
 	}
@@ -46,7 +47,7 @@ func (act *Account) ForUpdate(data M) error {
 
 // Insert inserts new address to table.
 func (act *Account) Insert() error {
-	return db.Default().FirstOrCreate(act, "symbol_id = ? and address = ?", act.SymbolID, act.Address).Error
+	return db.Default().FirstOrCreate(act, "symbol = ? and address = ?", act.Symbol, act.Address).Error
 }
 
 // DeprecatedGetAccountByAddress get account by address only.
@@ -156,7 +157,7 @@ func (act *Account) ForUpdateWithDB(db *gorm.DB, data map[string]interface{}) er
 	case "sub":
 		data["balance"] = act.Balance.Sub(data["balance"].(decimal.Decimal)).String()
 	}
-	err := tx.Model(act).Where("symbol_id=? and address = ?", act.SymbolID, act.Address).Updates(data).Error
+	err := tx.Model(act).Where("symbol=? and address = ?", act.Symbol, act.Address).Updates(data).Error
 	if err != nil {
 		tx.Rollback()
 		return err
