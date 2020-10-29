@@ -10,25 +10,26 @@ import (
 // Config defines configurations of the sync.
 type Config struct {
 	// Outer config.
-	DSN                    string
-	RPCURL                 string
-	RPCToken               string
-	BrokerURL              string
-	BrokerAccessKey        string
-	BrokerPrivateKey       string
-	Currency               string
-	Code                   int
-	ListenAddress          string
-	StatusAddress          string
-	MaxConfirm, SecConfirm int
-	StartHeight            int64
-	StartHash              string
-	StartDate              time.Time
-	IgnoreNotifyAudit      bool
-	IgnoreBlockStuckCheck  bool
-	IsNeedTag              bool
-	UseBlockTable          bool
-	MinAmount              float64
+	DSN                   string
+	RPCURL                string
+	RPCToken              string
+	BrokerURL             string
+	BrokerAccessKey       string
+	BrokerPrivateKey      string
+	Currency              string
+	Code                  int
+	ListenAddress         string
+	StatusAddress         string
+	MaxConfirm            int
+	SecConfirm            int
+	StartHeight           int64
+	StartHash             string
+	StartDate             time.Time
+	IgnoreNotifyAudit     bool
+	IgnoreBlockStuckCheck bool
+	IsNeedTag             bool
+	UseBlockTable         bool
+	MinAmount             float64
 
 	TrxTokenAirDropAddress string
 	ChainID                string

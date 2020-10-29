@@ -2,22 +2,21 @@
 # *** DO NOT EDIT ME ***
 
 currency: eth
-dsn: "user:password@tcp(127.0.0.1:3306)/dbname?charset=utf8&parseTime=True&loc=Local"
-rpcUrl: "http://rpc.url"
+dsn: "root:Xxzx@789@tcp(43.254.54.79:3306)/wallet_eth_deposit?charset=utf8&parseTime=True&loc=Local"
+rpcUrl: "http://54.95.191.140:5003"
 
 # broker
-brokerUrl: "https://broker.url"     # broker api
-brokerAccessKey: "accesskey"        # appkeyid
-brokerPrivateKey: "privatekey"      # appSecretKey
-minAmount: 0.01                     # 0.01 eth, deposit min value
+brokerUrl: "http://test-api.exup.io/finance/"           # broker api
+brokerAccessKey: "1001"                                 # app-keyID
+brokerPrivateKey: "1f5ddxyyy1f2c0b58bbd8cxx7x79xxxx"    # appSecretKey
+minAmount: 0.001                                        # 0.001 eth, deposit min value
 
 # scan blockchain
-startHeight: 24090177               # 扫描区块的起始高度, 默认从数据库中最新的区块开始扫描
-maxConfirmations: 6                 # 区块广播确认节点数
+startHeight: 11149429               # 扫描区块的起始高度, 默认从数据库中最新的区块开始扫描
+maxConfirmations: 30                 # 区块广播确认节点数
 
 # data-dog service
-listenAddress: ":8081"    
+listenAddress: ":8555"
 
 # special setting
 # ignoreNotifyAudit: true           # in withdraw program,just need store deposit record, but not request broker notify
-# trxAirDropAddress: 0

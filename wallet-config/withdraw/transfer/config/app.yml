@@ -21,11 +21,12 @@ sign:
 
 wallet:
   broadcastUrl: "broadcast-url"
-  maxFee: 1
-  alarmTimeout: 30
+  minFee: 1
+  maxFee: 10
   maxAccountRemain: 10  # 10 eth, grater than value, will do cool-down tx
   minAccountRemain: 6   # 6 eth , less than value, will alarm
   coldAddress: ""       # cold wallet address
+  alarmTimeout: 30
 
 broker:
   url: "url"
