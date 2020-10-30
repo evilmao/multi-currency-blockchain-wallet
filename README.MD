@@ -9,10 +9,10 @@ upex-wallet钱包, 用于`充值`, `提现`, `热转冷`,`归集` 操作; 批量
 ### 一.项目结构
 ```shell
 .
-├── go.mod							# 第三方依赖包
-├── go.sum							# 第三方包版本管理
+├── go.mod						# 第三方依赖包
+├── go.sum						# 第三方包版本管理
 ├── README.MD						# README.MD
-├── vendor							# Vendor本地第三方包
+├── vendor						# Vendor本地第三方包
 ├── wallet-base						# wallet-base 基础组件
 │   ├── api
 │   ├── blockchain
@@ -27,88 +27,88 @@ upex-wallet钱包, 用于`充值`, `提现`, `热转冷`,`归集` 操作; 批量
 │   │   ├── account.go				        # account表, 地址最终余额
 │   │   ├── account_test.go			        # account测试文件
 │   │   ├── address.go				        # address表,充值地址
-│   │   ├── blockinfo.go					# blockinfo表,最新区块详情
+│   │   ├── blockinfo.go				# blockinfo表,最新区块详情
 │   │   ├── currency.go				        # currency表, 合约地址表
 │   │   ├── models.go				        # 初始化数据库表方法
-│   │   ├── tx.go						# deposit_tx表,充值记录
-│   │   └── utxo.go						# utxo表,utxo交易记录
+│   │   ├── tx.go					# deposit_tx表,充值记录
+│   │   └── utxo.go					# utxo表,utxo交易记录
 │   ├── monitor						# data-dog服务监控
 │   ├── newbitx						# 依赖包
 │   ├── service						# service规范
 │   │   ├── service.go
 │   │   └── worker.go
-│   ├── util						        # 工具函数
-│   └── viper						        # yml文件读取配置方法
-├── wallet-config						# 配置文件
+│   ├── util						# 工具函数
+│   └── viper						# yml文件读取配置方法
+├── wallet-config				        # 配置文件
 │   ├── deposit						# depoist/syncd程序配置文件
 │   │   └── config
-│   └── withdraw						# 提现相关配置
-│       ├── broadcast					# 交易广播配置
-│       ├── signer						# 交易签名配置
-│       └── transfer					        # 提现/热转冷/归集配置
-├── wallet-deposit						# deposit主程序
-│   ├── base							# 数据库表初始化
+│   └── withdraw					# 提现相关配置
+│       ├── broadcast				        # 交易广播配置
+│       ├── signer					# 交易签名配置
+│       └── transfer					# 提现/热转冷/归集配置
+├── wallet-deposit					# deposit主程序
+│   ├── base						# 数据库表初始化
 │   │   └── models
-│   ├── build							# make build脚本
-│   ├── cmd							# 命令行启动主程序
+│   ├── build						# make build脚本
+│   ├── cmd						# 命令行启动主程序
 │   │   ├── cmd.go
-│   │   ├── deposit						# deposit服务主程序main函数
+│   │   ├── deposit					# deposit服务主程序main函数
 │   │   └── version.go
 │   ├── deposit						# 业务代码
 │   │   ├── notifier.go				        # notifier服务,充值后实时与交易所进行反馈
 │   │   ├── util.go
 │   │   ├── util_test.go
 │   │   └── worker.go			                # 区块同步,解析,入账
-│   ├── rpc							# rpc相关方法
+│   ├── rpc						# rpc相关方法
 │   │   ├── blockscanrpc.go				# 定义区块扫描相关方法
 │   │   ├── cache.go					# 区块缓存处理
 │   │   ├── eth						# eth rpc相关方法实现								
-│   │   └── rpc.go						# rpc接口定义	
+│   │   └── rpc.go					# rpc接口定义	
 │   ├── services
 │   └── syncer						# 区块同步
 │       ├── fetcher.go				        # 区块获取
 │       └── syncer.go					# 同步逻辑
-├── wallet-tools						# wallet-tools主程序
+├── wallet-tools				        # wallet-tools主程序
 │   ├── base
-│   ├── build							# make build构建脚本
+│   ├── build						# make build构建脚本
 │   └── cmd
 │       ├── cloneaccount
 │       ├── cmdserver
 │       ├── ecdsautil
-│       ├── genrsa					        # 生成密钥对
+│       ├── genrsa				        # 生成密钥对
 │       ├── genwallet					# 生成地址,公钥,钱包文件,sql文件
 │       ├── rundeck
 │       └── statuschecker
 └── wallet-withdraw					# withdraw主程序
     ├── base
-    ├── broadcast					        # 广播交易逻辑代码
-    ├── build							# make build脚本
-    ├── cmd							# 命令行启动程序
+    ├── broadcast					# 广播交易逻辑代码
+    ├── build						# make build脚本
+    ├── cmd						# 命令行启动程序
     │   ├── broadcast					# broadcast main入口
-    │   ├── cmd.go						# 命令行解析实现
-    │   ├── signer						# signer main 入口
-    │   ├── syncd						# syncd main入口
-    │   ├── transfer			                        # transfer main入口	
+    │   ├── cmd.go					# 命令行解析实现
+    │   ├── signer					# signer main 入口
+    │   ├── syncd					# syncd main入口
+    │   ├── transfer			                # transfer main入口	
     │   └── version.go
-    ├── signer							#交易签名逻辑
-    │   ├── client.go					        # 签名机客户端调用实现逻辑
+    ├── signer						#交易签名逻辑
+    │   ├── client.go					# 签名机客户端调用实现逻辑
     │   ├── client_test.go
     │   ├── keystore.go				        # 签名
     │   └── server.go				        # 签名机服务端实现
-    ├── syncd						        # 区块同步逻辑
+    ├── syncd						# 区块同步逻辑
     │   ├── notifier.go
     │   ├── util.go
     │   └── worker.go
-    └── transfer					        # 提现闲逛逻辑
-        ├── alarm					        # 告警逻辑
-        ├── checker					        # 地址余额监控逻辑
+    └── transfer					# 提现闲逛逻辑
+        ├── alarm					# 告警逻辑
+        ├── checker					# 地址余额监控逻辑
         ├── cooldown				        # 热转冷转账逻辑	
-        ├── gather					        # 归集逻辑
+        ├── gather					# 归集逻辑
         ├── helper.go			
         ├── rollback												
-        ├── txbuilder		                                # 核心代码: 交易构建,打包
-        ├── utxofee						# 实时获取最佳手续费(btc)				
-        └── withdraw					        # 提现逻辑
+        ├── txbuilder		                        # 核心代码: 交易构建,打包
+        ├── utxofee				        # 实时获取最佳手续费(btc)				
+        └── withdraw					# 提现逻辑
 ```
 
 ### 二.wallet-tools(工具)
@@ -289,7 +289,7 @@ make
    ```
 
 2. 修改配置—使用(`wallet-config/withdraw/signer/config/app.yml`)
-
+    
    ```shell
    # signer服务私钥
    rsaKey: |
@@ -327,7 +327,7 @@ make
      # 签名服务
      url: "http://127.0.0.1:8998"
      # 使用signer公钥对生成交易地址的密码后三位进行加密----"456"
-     # 使用 `wallet-withdraw/cmd/transfer/util.go程序`
+     # 使用 `wallet-withdraw/cmd/transfer/util.go 脚本`
      # 加密使用
      pass: "kCUU2+lCEuN67mPK91LgCBRimV0t5BN1shHmZ9xo8HOtmRzdDvP5lITRi9WyYWEMRHWP1JZzs9DMT2KtmKQ4W8HYOGb1SRbHN9w4dkPYCcSXvIlWhzDm4bZN45VTR0FYljVE7Nxeatwe5nzx6zz0dVgyuPZAO61WiuZ4ZGAdniAOjkjdbfyPravjRTeg/nD8z6FqP2fL7AVMU910rnUzcoO7wLy0+TnzD8g9v4vd3Or4Dh285NjVxY2zipAOwfv64DnNSbUat+szCmgcT0ygmPEoVd6whfjv1RGg2mGyFojOguRwaVPJi3PZwVid2DXwUn1NapmOvoXDk8Vv4t0Jjg=="
      timeout: 5
@@ -347,6 +347,31 @@ make
    ```shell
    ./eth-withdraw -c path/to/app.yml
    ```
+
+### 其他
+
+#### 邮件告警
+用来监控 `提现`, `热转冷` ,`归集` 交易故障时告警; `账户余额不足`,`热转冷资金变动`通知.
+
+1. 修改配置文件 `wallet-config/withdraw/transfer/app.yml`
+```shell script
+email:
+  errAlarmInterval: 15                      # same error trigger sending email interval, units `minutes`
+  host: "smtp.gmail.com"                    # email host
+  port: "465"                               # ssl port
+  from: "fc.notify.1@gmail.com"             # from email address
+  password: "wgcfkddggccddtwj"              # dedicated password(not account password)
+  to: "faily0117@gmail.com"                 # to email address
+```
+
+2. 使用HTML模板文件发送邮件: 将模板文件移动至主程序同已目录下
+```shell script
+├── withdraw						
+│   ├── transfer                    # transfer 主程序
+│   ├── app.yml                     # transfer config    
+│   ├──email-template.html          # email HTML 模板
+...
+```
 
    
 
