@@ -85,11 +85,11 @@ func IsContractAddress(addr string) (*Currency, error) {
 }
 
 // GetBalance returns the balance of the wallet.
-func GetBalance(symbolID uint) *decimal.Decimal {
+func GetBalance(symbol string) *decimal.Decimal {
 	var data struct {
 		Balance decimal.Decimal
 	}
-	db.Default().Model(&Account{}).Select("sum(balance) as balance").Where("symbol_id = ?", symbolID).Scan(&data)
+	db.Default().Model(&Account{}).Select("sum(balance) as balance").Where("symbol = ?", symbol).Scan(&data)
 	return &data.Balance
 }
 
