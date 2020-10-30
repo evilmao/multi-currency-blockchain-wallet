@@ -1,25 +1,43 @@
 # This is a sample.
 # *** DO NOT EDIT ME ***
 
-listen: ":8080"
+listen: ":9997"
 
 broker:
-  url: "the-url"
-  accessKey: "the-access-key"
-  privateKey: "the-private-key"
-
-btc:
-  dsn: "dsn"
-  rpcUrl: http://111:111@127.0.0.1:30304
-  verifyInterval: 1
-  rsaKey: |
-  -----BEGIN RSA PRIVATE KEY-----
-  -----END RSA PRIVATE KEY-----
+  url: "http://test-api.exup.io/finance/"
+  accessKey: "1001"
+  privateKey: "1f5ddxyyy1f2c0b58bbd8cxx7x79xxxx"
 
 eth:
-  dsn: "dsn"
-  rpcUrl: http://127.0.0.1:8545
+  dsn: "root:Xxzx@789@tcp(43.254.54.79:3306)/wallet_eth?charset=utf8&parseTime=True&loc=Local"
+  rpcUrl: "http://54.95.191.140:5003"
   verifyInterval: 1
+  # broadcast 私钥
   rsaKey: |
   -----BEGIN RSA PRIVATE KEY-----
+  MIIEowIBAAKCAQEAwU0+3HLvnYSoX+vUPghjuZKFXuNH/9VhFU349wjcDHn9n8c3
+  k7+17JKrHrKorMlwuvigPxfB/zvHKsuYBk7+A/eaQqyse7Tj8PfRTLf+ipC/2H0P
+  oZUAIDFcHQolftLlFki1uxx+V10nqR0kgqTqXyxsd6050tyXQZM9I++9Sskz6RoU
+  ZuELmiDmj1w7s0ptHuAjOznmsUf5k3oDCAuR/7j9N5yn61zBIk1efJF9WPW4itWK
+  314SUd5XMkDh/3+C64y4/7oS2lO/TyUTcixGYbRhOLqXAoLuBgJgZcPPZj1dhd8z
+  Ap48KWBKpjjPQZafGw4shp+WYsZj1fzIr1CHhQIDAQABAoIBAD8iWJ6t138uHcQ+
+  hTLBkLjCl1b3isOPUMchkWg195EHowO1kHxsSCH9gXBkT90nae9XVxdkThNr1dAv
+  cPbWg/aNv095kFhTK4O/nReenL9rKY2uwxU2UjUxifFeKAL1JKeTle+IDefA4DxG
+  7W7SKE5vdvnblSA+thRP389F9SBgZjto/lgaNtuVUS7mfwZYHDI+wAMr14+vmT5z
+  1wW7LrvSuDNEWJKlmQ4yBFd6tlt1QFvdZiTtDnIUqHEId1LT7ouvz8Ly0KS+GEgP
+  HW8gEk8+DwHBC7EwE0o2ePw8qMiogWZRQV4NXrKSilK18u7q3lFz7ciNdfs/VQxF
+  Flxx8D0CgYEAwpcCTPOPEtDtyk48n4P76gPi+yf6uAVIcB9E9V+Ng1t75cTiCn60
+  uPmdzqnLabamD6PGkq88/+NAvw91zjsAst8TspPJz4S31qyM8vt3bnGNU4RWyiGI
+  1KaEHOraajNlA5CeB4u0fsM3EmSaPJXQH5WyAwbr/cU16iN6urL15hMCgYEA/k4q
+  2JNm15mPxBJvqHgtIDSVY9nv5FLDmFrydJPb+NzWzIgwuFiZA46PBlC408EsFNzM
+  woIowfoKvs5DKVn9dnZWOoWAcY1tu0gZ+wztffLZ37KMIq0AmXuyg4EosspG5TVW
+  5IDRpM9z04021nLrttrt+TMGMj4uV2zaNwN3bwcCgYEAs7VctY6WCq2TfivFBxiQ
+  VW3jeUpR3RNb89idCfOGMNMTWH78tu6PnulA2XSsXGQHdxgssplOP5Az4n+3r4+E
+  NK2admjQj2slkQfoYBrnEMOj3oaw1Jol0SY7iq1Gq5/tYV5048kdF5jYSo9Idj1x
+  aUoJjYwd9E7mXOcJWFUgjasCgYAPMAfrC1KXCbrGUPuOKi83vyw03G0xS6gWz0ev
+  oqz+feHuMSwHtnLc/YSZMfT34I+LZ2xrKW7Ztt8xagwkyhUTIBoiQJrdLT8icjnq
+  /mionvpYG8e2wnJIuFR++hW+J8p4IelgmDjtCN64AbUGtbJSJ10TBvMVyRTnb77Q
+  jkpxvQKBgGBPP8qlwEeA3EZsBQEUVjPNgBY8ytOnWYFCRhHvKCaJn9fewiWEjOP7
+  XiUsSVKplID08Rlo68RodYToYXHm/pnLYpHewo1VvkGcJmYvYtvqmTbMm7K5kW2j
+  ZHj4OzJT6Trh7lB4iwr5QY1uHg5x3onBkpYEb3SrZXcsVmD5Oguk
   -----END RSA PRIVATE KEY-----

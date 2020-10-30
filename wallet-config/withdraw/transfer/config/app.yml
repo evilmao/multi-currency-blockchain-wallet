@@ -1,26 +1,28 @@
 # This is a sample.
 # *** DO NOT EDIT ME ***
 
-currency: "eth
-updateCurrency: False
-dsn: "dsn"
-rpcUrl: "rpc-url"
+currency: "eth"
+dsn: "root:Xxzx@789@tcp(43.254.54.79:3306)/wallet_eth?charset=utf8&parseTime=True&loc=Local"
+rpcUrl: "http://54.95.191.140:5003"
 chainID: ""
 withdraw: True
 cooldown: False
 gather: False
 autoRollback: False
 claim: False
+updateCurrency: False
 scheduleChecker:
   - "all"
 
 sign:
-  url: "http://127.0.0.1:8080"
-  pass: "password"
+  url: "http://127.0.0.1:9998"
+  # 使用 signer私钥对 password后3位加密
+  pass: "XFR4K6lJgO5sM6gOOOYH4X0ulvVUN4WELIA3waNx0zhtRUwIJB/xBsy0ppOsMmX//TfMb+/bhp9Sz0n9NWgorp/9unepocKguGnjbiPLX3aihJRiYJUkDT2+bS6I6vnW56lTI5Ih7j/VwhRf/vn71XJnzZzh2BjZAFYo9qvD9YS52l9pMDxiU7Kzd5cmpN7Mef/oWtGjm0mQQWmXhylnoJLtueyLmkyQ7gcMuZkl
+         lpueozsN+OnLEmqkCkW/fvb70UA9QNrQx+msk3WO+iqxKhjwRKwdQPalIckQV7OlQn4GdDYrH21zWTNJrOiml6KlOw96eo8KJ9Yer4NN4n064A=="
   timeout: 5
 
 wallet:
-  broadcastUrl: "broadcast-url"
+  broadcastUrl: "http://127.0.0.1:9997/v1/tx/broadcast"
   minFee: 0.001                 # 0.001 eth
   maxFee: 0.0144                # 0.0144 eth
   maxAccountRemain: 0.5         # 10 eth, grater than value, will do cool-down tx
@@ -31,13 +33,9 @@ wallet:
   # maxGasLimit: 72000          # 72000 G-WEI
 
 broker:
-  url: "url"
-  accessKey: "access-key"
-  privateKey: "private-key"
-
-claimer:
-  url: ""
-  wallet: ""
+  url: "http://test-api.exup.io/finance/"
+  accessKey: "1001"
+  privateKey: "1f5ddxyyy1f2c0b58bbd8cxx7x79xxxx"
 
 transfer:
   # request api interval second

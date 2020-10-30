@@ -2,19 +2,51 @@
 # *** DO NOT EDIT ME ***
 
 currency: "eth"
-listen: ":8899"
+listen: ":9998"
 dataPath: "./"
 fileName: 
   - "wallet.dat"
-  - "wallet2.dat"
-  - "wallet3.dat"
 
 # signer服务私钥
 rsaKey: |
   -----BEGIN RSA PRIVATE KEY-----
+  MIIEpAIBAAKCAQEApRQ/IgIgNZe/toQAmC7CcRgNqYSM979cjF2Fazo3GhdnQEV4
+  AT/UbGUxCu6AQLKWvTRoWDD2elzafuM08dESavj0+rNzaZWnJaFZy49XzaCIuGq6
+  hrc4rQjy8VSv/2eK3L2EG9dRQe+NtBzlFIGnzZsLP36jL0dbsVFz3Cqtltsk/DLf
+  Mwyo1de/wGvyAV7llvbRyLrI7YcuoaJ4PVW95q6fPsnBapfEjIjiYwLl/QayKv9O
+  LrDyZVI9EybFeBNDf+2ZfCdel/pc8BmUImvEf8l9d3CjUjtOGkZoLT+Ah2sQ+eNR
+  jiQxKWbSDpDok4xwYJGk/WfQzwggmuZpif3HbQIDAQABAoIBADfJDsisVTwnKuc/
+  1n+XFahoS32kyIqUhW79z697vdE4ZXEHyNULP/rde2RJUtgKQfxwcG6VJUYWiNPm
+  bibl00aJGSh7ah4dL5381759k1tuy6UelCggVKvM4WSCjPNPh1KvTKyn59LTZFyg
+  gx2Z7x4BLhzn67d3ctoKP5AAcCcRHmqz5bNdIHt6DDZMjVHBJhyossxeXD5v9rxC
+  qFezadtrzaX1BrY+spW5g8uXvaiaSdv/siyWQEwKZ3on48sHnPle++Dk/hEfh48o
+  Vdz3+F0UVd+SAg/H4GcN+AFMnXYEw12xFc+Bbi+TUt/rRtcBQA5QWQlPPUDkInvU
+  6+Bd8tUCgYEA1wRZzWSJPq3OSXdv0AUcqAAunvzmJeejOXMH+lwsnqQqWEdU/8Gs
+  Sac7EOiUfwUW98Hd+K90lPv8bU2anpOw19JZsVFHOVL3WYHrmFO8l4lHkODev2EZ
+  QI2Oge0uLIhMBaj+SCOumcqNlkreexoDvTrjh6aeLD+UBnCZIkgLFoMCgYEAxIsz
+  NuuHW61pXymvfRRO0YZhvp1ZepGCwUpgIl+S9mxgUOMarhZMlCXEoOfSFdHHxkRa
+  rUMfmHazdSotT1Ouvtic5aMvONZ88VgOggRSECJGGzIWd16WTQt1u/m2L+nH0IhW
+  rilJQ/6UCQpJbWP8mjsSSC5cueiX0MnNNOMGx08CgYEAho+Me8OtOHKhJM0ARpjM
+  ZD8o7gqrJZGfTra0iXPh4K4waerKQPy9i6KCjoRfWlafFxJWjemP9iT0xprIZvFa
+  vNZBl3ycLD3F2lg6Tqwo3FTnWr2/6NklaoasZpc+TFRH70rhR9g8zrY6gZH9ReDz
+  8hrGhgA6AMsRIi6ZRyD6/20CgYEAkKrhTKh63ok7CVfWmxuKlID0i2iohyZ59yp2
+  rnZo50eIcaFobwFs5pMSM1nPck4SXSbNE8FXjVK57yDXbw9qjYFFo2XFCXIfT0oA
+  i8UAXm3L6pKopL6TpSwtQeqhJo1OjXj9TH6JNio57pmKyKETOrcGUukFSbYhoQYZ
+  LLd6stMCgYBUlfEIQme2JUguXy6BjMjyVe08Hm8oge3mljXXr7nzm03tc0FLY8P4
+  94tEZ6/Vdk4lCgqJcBWMhvpWwX3khRrePuJ7Y7YZWtZAuo2/eRCxNF4S43VNAXVn
+  N6+3WAMaUV3T9FBIuT2GohWt8PwPdSx1sMKZtoEak+4pNsiwisiGgg==
   -----END RSA PRIVATE KEY-----
+
 
 # broadcast服务公钥
 rsaPubKey: |
   -----BEGIN PUBLIC KEY-----
+  MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwU0+3HLvnYSoX+vUPghj
+  uZKFXuNH/9VhFU349wjcDHn9n8c3k7+17JKrHrKorMlwuvigPxfB/zvHKsuYBk7+
+  A/eaQqyse7Tj8PfRTLf+ipC/2H0PoZUAIDFcHQolftLlFki1uxx+V10nqR0kgqTq
+  Xyxsd6050tyXQZM9I++9Sskz6RoUZuELmiDmj1w7s0ptHuAjOznmsUf5k3oDCAuR
+  /7j9N5yn61zBIk1efJF9WPW4itWK314SUd5XMkDh/3+C64y4/7oS2lO/TyUTcixG
+  YbRhOLqXAoLuBgJgZcPPZj1dhd8zAp48KWBKpjjPQZafGw4shp+WYsZj1fzIr1CH
+  hQIDAQAB
   -----END PUBLIC KEY-----
+
