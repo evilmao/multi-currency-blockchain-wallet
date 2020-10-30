@@ -166,7 +166,7 @@ func run(*cmd.Command) error {
 	}
 
 	// coolDown service
-	if cfg.Cooldown {
+	if cfg.CoolDown {
 		services = append(services, service.New(cooldown.New(cfg, txBuilder)))
 	}
 
