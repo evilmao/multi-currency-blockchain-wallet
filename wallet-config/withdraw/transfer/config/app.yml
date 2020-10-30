@@ -21,12 +21,14 @@ sign:
 
 wallet:
   broadcastUrl: "broadcast-url"
-  minFee: 1
-  maxFee: 10
-  maxAccountRemain: 10  # 10 eth, grater than value, will do cool-down tx
-  minAccountRemain: 6   # 6 eth , less than value, will alarm
-  coldAddress: ""       # cold wallet address
-  alarmTimeout: 30
+  minFee: 0.001                 # 0.001 eth
+  maxFee: 0.0144                # 0.0144 eth
+  maxAccountRemain: 0.5         # 10 eth, grater than value, will do cool-down tx
+  minAccountRemain: 0.1         # 6 eth , less than value, will alarm
+  coldAddress: ""               # cold wallet address
+  # alarmTimeout: 30
+  # maxGasPrice: 0.0000002
+  # maxGasLimit: 72000          # 72000 G-WEI
 
 broker:
   url: "url"
