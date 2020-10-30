@@ -6,13 +6,13 @@ import (
 	"time"
 
 	bmodels "upex-wallet/wallet-base/models"
+	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-base/service"
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/base/models"
 	"upex-wallet/wallet-withdraw/transfer"
+	"upex-wallet/wallet-withdraw/transfer/alarm"
 	"upex-wallet/wallet-withdraw/transfer/txbuilder"
-
-	"upex-wallet/wallet-base/newbitx/misclib/log"
 
 	"github.com/shopspring/decimal"
 )
@@ -67,12 +67,13 @@ func (w *Worker) Work() {
 }
 
 func (w *Worker) cooldown() error {
-
+	// verify cold info: address,balance
 	info, err := w.verifyColdInfo()
 	if err != nil {
 		return fmt.Errorf("invalid cold info, %v", err)
 	}
 
+	// get balance from db
 	balance := bmodels.GetSystemBalance()
 	if balance.LessThanOrEqual(info.maxAccountRemain) {
 		return nil
@@ -87,10 +88,11 @@ func (w *Worker) cooldown() error {
 		balance = fromAccount.Balance
 	}
 
+	// build cold down transfer task
 	task := &models.Tx{}
 	task.Symbol = strings.ToLower(w.cfg.Currency)
-	task.Address = info.coldAddress
 	task.TxType = models.TxTypeCold
+	task.Address = info.coldAddress
 	task.Amount = balance.Sub(info.maxAccountRemain)
 	task.UpdateLocalTransIDSequenceID()
 
@@ -103,7 +105,7 @@ func (w *Worker) cooldown() error {
 		return nil
 	}
 
-	err = transfer.CheckBalanceEnough(w.cfg, txInfo.Inputs)
+	err = transfer.CheckBalanceEnough(txInfo.Inputs)
 	if err != nil {
 		return fmt.Errorf("check balance enough failed, %v", err)
 	}
@@ -137,6 +139,10 @@ func (w *Worker) cooldown() error {
 	}
 
 	log.Warnf("%s, cool-down tx, %s", w.Name(), task)
+
+	// if cool_down tx success, will send email
+	e := alarm.NewWarnCoolWalletBalanceChange(info.maxAccountRemain, *balance, info.coldAddress, task.Hash)
+	go alarm.SendEmail(w.cfg, task, e, e.WarnDetail)
 	return nil
 }
 

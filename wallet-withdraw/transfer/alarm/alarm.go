@@ -20,11 +20,92 @@ import (
 )
 
 var (
-	emailObject = "[FCoin-Wallet Warning]"
+	emailTitle = "[UPEX 告警]"
 )
 
+func sendEmailByHTML(cfg *config.Config, task *models.Tx, errMsg string) (err error) {
+
+	var (
+		fromAddress     = cfg.EmailCfg.From
+		toAddress       = cfg.EmailCfg.To
+		password        = cfg.EmailCfg.Pwd
+		host            = cfg.EmailCfg.Host
+		port            = cfg.EmailCfg.Port
+		intervalProcess = cfg.ErrorAlarmInterval
+
+		server  = fmt.Sprintf("%s:%s", host, port)
+		txType  = models.TxTypeName(task.TxType)
+		errTime = task.CreatedAt.Format("2006-01-02 15:04:05")
+
+		txAddress = task.Address
+		currency  = strings.ToUpper(task.Symbol)
+		txTransID = task.TransID
+
+		auth = smtp.PlainAuth("", fromAddress, password, host)
+	)
+
+	e := email.NewEmail()
+	// sender
+	e.From = fromAddress
+	// to users
+	e.To = []string{toAddress}
+	// email title
+	e.Subject = emailTitle
+	// Parse html template
+	t, err := template.ParseFiles("email-template.html")
+	if err != nil {
+		return err
+	}
+
+	body := new(bytes.Buffer)
+
+	err = t.Execute(body, struct {
+		TxType          string
+		ErrorDetail     string
+		TimeDate        string
+		Currency        string
+		TxAddress       string
+		TxID            string
+		IntervalProcess string
+	}{
+		TxType:          txType,
+		ErrorDetail:     errMsg,
+		TimeDate:        errTime,
+		Currency:        currency,
+		TxAddress:       txAddress,
+		TxID:            txTransID,
+		IntervalProcess: intervalProcess.String(),
+	})
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	e.HTML = body.Bytes()
+
+	return e.SendWithTLS(server, auth, &tls.Config{ServerName: host})
+
+}
+
+func SendEmail(cfg *config.Config, task *models.Tx, err error, msg string) {
+
+	if err == nil {
+		return
+	}
+
+	// update error to catch
+	ok := Update(cfg, task, err)
+
+	if ok {
+		err := sendEmailByHTML(cfg, task, msg)
+		if err != nil {
+			log.Errorf("send email error,%v", err)
+		}
+	}
+}
+
 // alarm func, support email warning
-func sendEmail(cfg *config.Config, task *models.Tx, errMsg string) (err error) {
+func SendEmailByText(cfg *config.Config, content string) {
 
 	var (
 		fromAddress = cfg.EmailCfg.From
@@ -32,36 +113,29 @@ func sendEmail(cfg *config.Config, task *models.Tx, errMsg string) (err error) {
 		password    = cfg.EmailCfg.Pwd
 		server      = fmt.Sprintf("%s:%s", cfg.EmailCfg.Host, cfg.EmailCfg.Port)
 		conn        = &tls.Conn{}
-		txType      = models.TxTypeName(task.TxType)
-		errTime     = time.Now().Format("2006-01-02 15:04:05")
-		txAddress   = task.Address
+		Time        = time.Now().Format("2006-01-02 15:04:05")
 	)
 
 	var (
-		from = mail.Address{"FCoin", fromAddress}
-		to   = mail.Address{"", toAddress}
+		from = mail.Address{Name: "UPEX", Address: fromAddress}
+		to   = mail.Address{Address: toAddress}
+
 		// Setup headers
 		headers = make(map[string]string)
-		title   = "[FCoin-Wallet]"
 		body    = fmt.Sprintf(`
 		
 		你好，Administrator ：
 
-		当前发生一笔[ %s ]操作失败:
-		
 		  - 详情: %s
 		  - 时间：%s
-		  - 币种: %s
-		  - 交易地址: %s
-		  - 交易ID: %s
 
-		请及时进行处理!!!
-			`, txType, errMsg, errTime, task.Symbol, txAddress, task.TransID)
+		请知悉!!!
+			`, content, Time)
 	)
 
 	headers["From"] = from.String()
 	headers["To"] = to.String()
-	headers["Subject"] = title
+	headers["Subject"] = emailTitle
 
 	// Setup message
 	message := ""
@@ -70,7 +144,7 @@ func sendEmail(cfg *config.Config, task *models.Tx, errMsg string) (err error) {
 	}
 	message += "\r\n" + body
 
-	// Connect to the SMTP Server
+	// Connect to the SMTP_Server
 	host, _, _ := net.SplitHostPort(server)
 
 	auth := smtp.PlainAuth("", fromAddress, password, host)
@@ -84,7 +158,7 @@ func sendEmail(cfg *config.Config, task *models.Tx, errMsg string) (err error) {
 	// Here is the key, you need to call tls.Dial instead of smtp.Dial
 	// for smtp servers running on 465 that require an ssl connection
 	// from the very beginning (no starttls)
-	conn, err = tls.Dial("tcp", server, tlsConfig)
+	conn, err := tls.Dial("tcp", server, tlsConfig)
 
 	if err != nil {
 		log.Panic(err)
@@ -133,82 +207,4 @@ func sendEmail(cfg *config.Config, task *models.Tx, errMsg string) (err error) {
 
 	log.Info("send email success!")
 	return
-}
-
-func sendEmailByHTML(cfg *config.Config, task *models.Tx, errMsg string) (err error) {
-
-	var (
-		fromAddress = cfg.EmailCfg.From
-		toAddress   = cfg.EmailCfg.To
-		password    = cfg.EmailCfg.Pwd
-		host        = cfg.EmailCfg.Host
-		port        = cfg.EmailCfg.Port
-
-		server  = fmt.Sprintf("%s:%s", host, port)
-		txType  = models.TxTypeName(task.TxType)
-		errTime = task.CreatedAt.Format("2006-01-02 15:04:05")
-
-		txAddress = task.Address
-		currency  = strings.ToUpper(task.Symbol)
-		txTransID = task.TransID
-
-		auth = smtp.PlainAuth("", fromAddress, password, host)
-	)
-
-	e := email.NewEmail()
-	// sender
-	e.From = fromAddress
-	// to users
-	e.To = []string{toAddress}
-	// email title
-	e.Subject = emailObject
-	// Parse html template
-	t, err := template.ParseFiles("email-template.html")
-	if err != nil {
-		return err
-	}
-
-	body := new(bytes.Buffer)
-
-	err = t.Execute(body, struct {
-		TxType      string
-		ErrorDetail string
-		TimeDate    string
-		Currency    string
-		TxAddress   string
-		TxID        string
-	}{
-		TxType:      txType,
-		ErrorDetail: errMsg,
-		TimeDate:    errTime,
-		Currency:    currency,
-		TxAddress:   txAddress,
-		TxID:        txTransID,
-	})
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	e.HTML = body.Bytes()
-
-	return e.SendWithTLS(server, auth, &tls.Config{ServerName: host})
-
-}
-
-func SendEmail(cfg *config.Config, task *models.Tx, err error, msg string) {
-
-	if err == nil {
-		return
-	}
-
-	// update error to catch
-	ok := Update(cfg, task, err)
-
-	if ok {
-		err := sendEmailByHTML(cfg, task, msg)
-		if err != nil {
-			log.Errorf("send email error,%v", err)
-		}
-	}
 }

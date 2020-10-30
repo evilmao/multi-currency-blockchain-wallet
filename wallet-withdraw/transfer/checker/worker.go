@@ -3,10 +3,8 @@ package checker
 import (
 	"strings"
 
-	"upex-wallet/wallet-base/service"
-
 	"upex-wallet/wallet-base/newbitx/misclib/log"
-
+	"upex-wallet/wallet-base/service"
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/transfer/checker/checker"
 	_ "upex-wallet/wallet-withdraw/transfer/checker/checker/calculator"

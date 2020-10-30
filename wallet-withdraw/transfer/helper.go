@@ -49,8 +49,8 @@ func (b *Broadcaster) BroadcastTx(txInfo *txbuilder.TxInfo, task *models.Tx) err
 	return err
 }
 
-// CheckBalanceEnough checks whether the balance of txin account is enought.
-func CheckBalanceEnough(cfg *config.Config, txIns []*txbuilder.TxIn) error {
+// CheckBalanceEnough checks whether the balance of tx_ account is enough
+func CheckBalanceEnough(txIns []*txbuilder.TxIn) error {
 	for _, in := range txIns {
 		if in.Account.Balance.LessThan(in.Cost) {
 			return fmt.Errorf("balance of %s address %s not enought, need: %s, got: %s",
@@ -69,10 +69,14 @@ func SpendTxIns(cfgCode int, sequenceID string, txIns []*txbuilder.TxIn, txNonce
 			Symbol:       in.Account.Symbol,
 			Amount:       in.Cost,
 		}
-		dbIn.FirstOrCreate()
+
+		err := dbIn.FirstOrCreate()
+		if err != nil {
+			log.Errorf("insert or create tx_in data fail, %v", err)
+		}
 
 		// Spend account.
-		err := in.Account.ForUpdate(bmodels.M{
+		err = in.Account.ForUpdate(bmodels.M{
 			"balance": in.Cost,
 			"op":      "sub",
 		})

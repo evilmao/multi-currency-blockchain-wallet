@@ -35,6 +35,18 @@ func (f FeeMeta) Clone() FeeMeta {
 	}
 }
 
+func (f *FeeMeta) AdjustFee(min, max decimal.Decimal) {
+	if min.GreaterThan(max) {
+		min, max = max, min
+	}
+
+	if f.Fee.LessThan(min) {
+		f.Fee = min
+	} else if f.Fee.GreaterThan(max) {
+		f.Fee = max
+	}
+}
+
 type AccountModelBuildInfo struct {
 	FromAccount *bmodels.Account
 	FromPubKey  []byte
@@ -61,10 +73,7 @@ func NewAccountModelBuilder(cfg *config.Config, builder AccountModelTxBuilder) B
 		feeMeta.Symbol = cfg.Currency
 	}
 
-	cfgFee := decimal.NewFromFloat(cfg.MaxFee)
-	if cfgFee.GreaterThan(feeMeta.Fee) {
-		feeMeta.Fee = cfgFee
-	}
+	feeMeta.AdjustFee(decimal.NewFromFloat(cfg.MinFee), decimal.NewFromFloat(cfg.MaxFee))
 
 	cfgGasLimit := decimal.NewFromFloat(cfg.MaxGasLimit)
 	if cfgGasLimit.GreaterThan(feeMeta.GasLimit) {
@@ -86,10 +95,11 @@ func NewAccountModelBuilder(cfg *config.Config, builder AccountModelTxBuilder) B
 type BuildByFeeMetaFunc func(FeeMeta, *models.Tx) (*TxInfo, error)
 
 // BuildByFeeMeta build TxInfo by feeMeta, handle ErrFeeNotEnough.
-func BuildByFeeMeta(feeMeta FeeMeta, estimateFeeMeta *FeeMeta, task *models.Tx, doBuild BuildByFeeMetaFunc) (*TxInfo, error) {
+func BuildByFeeMeta(cfg *config.Config, feeMeta FeeMeta, estimateFeeMeta *FeeMeta, task *models.Tx, doBuild BuildByFeeMetaFunc) (*TxInfo, error) {
 	if estimateFeeMeta != nil && estimateFeeMeta.Fee.GreaterThan(feeMeta.Fee) {
 		meta := estimateFeeMeta.Clone()
 		meta.Symbol = feeMeta.Symbol
+		meta.AdjustFee(decimal.NewFromFloat(cfg.MinFee), decimal.NewFromFloat(cfg.MaxFee))
 		feeMeta = meta
 	}
 
@@ -114,7 +124,7 @@ func (b *AccountModelBuilder) Model() Model {
 
 func (b *AccountModelBuilder) BuildWithdraw(task *models.Tx) (*TxInfo, error) {
 
-	txInfo, err := BuildByFeeMeta(b.feeMeta, b.builder.EstimateFeeMeta(task.Symbol, task.TxType), task, b.buildWithdraw)
+	txInfo, err := BuildByFeeMeta(b.cfg, b.feeMeta, b.builder.EstimateFeeMeta(task.Symbol, task.TxType), task, b.buildWithdraw)
 
 	if err != nil {
 		errMsg := ""
@@ -136,7 +146,7 @@ func (b *AccountModelBuilder) BuildWithdraw(task *models.Tx) (*TxInfo, error) {
 
 func (b *AccountModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 
-	txInfo, err := BuildByFeeMeta(b.feeMeta, b.builder.EstimateFeeMeta(task.Symbol, task.TxType), task, b.buildGather)
+	txInfo, err := BuildByFeeMeta(b.cfg, b.feeMeta, b.builder.EstimateFeeMeta(task.Symbol, task.TxType), task, b.buildWithdraw)
 
 	if err != nil {
 		errMsg := ""
@@ -167,7 +177,7 @@ func (b *AccountModelBuilder) FeeSymbol() string {
 }
 
 func (b *AccountModelBuilder) BuildSupplementaryFee(task *models.Tx) (*TxInfo, error) {
-	return BuildByFeeMeta(b.feeMeta, b.builder.EstimateFeeMeta(task.Symbol, task.TxType), task, b.buildSupplementaryFee)
+	return BuildByFeeMeta(b.cfg, b.feeMeta, b.builder.EstimateFeeMeta(task.Symbol, task.TxType), task, b.buildWithdraw)
 }
 
 func (b *AccountModelBuilder) buildWithdraw(feeMeta FeeMeta, task *models.Tx) (*TxInfo, error) {

@@ -28,7 +28,7 @@ type ErrorBalanceLessThanFee struct {
 
 func NewErrorBalanceLessThanFee(fee decimal.Decimal) *ErrorBalanceLessThanFee {
 	return &ErrorBalanceLessThanFee{
-		ErrorDetail: fmt.Sprintf("无可用的系统地址: 系统地址资金小于最低交易手续费;当前交易手续为:[%v]", fee),
+		ErrorDetail: fmt.Sprintf("无可用的系统地址: 系统地址资金小于最低交易手续费;当前交易手续费为:[%v]", fee),
 	}
 }
 
@@ -93,4 +93,18 @@ func NewErrorAccountBalanceNotEnough(address string, balance, needFee decimal.De
 
 func (e *ErrorAccountBalanceNotEnough) Error() string {
 	return fmt.Sprintf("address balance not enough for transaction fee ")
+}
+
+type WarnCoolWalletBalanceChange struct {
+	WarnDetail string
+}
+
+func NewWarnCoolWalletBalanceChange(maxRemainBalance, amount decimal.Decimal, coldAddress, c string) *WarnCoolWalletBalanceChange {
+	return &WarnCoolWalletBalanceChange{
+		WarnDetail: fmt.Sprintf("钱包资金超过预留最大值: %s, 当前余额为:%s, 已转入冷钱包(%s),交易哈希值为:%s", maxRemainBalance.String(), amount.String(), coldAddress, coldAddress),
+	}
+}
+
+func (e *WarnCoolWalletBalanceChange) Error() string {
+	return fmt.Sprintf("cool wallet balance has changed ")
 }

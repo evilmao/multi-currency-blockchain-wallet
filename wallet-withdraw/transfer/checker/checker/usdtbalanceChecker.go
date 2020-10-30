@@ -1,14 +1,14 @@
 package checker
 
 import (
+	"fmt"
+
 	"upex-wallet/wallet-base/api"
 	bmodels "upex-wallet/wallet-base/models"
-
 	"upex-wallet/wallet-base/newbitx/misclib/log"
+	"upex-wallet/wallet-config/withdraw/transfer/config"
 
 	"github.com/shopspring/decimal"
-
-	"upex-wallet/wallet-config/withdraw/transfer/config"
 )
 
 func init() {
@@ -26,6 +26,7 @@ type USDTBalanceChecker struct {
 	withdrawEnabled bool
 }
 
+// NewUSDTBalanceChecker, USD
 func NewUSDTBalanceChecker(mainCurrency, blockchainName string, minBalance decimal.Decimal) *USDTBalanceChecker {
 	return &USDTBalanceChecker{
 		mainCurrency:   mainCurrency,
@@ -48,18 +49,24 @@ func (c *USDTBalanceChecker) Check() error {
 		return nil
 	}
 
-	const usdtCode = 105
+	const symbol = "usdt"
 
-	balance := bmodels.GetBalance(usdtCode)
+	balance := bmodels.GetBalance(symbol)
 	if balance.LessThan(c.minBalance) && c.withdrawEnabled {
-		c.brokerAPI.ChangeWithdrawStatus("usdt", c.blockchainName, false)
+		_, err := c.brokerAPI.ChangeWithdrawStatus("usdt", c.blockchainName, false)
+		if err != nil {
+			return fmt.Errorf("change Withdraw Status fail, %v", err.Error())
+		}
 		c.withdrawEnabled = false
 		log.Warnf("checker, %s usdt balance (%s) less than minBalance (%s), disable withdraw",
 			c.blockchainName, balance, c.minBalance)
 	}
 
 	if balance.GreaterThan(c.minBalance) && !c.withdrawEnabled {
-		c.brokerAPI.ChangeWithdrawStatus("usdt", c.blockchainName, true)
+		_, err := c.brokerAPI.ChangeWithdrawStatus("usdt", c.blockchainName, false)
+		if err != nil {
+			return fmt.Errorf("change Withdraw Status fail, %v", err.Error())
+		}
 		c.withdrawEnabled = true
 		log.Warnf("checker, %s usdt balance (%s) greater than minBalance (%s), enable withdraw",
 			c.blockchainName, balance, c.minBalance)

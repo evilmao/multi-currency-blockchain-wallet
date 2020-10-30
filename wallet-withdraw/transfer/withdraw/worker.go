@@ -55,6 +55,7 @@ func (w *Worker) Init() error {
 }
 
 func (w *Worker) updateTxHashIfNeeded() {
+
 	txSequenceID := w.cfg.TxSequenceIDForUpdateTxHashToExchange
 	if len(txSequenceID) == 0 {
 		return
@@ -145,6 +146,7 @@ func (w *Worker) processTask(task *models.Tx) error {
 	if err != nil {
 		return fmt.Errorf("withdraw notify failed, %v", err)
 	}
+
 	// withdraw lessThan 0 is not available
 	if task.Amount.LessThanOrEqual(decimal.Zero) {
 		return nil
@@ -158,7 +160,7 @@ func (w *Worker) processTask(task *models.Tx) error {
 		}
 	}
 
-	// withdraw account
+	// balance verify
 	total := task.Amount
 	// sum balance from all system accounts.
 	balance := bmodels.GetSystemBalance()
@@ -181,7 +183,7 @@ func (w *Worker) processTask(task *models.Tx) error {
 		return fmt.Errorf("build tx failed, txInfo is nil")
 	}
 	// check balance
-	err = transfer.CheckBalanceEnough(w.cfg, txInfo.Inputs)
+	err = transfer.CheckBalanceEnough(txInfo.Inputs)
 	if err != nil {
 		return fmt.Errorf("check balance enough failed, %v", err)
 	}

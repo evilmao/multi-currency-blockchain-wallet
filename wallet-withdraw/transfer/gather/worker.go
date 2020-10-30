@@ -19,12 +19,10 @@ import (
 type Worker struct {
 	*service.SimpleWorker
 	*transfer.Broadcaster
-	cfg       *config.Config
-	txBuilder txbuilder.Builder
-
+	cfg                     *config.Config
+	txBuilder               txbuilder.Builder
 	supplementaryFeeBuilder txbuilder.SupplementaryFeeBuilder
-
-	unsupported map[string]struct{}
+	unsupported             map[string]struct{}
 }
 
 func New(cfg *config.Config, txBuilder txbuilder.Builder) *Worker {
@@ -83,7 +81,7 @@ func (w *Worker) gather(address string) {
 		return
 	}
 
-	err = transfer.CheckBalanceEnough(w.cfg, txInfo.Inputs)
+	err = transfer.CheckBalanceEnough(txInfo.Inputs)
 	if err != nil {
 		log.Errorf("%s, check balance enough failed, %v", w.Name(), err)
 		return
@@ -100,48 +98,8 @@ func (w *Worker) gather(address string) {
 	log.Infof("%s, gather tx, %s", w.Name(), task)
 }
 
-func (w *Worker) supplementaryFee(toAddress string) {
-	if w.supplementaryFeeBuilder == nil {
-		return
-	}
-
-	feeCode, _ := config.CC.Code(w.supplementaryFeeBuilder.FeeSymbol())
-	if exist, err := existUnconfirmedSupplementaryFeeTx(int(feeCode), toAddress); err != nil {
-		log.Errorf("%s, check unconfirmed supplementary-fee-tx failed, %v", err)
-		return
-	} else if exist {
-		return
-	}
-
-	task := &models.Tx{}
-	task.Address = toAddress
-	task.TxType = models.TxTypeSupplementaryFee
-	task.UpdateLocalTransIDSequenceID()
-
-	txInfo, err := w.supplementaryFeeBuilder.BuildSupplementaryFee(task)
-	if err != nil {
-		log.Errorf("%s, build supplementaryFee tx %s failed, %v", w.Name(), task, err)
-		return
-	}
-
-	err = transfer.CheckBalanceEnough(w.cfg, txInfo.Inputs)
-	if err != nil {
-		log.Errorf("%s, check balance enough failed, %v", w.Name(), err)
-		return
-	}
-
-	log.Infof("%s, start supplementary fee, %s", w.Name(), task)
-
-	err = w.storeAndBroadcast(txInfo, task)
-	if err != nil {
-		log.Error(err)
-		return
-	}
-
-	log.Infof("%s, supplementary fee, %s", w.Name(), task)
-}
-
 func (w *Worker) storeAndBroadcast(txInfo *txbuilder.TxInfo, task *models.Tx) error {
+
 	task.Hex = txInfo.TxHex
 	if txInfo.Nonce != nil {
 		task.Nonce = *txInfo.Nonce
@@ -151,6 +109,7 @@ func (w *Worker) storeAndBroadcast(txInfo *txbuilder.TxInfo, task *models.Tx) er
 		return fmt.Errorf("%s, db insert tx failed, %v", w.Name(), err)
 	}
 
+	// sign and send transaction
 	err = w.BroadcastTx(txInfo, task)
 	if err != nil {
 		return fmt.Errorf("%s, broadcast tx failed, %v", w.Name(), err)
@@ -171,8 +130,48 @@ func (w *Worker) storeAndBroadcast(txInfo *txbuilder.TxInfo, task *models.Tx) er
 	return nil
 }
 
-func existUnconfirmedSupplementaryFeeTx(code int, toAddress string) (bool, error) {
-	tx, err := models.GetLastSupplementaryFeeTxByAddress(code, toAddress)
+func (w *Worker) supplementaryFee(toAddress string) {
+	if w.supplementaryFeeBuilder == nil {
+		return
+	}
+
+	if exist, err := existUnconfirmedSupplementaryFeeTx(toAddress); err != nil {
+		log.Errorf("%s, check unconfirmed supplementary-fee-tx failed, %v", err)
+		return
+	} else if exist {
+		return
+	}
+
+	task := &models.Tx{}
+	task.Address = toAddress
+	task.TxType = models.TxTypeSupplementaryFee
+	task.UpdateLocalTransIDSequenceID()
+
+	txInfo, err := w.supplementaryFeeBuilder.BuildSupplementaryFee(task)
+	if err != nil {
+		log.Errorf("%s, build supplementaryFee tx %s failed, %v", w.Name(), task, err)
+		return
+	}
+
+	err = transfer.CheckBalanceEnough(txInfo.Inputs)
+	if err != nil {
+		log.Errorf("%s, check balance enough failed, %v", w.Name(), err)
+		return
+	}
+
+	log.Infof("%s, start supplementary fee, %s", w.Name(), task)
+
+	err = w.storeAndBroadcast(txInfo, task)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	log.Infof("%s, supplementary fee, %s", w.Name(), task)
+}
+
+func existUnconfirmedSupplementaryFeeTx(toAddress string) (bool, error) {
+	tx, err := models.GetLastSupplementaryFeeTxByAddress(toAddress)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return false, nil

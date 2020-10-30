@@ -11,10 +11,10 @@ import (
 )
 
 func init() {
-	checker.Add("eth", checker.NewFeeReadjuster(EthCalc))
-	checker.Add("etc", checker.NewFeeReadjuster(EthCalc))
-	checker.Add("smt", checker.NewFeeReadjuster(EthCalc))
-	checker.Add("ionc", checker.NewFeeReadjuster(EthCalc))
+	checker.Add("eth", checker.NewFeeReadJuster(EthCalc))
+	checker.Add("etc", checker.NewFeeReadJuster(EthCalc))
+	checker.Add("smt", checker.NewFeeReadJuster(EthCalc))
+	checker.Add("ionc", checker.NewFeeReadJuster(EthCalc))
 }
 
 func EthCalc(cfg *config.Config, txHash string) (*checker.ReadjustFeeInfo, error) {

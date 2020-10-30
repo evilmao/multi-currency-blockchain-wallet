@@ -82,6 +82,7 @@ func (p *taskProducer) produceFromAPI() {
 	data["app_id"] = p.cfg.BrokerAccessKey
 	data["timestamp"] = time.Now().Unix()
 
+	// get withdraws tasks form broker
 	resp, _, err := p.exAPI.GetWithdraws(data)
 	if err != nil || resp == nil {
 		if err != nil {
@@ -137,11 +138,4 @@ func (p *taskProducer) acceptBlockchainCurrency(blockchainName, currency string)
 	}
 
 	return false
-}
-
-func produceFakeTask() *models.Tx {
-	task := &models.Tx{}
-	task.TxType = models.TxTypeWithdraw
-	task.Fees = decimal.NewFromFloat(0.1)
-	return task
 }

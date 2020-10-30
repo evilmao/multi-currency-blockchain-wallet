@@ -24,7 +24,7 @@ type FeeReadJuster struct {
 	cfg               *config.Config
 }
 
-func NewFeeReadjuster(calculate Calculator) *FeeReadJuster {
+func NewFeeReadJuster(calculate Calculator) *FeeReadJuster {
 	return &FeeReadJuster{
 		calculateReadjust: calculate,
 	}
@@ -39,7 +39,7 @@ func (a *FeeReadJuster) Init(cfg *config.Config) {
 }
 
 func (a *FeeReadJuster) Check() error {
-	txs := models.GetUnReadjustedFeeTxs(config.CC.Codes())
+	txs := models.GetUnReadjustedFeeTxs()
 	if len(txs) == 0 {
 		return nil
 	}
