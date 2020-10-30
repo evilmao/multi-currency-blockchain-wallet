@@ -198,7 +198,7 @@ func (wtx *Tx) UpdateLocalTransIDSequenceID() {
 		shortAddr = shortAddr[:MaxShortAddrLen]
 	}
 
-	wtx.TransID = fmt.Sprintf("%s%d%s%d", wtx.Symbol, wtx.TxType, shortAddr, time.Now().Unix())
+	wtx.TransID = fmt.Sprintf("%s%d%s%d", wtx.Symbol, wtx.TxType, shortAddr, time.Now().UnixNano()/1e6)
 	wtx.SequenceID = util.HashString32([]byte(wtx.TransID))
 }
 
@@ -240,19 +240,19 @@ func GetUnfinishedWithdraws() []*Tx {
 	return txs
 }
 
-func GetLastSupplementaryFeeTxByAddress(code int, toAddress string) (*Tx, error) {
+func GetLastSupplementaryFeeTxByAddress(toAddress string) (*Tx, error) {
 	var tx Tx
 	err := db.Default().
-		Where("tx_type = ? and code = ? and address = ?", TxTypeSupplementaryFee, code, toAddress).
+		Where("tx_type = ? and address = ?", TxTypeSupplementaryFee, toAddress).
 		Order("created_at desc").
 		First(&tx).Error
 	return &tx, err
 }
 
-func GetUnReadjustedFeeTxs(codes []int) []*Tx {
+func GetUnReadjustedFeeTxs() []*Tx {
 	var txs []*Tx
 	db.Default().
-		Where("readjusted_fee = false and tx_status = ? and code in (?)", TxStatusSuccess, codes).
+		Where("readjusted_fee = false and tx_status = ? ", TxStatusSuccess).
 		Limit(10).
 		Find(&txs)
 	return txs
