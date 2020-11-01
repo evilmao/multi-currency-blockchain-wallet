@@ -8,7 +8,7 @@ import (
 
 	bviper "upex-wallet/wallet-base/viper"
 
-	"github.com/prometheus/common/log"
+	"upex-wallet/wallet-base/newbitx/misclib/log"
 )
 
 const (
