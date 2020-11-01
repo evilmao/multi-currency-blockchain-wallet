@@ -14,7 +14,7 @@ const (
 	_minGasLimit      = 21000
 	_minTokenGasLimit = 100000
 
-	_minGasPrice          = 1000000000
+	_minGasPrice          = 1000000000 // 1 * e9 wei = 1G-wei
 	_minHighPriorityPrice = _minGasPrice * 10
 )
 
