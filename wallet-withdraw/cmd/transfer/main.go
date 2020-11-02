@@ -7,6 +7,8 @@ import (
 	"strings"
 	"syscall"
 
+	_ "upex-wallet/wallet-withdraw/cmd/transfer/imports"
+
 	"upex-wallet/wallet-base/cmd"
 	"upex-wallet/wallet-base/db"
 	"upex-wallet/wallet-base/newbitx/misclib/log"
@@ -22,7 +24,6 @@ import (
 	"upex-wallet/wallet-withdraw/transfer/gather"
 	"upex-wallet/wallet-withdraw/transfer/rollback"
 	"upex-wallet/wallet-withdraw/transfer/txbuilder"
-	_ "upex-wallet/wallet-withdraw/transfer/txbuilder/eth"
 	"upex-wallet/wallet-withdraw/transfer/utxofee"
 	"upex-wallet/wallet-withdraw/transfer/withdraw"
 

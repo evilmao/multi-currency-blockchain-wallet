@@ -13,7 +13,7 @@ import (
 	lcmd "upex-wallet/wallet-withdraw/cmd"
 	"upex-wallet/wallet-withdraw/signer"
 
-	daemon "github.com/sevlyar/go-daemon"
+	"github.com/sevlyar/go-daemon"
 	"github.com/spf13/viper"
 )
 

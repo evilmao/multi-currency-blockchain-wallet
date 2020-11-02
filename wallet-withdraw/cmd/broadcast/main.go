@@ -10,6 +10,7 @@ import (
 
 	"upex-wallet/wallet-base/api"
 	"upex-wallet/wallet-base/monitor"
+	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-base/service"
 	"upex-wallet/wallet-base/util"
 	bviper "upex-wallet/wallet-base/viper"
@@ -18,8 +19,7 @@ import (
 	"upex-wallet/wallet-withdraw/broadcast/handler"
 	"upex-wallet/wallet-withdraw/broadcast/types"
 	"upex-wallet/wallet-withdraw/cmd"
-
-	"upex-wallet/wallet-base/newbitx/misclib/log"
+	_ "upex-wallet/wallet-withdraw/cmd/broadcast/imports"
 
 	"github.com/gin-gonic/gin"
 	gintrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/gin-gonic/gin"
