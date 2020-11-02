@@ -61,12 +61,12 @@ func DeprecatedGetAccountByAddress(addr string) *Account {
 }
 
 // GetAccountByAddress get account by address and symbolID.
-func GetAccountByAddress(addr string, symboolID int) *Account {
+func GetAccountByAddress(addr string, symbol string) *Account {
 	var (
 		account Account
 	)
 
-	db.Default().Where("symbol_id = ? and address = ?", symboolID, addr).First(&account)
+	db.Default().Where("symbol = ? and address = ?", symbol, addr).First(&account)
 	return &account
 }
 

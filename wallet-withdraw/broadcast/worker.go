@@ -101,26 +101,6 @@ func (w *Worker) loadUnfinishedTasks() {
 	})
 }
 
-func findHandler(task *models.Tx) (handler.Handler, error) {
-	h, ok := handler.Find(task.Symbol)
-	if ok {
-		return h, nil
-	}
-
-	// Tokens use main-chain's handler.
-	details, _ := currency.CurrencyDetail(task.Symbol)
-	for _, detail := range details {
-		if detail.BlockchainName == task.BlockchainName {
-			h, ok = handler.Find(detail.BelongChainName())
-			if ok {
-				return h, nil
-			}
-		}
-	}
-
-	return nil, fmt.Errorf("can't find handler of %s", task.Symbol)
-}
-
 func (w *Worker) Add(args *types.QueryArgs, task *models.BroadcastTask) error {
 	if len(w.taskCh) == taskLen {
 		return fmt.Errorf("the task queue is full, please retry after a while")
@@ -205,15 +185,6 @@ func (w *Worker) Work() {
 	}, nil)
 }
 
-func costRetryTimes(err error) bool {
-	for _, e := range errWhiteList {
-		if strings.Contains(err.Error(), e.Error()) {
-			return false
-		}
-	}
-	return true
-}
-
 func (w *Worker) process(t *Task) {
 	err := w.doProcess(t)
 	if err != nil {
@@ -248,12 +219,6 @@ func (w *Worker) doProcess(t *Task) error {
 				return fmt.Errorf("broadcast transaction failed, %v", err)
 			}
 		}
-
-		// pass notify
-		// err = exAPI.WithdrawNotify(args.Task.PassFormat(t.txID))
-		// if err != nil {
-		// 	return fmt.Errorf("%s, %v", ErrWithdrawNotify, err)
-		// }
 	case models.TxTypeGather, models.TxTypeSupplementaryFee, models.TxTypeCold:
 		err = w.tryBroadcast(t)
 		if err != nil {
@@ -289,9 +254,12 @@ func (w *Worker) tryBroadcast(t *Task) error {
 	}
 
 	args := t.args
-	args.Task.Update(map[string]interface{}{
+	err := args.Task.Update(map[string]interface{}{
 		"broadcast_try_count": gorm.Expr("`broadcast_try_count` + 1"),
 	}, t.h.DB())
+	if err !=nil{
+		log.Errorf("broadcast update count failed,%v",err)
+	}
 
 	updateTxID := func(txID string) {
 		if len(txID) > 0 {
@@ -342,7 +310,7 @@ func (w *Worker) tryBroadcast(t *Task) error {
 		return fmt.Errorf("can't find %s tx %s in blockchain yet", args.Task.Symbol, t.txID)
 	}
 
-	err := util.TryWithInterval(3, time.Second, func(int) error {
+	err = util.TryWithInterval(3, time.Second, func(int) error {
 		return args.Task.Update(map[string]interface{}{
 			"tx_status": models.TxStatusBroadcastSuccess,
 		}, t.h.DB())
@@ -386,3 +354,33 @@ func (w *Worker) retry(t *Task, costRetry bool) {
 func (w *Worker) Destroy() {
 	//
 }
+
+func costRetryTimes(err error) bool {
+	for _, e := range errWhiteList {
+		if strings.Contains(err.Error(), e.Error()) {
+			return false
+		}
+	}
+	return true
+}
+
+func findHandler(task *models.Tx) (handler.Handler, error) {
+	h, ok := handler.Find(task.Symbol)
+	if ok {
+		return h, nil
+	}
+
+	// Tokens use main-chain's handler.
+	details, _ := currency.CurrencyDetail(task.Symbol)
+	for _, detail := range details {
+		if detail.BlockchainName == task.BlockchainName {
+			h, ok = handler.Find(detail.BelongChainName())
+			if ok {
+				return h, nil
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("can't find handler of %s", task.Symbol)
+}
+

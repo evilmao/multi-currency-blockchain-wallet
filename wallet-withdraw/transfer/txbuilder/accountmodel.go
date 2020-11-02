@@ -8,12 +8,10 @@ import (
 	"time"
 
 	bmodels "upex-wallet/wallet-base/models"
-
+	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/base/models"
 	"upex-wallet/wallet-withdraw/transfer/alarm"
-
-	"upex-wallet/wallet-base/newbitx/misclib/log"
 
 	"github.com/jinzhu/gorm"
 	"github.com/shopspring/decimal"
@@ -102,7 +100,7 @@ func BuildByFeeMeta(cfg *config.Config, feeMeta FeeMeta, estimateFeeMeta *FeeMet
 		meta.AdjustFee(decimal.NewFromFloat(cfg.MinFee), decimal.NewFromFloat(cfg.MaxFee))
 		feeMeta = meta
 	}
-
+	log.Warnf("----11111---feeMeta(%v)",feeMeta)
 	txInfo, err := doBuild(feeMeta, task)
 	if err != nil {
 		if err, ok := err.(*ErrFeeNotEnough); ok {
@@ -154,16 +152,14 @@ func (b *AccountModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 
 		case *ErrFeeNotEnough:
 			fee, needFee := err.(*ErrFeeNotEnough).Fee, err.(*ErrFeeNotEnough).NeedFee
-			err = alarm.NewErrorTxFeeNotEnough(decimal.Decimal(fee), decimal.Decimal(needFee))
+			err = alarm.NewErrorTxFeeNotEnough(fee, needFee)
 			errMsg = err.(*alarm.NotMatchAccount).ErrorDetail
 		case *ErrBalanceForFeeNotEnough:
-			feeCode, _ := b.feeCode()
 			address, fee := err.(*ErrBalanceForFeeNotEnough).Address, err.(*ErrBalanceForFeeNotEnough).NeedFee
-			feeAccount := bmodels.GetAccountByAddress(address, feeCode)
+			feeAccount := bmodels.GetAccountByAddress(address, task.Symbol)
 			err = alarm.NewErrorAccountBalanceNotEnough(address, *feeAccount.Balance, fee)
 			errMsg = err.(*alarm.ErrorAccountBalanceNotEnough).ErrorDetail
 		}
-
 		if errMsg != "" {
 			go alarm.SendEmail(b.cfg, task, err, errMsg)
 		}
@@ -221,7 +217,6 @@ func (b *AccountModelBuilder) buildGather(feeMeta FeeMeta, task *models.Tx) (*Tx
 	)
 	if b.isFeeSymbol(task.Symbol) {
 		maxRemain := decimal.NewFromFloat(b.cfg.MaxAccountRemain)
-		// Use wide-remain to avoid gathering too small value.
 		wideRemainWithFee := maxRemain.Mul(decimal.NewFromFloat(1.5)).Add(feeMeta.Fee)
 		fromAccount = bmodels.GetMatchedAccount(wideRemainWithFee.String(), bmodels.AddressTypeNormal)
 		if fromAccount.Address == "" {
@@ -236,12 +231,7 @@ func (b *AccountModelBuilder) buildGather(feeMeta FeeMeta, task *models.Tx) (*Tx
 			return nil, nil
 		}
 
-		feeCode, err := b.feeCode()
-		if err != nil {
-			return nil, err
-		}
-
-		feeAccount = bmodels.GetAccountByAddress(fromAccount.Address, int(feeCode))
+		feeAccount = bmodels.GetAccountByAddress(fromAccount.Address, strings.ToLower(b.cfg.Currency))
 		if feeAccount.Address == "" || feeAccount.Balance == nil || feeAccount.Balance.LessThan(feeMeta.Fee) {
 			return nil, NewErrBalanceForFeeNotEnough(fromAccount.Address, feeMeta.Fee)
 		}

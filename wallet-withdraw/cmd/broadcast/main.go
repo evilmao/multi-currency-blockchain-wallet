@@ -23,7 +23,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	gintrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/gin-gonic/gin"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 var (
@@ -38,7 +37,7 @@ func initWorker() error {
 	brokerPrivate := bviper.GetString("broker.privateKey", "")
 
 	if len(brokerUrl) == 0 {
-		return fmt.Errorf("exUrl can't be empty")
+		return fmt.Errorf("broker URL can't be empty")
 	}
 
 	exAPI := api.NewExAPI(brokerUrl, brokerAccessKey, brokerPrivate)
@@ -90,8 +89,8 @@ func main() {
 		panic(err)
 	}
 
-	tracer.Start()
-	defer tracer.Stop()
+	// tracer.Start()
+	// defer tracer.Stop()
 
 	gin.SetMode(gin.ReleaseMode)
 	gin.DefaultWriter = util.NewLogWriter(log.Info)

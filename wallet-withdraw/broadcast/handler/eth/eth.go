@@ -101,6 +101,7 @@ func (h *ethHandler) BroadcastTransaction(tx handler.Tx, txHash string) (string,
 	}
 
 	ethTx := tx.(*types.Transaction)
+	log.Warnf("2222-----------ethTX:%v",ethTx)
 	err := h.rpcClient.SendTransaction(context.Background(), ethTx)
 	if err != nil {
 		if h.VerifyTxBroadCasted(txHash) {
