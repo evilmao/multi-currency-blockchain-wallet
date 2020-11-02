@@ -6,12 +6,12 @@ import (
 	"syscall"
 
 	"upex-wallet/wallet-base/cmd"
+	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-base/util"
 	"upex-wallet/wallet-config/withdraw/signer/config"
+	_ "upex-wallet/wallet-tools/cmd/genwallet/keypair/builder"
 	lcmd "upex-wallet/wallet-withdraw/cmd"
 	"upex-wallet/wallet-withdraw/signer"
-
-	"upex-wallet/wallet-base/newbitx/misclib/log"
 
 	daemon "github.com/sevlyar/go-daemon"
 	"github.com/spf13/viper"
