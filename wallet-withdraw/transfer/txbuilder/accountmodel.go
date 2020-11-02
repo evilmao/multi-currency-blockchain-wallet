@@ -146,7 +146,7 @@ func (b *AccountModelBuilder) BuildWithdraw(task *models.Tx) (*TxInfo, error) {
 
 func (b *AccountModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 
-	txInfo, err := BuildByFeeMeta(b.cfg, b.feeMeta, b.builder.EstimateFeeMeta(task.Symbol, task.TxType), task, b.buildWithdraw)
+	txInfo, err := BuildByFeeMeta(b.cfg, b.feeMeta, b.builder.EstimateFeeMeta(task.Symbol, task.TxType), task, b.buildGather)
 
 	if err != nil {
 		errMsg := ""
