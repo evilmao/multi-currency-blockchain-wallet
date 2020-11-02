@@ -50,7 +50,6 @@ func main() {
 	}
 }
 
-// initConfig 初始化配置文件
 func initConfig() {
 	if cfgFile != "" && utils.FileExist(cfgFile) {
 		viper.SetConfigFile(cfgFile)

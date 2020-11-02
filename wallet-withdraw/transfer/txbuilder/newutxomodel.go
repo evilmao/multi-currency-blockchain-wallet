@@ -196,9 +196,9 @@ func (b *UTXOModelBuilder) BuildWithdraw(task *models.Tx) (*TxInfo, error) {
 		MaxOutAmount = decimal.Zero
 	)
 
-	if !b.builder.Support(task.Symbol) {
-		return nil, NewErrUnsupportedCurrency(task.Symbol)
-	}
+	// if !b.builder.Support(task.Symbol) {
+	// 	return nil, NewErrUnsupportedCurrency(task.Symbol)
+	// }
 
 	txInfo, err := b.buildBySuggestTransactionFee(b.metaData, task, MaxOutAmount)
 	if err != nil {
@@ -233,9 +233,9 @@ func (b *UTXOModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 		txType = models.TxTypeName(task.TxType)
 	)
 
-	if !b.builder.Support(task.Symbol) {
-		return nil, NewErrUnsupportedCurrency(task.Symbol)
-	}
+	// if !b.builder.Support(task.Symbol) {
+	// 	return nil, NewErrUnsupportedCurrency(task.Symbol)
+	// }
 	maxWithdrawAmount, ok := currency.MaxWithdrawAmount(task.Symbol)
 
 	if !ok {

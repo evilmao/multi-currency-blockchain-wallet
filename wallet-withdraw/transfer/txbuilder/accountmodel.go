@@ -181,9 +181,9 @@ func (b *AccountModelBuilder) BuildSupplementaryFee(task *models.Tx) (*TxInfo, e
 }
 
 func (b *AccountModelBuilder) buildWithdraw(feeMeta FeeMeta, task *models.Tx) (*TxInfo, error) {
-	if !b.builder.Support(task.Symbol) {
-		return nil, NewErrUnsupportedCurrency(task.Symbol)
-	}
+	// if !b.builder.Support(task.Symbol) {
+	// 	return nil, NewErrUnsupportedCurrency(task.Symbol)
+	// }
 
 	var (
 		fromAccount *bmodels.Account
@@ -211,9 +211,9 @@ func (b *AccountModelBuilder) buildWithdraw(feeMeta FeeMeta, task *models.Tx) (*
 }
 
 func (b *AccountModelBuilder) buildGather(feeMeta FeeMeta, task *models.Tx) (*TxInfo, error) {
-	if !b.builder.Support(task.Symbol) {
-		return nil, NewErrUnsupportedCurrency(task.Symbol)
-	}
+	// if !b.builder.Support(task.Symbol) {
+	// 	return nil, NewErrUnsupportedCurrency(task.Symbol)
+	// }
 
 	var (
 		fromAccount *bmodels.Account
