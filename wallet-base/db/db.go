@@ -46,7 +46,7 @@ func New(dsn string, serviceName string) (*gorm.DB, error) {
 	conn.DB().SetConnMaxLifetime(time.Minute * 5)
 	conn.DB().SetMaxIdleConns(10)
 	conn.DB().SetMaxOpenConns(10)
-	//conn.LogMode(true)
+	// conn.LogMode(true)
 	if defaultdb == nil {
 		defaultdb = conn
 	}

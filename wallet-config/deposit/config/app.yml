@@ -19,4 +19,4 @@ maxConfirmations: 30                 # 区块广播确认节点数
 listenAddress: ":8555"
 
 # special setting
-# ignoreNoti fyAudit: true           # in withdraw program,just need store deposit record, but not request broker notify
+# ignoreNotifyAudit: true           # in withdraw program,just need store deposit record, but not request broker notify

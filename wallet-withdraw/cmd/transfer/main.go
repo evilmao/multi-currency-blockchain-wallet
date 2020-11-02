@@ -22,6 +22,7 @@ import (
 	"upex-wallet/wallet-withdraw/transfer/gather"
 	"upex-wallet/wallet-withdraw/transfer/rollback"
 	"upex-wallet/wallet-withdraw/transfer/txbuilder"
+	_ "upex-wallet/wallet-withdraw/transfer/txbuilder/eth"
 	"upex-wallet/wallet-withdraw/transfer/utxofee"
 	"upex-wallet/wallet-withdraw/transfer/withdraw"
 
