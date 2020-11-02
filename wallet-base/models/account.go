@@ -130,17 +130,17 @@ func GetAccounts(symbolID uint, index, pageSize int64) (*[]Account, int64) {
 }
 
 // GetBalanceByAddress return account balance.
-func GetBalanceByAddress(address string, symbolID int) decimal.Decimal {
-	acc := GetAccountByAddress(address, symbolID)
+func GetBalanceByAddress(address string, symbol string) decimal.Decimal {
+	acc := GetAccountByAddress(address, symbol)
 	if acc.Balance == nil {
 		return decimal.Zero
 	}
 	return *acc.Balance
 }
 
-func GetAccountByAddressWithDB(db *gorm.DB, addr string, symboolID int) *Account {
+func GetAccountByAddressWithDB(db *gorm.DB, addr string, symbol string) *Account {
 	var account Account
-	db.Where("symbol_id = ? and address = ?", symboolID, addr).First(&account)
+	db.Where("symbol = ? and address = ?", symbol, addr).First(&account)
 	return &account
 }
 
