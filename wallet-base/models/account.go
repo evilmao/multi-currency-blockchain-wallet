@@ -10,7 +10,7 @@ import (
 // Account represents a wrapper of address info.
 type Account struct {
 	ID      uint             `gorm:"AUTO_INCREMENT" json:"id"`
-	Address string           `gorm:"index:idx_address_symbolid" json:"address"`
+	Address string           `gorm:"index:idx_address_symbol" json:"address"`
 	Nonce   uint64           `gorm:"type:bigint;default:0" json:"nonce"`
 	Balance *decimal.Decimal `gorm:"type:decimal(32, 20);default:0" json:"balance"`
 	Symbol  string           `gorm:"column:symbol;size:32" json:"symbol"`

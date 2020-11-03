@@ -100,8 +100,9 @@ func (h *ethHandler) BroadcastTransaction(tx handler.Tx, txHash string) (string,
 		return "", fmt.Errorf("rpc client is nil")
 	}
 
+	log.Warnf("2223-----------ethTX:v%",tx)
 	ethTx := tx.(*types.Transaction)
-	log.Warnf("2222-----------ethTX:%v",ethTx)
+	log.Warnf("2222-----------ethTX:#v%",*ethTx.GasPrice())
 	err := h.rpcClient.SendTransaction(context.Background(), ethTx)
 	if err != nil {
 		if h.VerifyTxBroadCasted(txHash) {

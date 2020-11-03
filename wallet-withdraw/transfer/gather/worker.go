@@ -45,6 +45,7 @@ func (w *Worker) Name() string {
 }
 
 func (w *Worker) Work() {
+	// 1. use system address as to_address
 	sysAddress := bmodels.GetSystemAddress()
 
 	if len(sysAddress) == 0 {
@@ -57,12 +58,14 @@ func (w *Worker) Work() {
 }
 
 func (w *Worker) gather(address string) {
+	// 2. build a new gather task
 	task := &models.Tx{}
 	task.Symbol = strings.ToLower(w.cfg.Currency)
 	task.Address = address
 	task.TxType = models.TxTypeGather
 	task.UpdateLocalTransIDSequenceID()
 
+	// 3. build gather
 	txInfo, err := w.txBuilder.BuildGather(task)
 	if err != nil {
 		switch err := err.(type) {

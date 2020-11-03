@@ -82,18 +82,20 @@ func NewAccountModelBuilder(cfg *config.Config, builder AccountModelTxBuilder) B
 	if cfgGasPrice.GreaterThan(feeMeta.GasPrice) {
 		feeMeta.GasPrice = cfgGasPrice
 	}
-
+	log.Warnf("----01010----%v",feeMeta)
 	return &AccountModelBuilder{
 		cfg:     cfg,
 		builder: builder,
 		feeMeta: feeMeta,
 	}
+
 }
 
 type BuildByFeeMetaFunc func(FeeMeta, *models.Tx) (*TxInfo, error)
 
 // BuildByFeeMeta build TxInfo by feeMeta, handle ErrFeeNotEnough.
 func BuildByFeeMeta(cfg *config.Config, feeMeta FeeMeta, estimateFeeMeta *FeeMeta, task *models.Tx, doBuild BuildByFeeMetaFunc) (*TxInfo, error) {
+
 	if estimateFeeMeta != nil && estimateFeeMeta.Fee.GreaterThan(feeMeta.Fee) {
 		meta := estimateFeeMeta.Clone()
 		meta.Symbol = feeMeta.Symbol
@@ -143,7 +145,7 @@ func (b *AccountModelBuilder) BuildWithdraw(task *models.Tx) (*TxInfo, error) {
 }
 
 func (b *AccountModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
-
+	log.Warnf("----00000--------%v",b.feeMeta)
 	txInfo, err := BuildByFeeMeta(b.cfg, b.feeMeta, b.builder.EstimateFeeMeta(task.Symbol, task.TxType), task, b.buildGather)
 
 	if err != nil {
