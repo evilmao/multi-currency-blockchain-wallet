@@ -41,6 +41,7 @@ func (b *Broadcaster) BroadcastTx(txInfo *txbuilder.TxInfo, task *models.Tx) err
 	}
 
 	task.Hex = txInfo.TxHex
+	log.Warnf("---------888--------------task:%v",task)
 	_, _, err = util.RestPost(&types.QueryArgs{
 		Task:       *task,
 		Signatures: sigResp.Signature,

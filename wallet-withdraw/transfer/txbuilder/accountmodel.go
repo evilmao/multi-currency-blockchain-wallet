@@ -242,7 +242,7 @@ func (b *AccountModelBuilder) buildGather(feeMeta FeeMeta, task *models.Tx) (*Tx
 
 		task.Amount = *fromAccount.Balance
 	}
-
+	log.Warnf("----444------task:%v",task)
 	return b.doBuild(fromAccount, feeMeta, task, feeAccount)
 }
 
@@ -296,7 +296,7 @@ func (b *AccountModelBuilder) doBuild(fromAccount *bmodels.Account, feeMeta FeeM
 	if err != nil {
 		return nil, fmt.Errorf("lock address failed, %v", err)
 	}
-
+	log.Warnf("-------7777---------task:%v,feeMeta:%v",task,feeMeta)
 	txInfo, err := b.builder.DoBuild(&AccountModelBuildInfo{
 		FromAccount: fromAccount,
 		FromPubKey:  fromPubKey,

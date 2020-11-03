@@ -90,7 +90,7 @@ func (b *ETHBuilder) EstimateFeeMeta(symbol string, txType int8) *txbuilder.FeeM
 	if err != nil {
 		return nil
 	}
-
+	log.Warnf("----333----gasLimit:%d, gasPrice:%s:",int64(gasLimit), gasPrice.String())
 	return &txbuilder.FeeMeta{
 		Fee: decimal.New(int64(gasLimit), 0).Mul(decimal.NewFromBigInt(gasPrice, -geth.Precision)),
 	}
@@ -166,6 +166,7 @@ func (b *ETHBuilder) DoBuild(info *txbuilder.AccountModelBuildInfo) (*txbuilder.
 		return nil, fmt.Errorf("get suggest gas price failed, %v", err)
 	}
 
+	log.Warnf("----555---gasLimit:%d, gasPrice:%s",int64(gasLimit),gasPrice.String())
 	needFee := decimal.New(int64(gasLimit), 0).Mul(decimal.NewFromBigInt(gasPrice, -geth.Precision))
 	if needFee.GreaterThan(info.FeeMeta.Fee) {
 		return nil, txbuilder.NewErrFeeNotEnough(info.FeeMeta.Fee, needFee)
