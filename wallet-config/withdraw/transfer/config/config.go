@@ -200,6 +200,7 @@ func New() *Config {
 
 	cfg.AlarmTimeout = bviper.GetInt64("wallet.alarmTimeout", cfg.AlarmTimeout)
 	cfg.MaxFee = bviper.GetFloat64("wallet.maxFee", cfg.MaxFee)
+	cfg.MinFee = bviper.GetFloat64("wallet.minFee", cfg.MinFee)
 
 	if cfg.MaxFee <= 0 {
 		cfg.MaxFee = math.MaxFloat64
