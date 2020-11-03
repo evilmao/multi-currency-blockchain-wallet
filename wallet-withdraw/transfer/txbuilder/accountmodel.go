@@ -215,16 +215,20 @@ func (b *AccountModelBuilder) buildGather(feeMeta FeeMeta, task *models.Tx) (*Tx
 		fromAccount *bmodels.Account
 		feeAccount  *bmodels.Account
 	)
+
 	if b.isFeeSymbol(task.Symbol) {
-		maxRemain := decimal.NewFromFloat(b.cfg.MaxAccountRemain)
-		wideRemainWithFee := maxRemain.Mul(decimal.NewFromFloat(1.5)).Add(feeMeta.Fee)
-		fromAccount = bmodels.GetMatchedAccount(wideRemainWithFee.String(), bmodels.AddressTypeNormal)
+		// maxRemain := decimal.NewFromFloat(b.cfg.MaxAccountRemain)
+		// wideRemainWithFee := maxRemain.Mul(decimal.NewFromFloat(1.5)).Add(feeMeta.Fee)
+		// fromAccount = bmodels.GetMatchedAccount(wideRemainWithFee.String(), bmodels.AddressTypeNormal)
+		fee := feeMeta.Fee
+		fromAccount = bmodels.GetMatchedAccount(fee.String(), bmodels.AddressTypeNormal)
+
 		if fromAccount.Address == "" {
 			return nil, nil
 		}
 
-		maxRemainWithFee := maxRemain.Add(feeMeta.Fee)
-		task.Amount = fromAccount.Balance.Sub(maxRemainWithFee)
+		// maxRemainWithFee := maxRemain.Add(feeMeta.Fee)
+		task.Amount = fromAccount.Balance.Sub(fee)
 	} else {
 		fromAccount = bmodels.GetMatchedAccount("0", bmodels.AddressTypeNormal)
 		if fromAccount.Address == "" {
