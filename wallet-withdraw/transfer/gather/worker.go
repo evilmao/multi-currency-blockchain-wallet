@@ -58,14 +58,14 @@ func (w *Worker) Work() {
 }
 
 func (w *Worker) gather(address string) {
-	// 2. build a new gather task
+
 	task := &models.Tx{}
 	task.Symbol = strings.ToLower(w.cfg.Currency)
 	task.Address = address
 	task.TxType = models.TxTypeGather
 	task.UpdateLocalTransIDSequenceID()
 
-	// 3. build gather
+	// 2. build gather
 	txInfo, err := w.txBuilder.BuildGather(task)
 	if err != nil {
 		switch err := err.(type) {

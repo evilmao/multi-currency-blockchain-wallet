@@ -61,17 +61,18 @@ func (h *ethHandler) BuildTx(txHex string, signatures []string, pubKeys []string
 		return nil, "", fmt.Errorf("rpc client is nil")
 	}
 
-	// if h.chainID == nil {
-	// 	chainID, err := h.rpcClient.ChainID(context.Background())
-	// 	if err != nil {
-	// 		return nil, "", fmt.Errorf("get chain id failed, %v", err)
-	// 	}
-	//
-	// 	h.chainID = chainID
-	// }
+	if h.chainID == nil {
+		chainID, err := h.rpcClient.ChainID(context.Background())
+		if err != nil {
+			return nil, "", fmt.Errorf("get chain id failed, %v", err)
+		}
 
-	sigs := handler.DecryptSignatures(h.rsaKey, signatures)
-	if len(sigs) == 0 {
+		h.chainID = chainID
+	}
+
+	log.Warnf("-----chainID---",h.chainID)
+	sign := handler.DecryptSignatures(h.rsaKey, signatures)
+	if len(sign) == 0 {
 		return nil, "", handler.ErrDecryptSignatureFail
 	}
 
@@ -87,7 +88,7 @@ func (h *ethHandler) BuildTx(txHex string, signatures []string, pubKeys []string
 	}
 
 	signer := types.NewEIP155Signer(h.chainID)
-	tx, err = tx.WithSignature(signer, sigs[0])
+	tx, err = tx.WithSignature(signer, sign[0])
 	if err != nil {
 		return nil, "", fmt.Errorf("set tx signature failed, %v", err)
 	}
@@ -100,11 +101,9 @@ func (h *ethHandler) BroadcastTransaction(tx handler.Tx, txHash string) (string,
 		return "", fmt.Errorf("rpc client is nil")
 	}
 
-	log.Warnf("2223-----------ethTX:v%",tx)
 	ethTx := tx.(*types.Transaction)
-	log.Warnf("2222-----------ethTX:#v%",*ethTx.GasPrice())
 	err := h.rpcClient.SendTransaction(context.Background(), ethTx)
-	if err != nil {
+	if err != 	nil {
 		if h.VerifyTxBroadCasted(txHash) {
 			return txHash, nil
 		}

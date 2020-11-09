@@ -82,7 +82,7 @@ func NewAccountModelBuilder(cfg *config.Config, builder AccountModelTxBuilder) B
 	if cfgGasPrice.GreaterThan(feeMeta.GasPrice) {
 		feeMeta.GasPrice = cfgGasPrice
 	}
-	log.Warnf("----01010----%v",feeMeta)
+
 	return &AccountModelBuilder{
 		cfg:     cfg,
 		builder: builder,
@@ -102,7 +102,7 @@ func BuildByFeeMeta(cfg *config.Config, feeMeta FeeMeta, estimateFeeMeta *FeeMet
 		meta.AdjustFee(decimal.NewFromFloat(cfg.MinFee), decimal.NewFromFloat(cfg.MaxFee))
 		feeMeta = meta
 	}
-	log.Warnf("----11111---feeMeta(%v)",feeMeta)
+
 	txInfo, err := doBuild(feeMeta, task)
 	if err != nil {
 		if err, ok := err.(*ErrFeeNotEnough); ok {
@@ -145,7 +145,7 @@ func (b *AccountModelBuilder) BuildWithdraw(task *models.Tx) (*TxInfo, error) {
 }
 
 func (b *AccountModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
-	log.Warnf("----00000--------%v",b.feeMeta)
+
 	txInfo, err := BuildByFeeMeta(b.cfg, b.feeMeta, b.builder.EstimateFeeMeta(task.Symbol, task.TxType), task, b.buildGather)
 
 	if err != nil {
@@ -244,7 +244,7 @@ func (b *AccountModelBuilder) buildGather(feeMeta FeeMeta, task *models.Tx) (*Tx
 
 		task.Amount = *fromAccount.Balance
 	}
-	log.Warnf("----444------task:%v",task)
+
 	return b.doBuild(fromAccount, feeMeta, task, feeAccount)
 }
 
@@ -298,7 +298,7 @@ func (b *AccountModelBuilder) doBuild(fromAccount *bmodels.Account, feeMeta FeeM
 	if err != nil {
 		return nil, fmt.Errorf("lock address failed, %v", err)
 	}
-	log.Warnf("-------7777---------task:%v,feeMeta:%v",task,feeMeta)
+
 	txInfo, err := b.builder.DoBuild(&AccountModelBuildInfo{
 		FromAccount: fromAccount,
 		FromPubKey:  fromPubKey,
