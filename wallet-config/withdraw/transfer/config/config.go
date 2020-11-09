@@ -12,10 +12,11 @@ import (
 )
 
 const (
-	minWithdrawInterval = 5
-	minGatherInterval   = 5
-	minSignTimeout      = 5
-	sendEmailInterval   = 15
+	minWithdrawInterval     = 5
+	minGatherInterval       = 5
+	minSignTimeout          = 5
+	sendEmailInterval       = 15
+	coolDownTaskInterval = 15
 )
 
 type RequestFeeAPI struct {
@@ -70,15 +71,16 @@ type Config struct {
 	SignTimeout time.Duration
 
 	// wallet configuration
-	BroadcastURL     string
-	ColdAddress      string
-	MaxFee           float64
-	MinFee           float64
-	MaxGasPrice      float64
-	MaxGasLimit      float64
-	MaxAccountRemain float64
-	MinAccountRemain float64
-	AlarmTimeout     int64
+	BroadcastURL         string
+	ColdAddress          string
+	MaxFee               float64
+	MinFee               float64
+	MaxGasPrice          float64
+	MaxGasLimit          float64
+	MaxAccountRemain     float64
+	MinAccountRemain     float64
+	AlarmTimeout         int64
+	CoolDownTaskInterval time.Duration
 
 	// broker api
 	BrokerURL        string
@@ -114,19 +116,20 @@ type Config struct {
 // DefaultConfig returns a default Wallet Config.
 func DefaultConfig() *Config {
 	return &Config{
-		Currency:         "btc",
-		Code:             0,
-		UpdateCurrency:   false,
-		RPCUrl:           "http://localhost:8545",
-		RPCToken:         "",
-		SignURL:          "http://localhost:8899",
-		SignTimeout:      5,
-		WithdrawInterval: time.Second * minWithdrawInterval,
-		CoolDown:         false,
-		Gather:           false,
-		AutoRollback:     false,
-		Withdraw:         true,
-		GatherInterval:   time.Second * minGatherInterval,
+		Currency:             "btc",
+		Code:                 0,
+		UpdateCurrency:       false,
+		RPCUrl:               "http://localhost:8545",
+		RPCToken:             "",
+		SignURL:              "http://localhost:8899",
+		SignTimeout:          5,
+		CoolDown:             false,
+		Gather:               false,
+		AutoRollback:         false,
+		Withdraw:             true,
+		GatherInterval:       time.Second * minGatherInterval,
+		CoolDownTaskInterval: time.Minute * coolDownTaskInterval,
+		WithdrawInterval:     time.Second * minWithdrawInterval,
 
 		AlarmTimeout:     108000,
 		MinFee:           0,
@@ -137,7 +140,6 @@ func DefaultConfig() *Config {
 		MinAccountRemain: 0,
 		ColdAddress:      "",
 		ChainID:          "",
-		DSN:              "",
 		BroadcastURL:     "",
 		ExitSignal:       make(chan struct{}),
 
@@ -177,7 +179,6 @@ func New() *Config {
 		cfg.WithdrawInterval = time.Second * time.Duration(interval)
 	}
 
-	cfg.CoolDown = bviper.GetBool("cooldown", false)
 	cfg.Gather = bviper.GetBool("gather", false)
 	cfg.AutoRollback = bviper.GetBool("autoRollback", false)
 	if cfg.Gather {
@@ -186,6 +187,12 @@ func New() *Config {
 			interval = minGatherInterval
 		}
 		cfg.GatherInterval = time.Second * time.Duration(interval)
+	}
+
+	cfg.CoolDown = bviper.GetBool("cooldown", false)
+	if cfg.CoolDown {
+		interval := bviper.GetInt64("coolDownTaskInterval", coolDownTaskInterval)
+		cfg.GatherInterval = time.Minute * time.Duration(interval)
 	}
 
 	cfg.ScheduleChecker = bviper.GetStringSlice("scheduleChecker", nil)

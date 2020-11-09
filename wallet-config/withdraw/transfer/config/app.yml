@@ -30,6 +30,7 @@ wallet:
   maxAccountRemain: 0.02         # 0.05 eth, grater than value, will do cool-down tx
   minAccountRemain: 0.01         # 0.03 eth , less than value, will alarm
   coldAddress: ""                # cold wallet address
+  coolDownTaskInterval: 15       # cold down transfer trigger interval, unit minute
   # alarmTimeout: 30
 
 
