@@ -96,8 +96,8 @@ func (f *BaseFetcher) reprocessDeposit() {
 			continue
 		}
 
-		symbols := []string{f.Cfg.Currency}
-		txs := models.GetUnfinishedTxs(symbols)
+		symbol := strings.ToLower(f.Cfg.Currency)
+		txs := models.GetUnfinishedTxs(symbol)
 		for i := 0; i < len(txs); i++ {
 			tx := txs[i]
 			if int(tx.Confirm) < f.Cfg.MaxConfirm {

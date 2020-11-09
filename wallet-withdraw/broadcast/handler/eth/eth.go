@@ -70,7 +70,6 @@ func (h *ethHandler) BuildTx(txHex string, signatures []string, pubKeys []string
 		h.chainID = chainID
 	}
 
-	log.Warnf("-----chainID---",h.chainID)
 	sign := handler.DecryptSignatures(h.rsaKey, signatures)
 	if len(sign) == 0 {
 		return nil, "", handler.ErrDecryptSignatureFail
