@@ -125,9 +125,12 @@ func (w *Worker) Add(args *types.QueryArgs, task *models.BroadcastTask) error {
 			return fmt.Errorf("supplementary-fee transfer to %s is not allowed", args.Task.Address)
 		}
 	case models.TxTypeCold:
-		info, err := models.GetColdInfo(h.DB(), args.Task.Symbol)
-		if err != nil || args.Task.Address != info.Address {
-			return fmt.Errorf("cold transfer to %s is not allowed", args.Task.Address)
+		// info, err := models.GetColdInfo(h.DB(), args.Task.Symbol)
+		// if err != nil || args.Task.Address != info.Address {
+		// 	return fmt.Errorf("cold transfer to %s is not allowed", args.Task.Address)
+		// }
+		if args.Task.Address == ""{
+			return fmt.Errorf("cold transfer address can not be empty ")
 		}
 	}
 
