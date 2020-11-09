@@ -192,7 +192,7 @@ func New() *Config {
 	cfg.CoolDown = bviper.GetBool("cooldown", false)
 	if cfg.CoolDown {
 		interval := bviper.GetInt64("coolDownTaskInterval", coolDownTaskInterval)
-		cfg.GatherInterval = time.Minute * time.Duration(interval)
+		cfg.CoolDownTaskInterval = time.Minute * time.Duration(interval)
 	}
 
 	cfg.ScheduleChecker = bviper.GetStringSlice("scheduleChecker", nil)

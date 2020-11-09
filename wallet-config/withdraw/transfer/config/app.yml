@@ -33,7 +33,6 @@ wallet:
   coolDownTaskInterval: 15       # cold down transfer trigger interval, unit minute
   # alarmTimeout: 30
 
-
 broker:
   url: "http://test-api.exup.io/finance/"
   accessKey: "1001"
