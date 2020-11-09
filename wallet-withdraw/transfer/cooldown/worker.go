@@ -17,16 +17,14 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-var (
-	coolDownTaskInterval time.Duration = 15
-)
 
 type Worker struct {
 	*service.SimpleWorker
 	*transfer.Broadcaster
-	cfg                *config.Config
-	txBuilder          txbuilder.Builder
-	lastCoolDownTxTime time.Time
+	cfg                  *config.Config
+	txBuilder            txbuilder.Builder
+	lastCoolDownTxTime   time.Time
+	coolDownTaskInterval time.Duration
 }
 
 type ColdWalletInfo struct {
@@ -42,7 +40,8 @@ func New(cfg *config.Config, txBuilder txbuilder.Builder) *Worker {
 		cfg:         cfg,
 		txBuilder:   txBuilder,
 
-		lastCoolDownTxTime: time.Now(),
+		lastCoolDownTxTime:   time.Now(),
+		coolDownTaskInterval: cfg.CoolDownTaskInterval,
 	}
 }
 
@@ -53,7 +52,7 @@ func (w *Worker) Name() string {
 func (w *Worker) Work() {
 	// per 15 minutes, scan system address balance,then do cool down task
 	now := time.Now()
-	if now.Sub(w.lastCoolDownTxTime) > time.Minute*coolDownTaskInterval {
+	if now.Sub(w.lastCoolDownTxTime) > w.coolDownTaskInterval {
 		log.Infof("cool down worker process...")
 		w.lastCoolDownTxTime = now
 	} else {
