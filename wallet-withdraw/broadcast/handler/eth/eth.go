@@ -36,6 +36,7 @@ func (h *ethHandler) Init() error {
 	h.rsaKey = bviper.GetString(h.configPrefix+".rsaKey", "")
 
 	rpcURL := bviper.GetString(h.configPrefix+".rpcUrl", "")
+
 	if len(rpcURL) > 0 {
 		var err error
 		h.rpcClient, err = ethclient.Dial(rpcURL)

@@ -82,7 +82,7 @@ func (p *taskProducer) produceFromAPI() {
 	data["app_id"] = p.cfg.BrokerAccessKey
 	data["timestamp"] = time.Now().Unix()
 
-	// get withdraws tasks form broker
+	// get withdraws tasks from broker
 	resp, _, err := p.exAPI.GetWithdraws(data)
 	if err != nil || resp == nil {
 		if err != nil {

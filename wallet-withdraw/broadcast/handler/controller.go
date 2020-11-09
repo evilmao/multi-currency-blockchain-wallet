@@ -26,6 +26,12 @@ func (c *Controller) VerifyInterval() time.Duration {
 	return time.Duration(interval) * time.Second
 }
 
+func (c *Controller) Confirms() int64 {
+	confirms := bviper.GetInt64(c.configPrefix+".maxConfirm", 0)
+	return confirms
+}
+
+
 func normalizeInt64(v, min, max int64) int64 {
 	if min > max {
 		min, max = max, min

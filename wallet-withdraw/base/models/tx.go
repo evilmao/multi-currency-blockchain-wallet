@@ -258,7 +258,7 @@ func GetUnReadjustedFeeTxs() []*Tx {
 	return txs
 }
 
-// SelectUTXOWithTransFee sort utxo accoring utxo.Amount
+// SelectUTXOWithTransFee sort utxo according utxo.Amount
 func SelectUTXOWithTransFee(address string, limitLen int, bigOrder bool) ([]*models.UTXO, bool) {
 	utxos := models.GetUTXOsByAddress(address)
 

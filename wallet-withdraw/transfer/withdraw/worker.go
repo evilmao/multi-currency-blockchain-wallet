@@ -140,13 +140,6 @@ func (w *Worker) processTask(task *models.Tx) error {
 
 	log.Infof("%s, start process task %+v", w.Name(), task)
 
-	// request broker api
-	data := task.WithdrawNotifyFormat()
-	_, _, err := w.exAPI.WithdrawNotify(data)
-	if err != nil {
-		return fmt.Errorf("withdraw notify failed, %v", err)
-	}
-
 	// withdraw lessThan 0 is not available
 	if task.Amount.LessThanOrEqual(decimal.Zero) {
 		return nil
@@ -154,7 +147,7 @@ func (w *Worker) processTask(task *models.Tx) error {
 
 	// check if a new trans
 	if task.TxStatus == models.TxStatusNotRecord {
-		err = task.FirstOrCreate()
+		err := task.FirstOrCreate()
 		if err != nil {
 			return fmt.Errorf("db insert tx failed, %v", err)
 		}
@@ -216,7 +209,7 @@ func (w *Worker) processTask(task *models.Tx) error {
 		return fmt.Errorf("db update tx status failed, %v", err)
 	}
 
-	err = transfer.SpendTxIns(int(w.cfg.Code), task.SequenceID, txInfo.Inputs, txInfo.Nonce, txInfo.DiscardAddress)
+	err = transfer.SpendTxIns(w.cfg.Code, task.SequenceID, txInfo.Inputs, txInfo.Nonce, txInfo.DiscardAddress)
 	if err != nil {
 		return err
 	}

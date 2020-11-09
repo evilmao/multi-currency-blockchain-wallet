@@ -210,11 +210,12 @@ func (w *Worker) doProcess(t *Task) error {
 		}
 
 		if !t.broadcastSuccess {
-			// audit
+			// notify
 			data := args.Task.WithdrawNotifyFormat()
+			data["confirm"] = t.h.Ctrler().Confirms()
 			_, _, err = exAPI.WithdrawNotify(data)
 			if err != nil {
-				return fmt.Errorf("%s, %v", ErrWithdrawAudit, err)
+				return fmt.Errorf("%s, %v", ErrWithdrawNotify, err)
 			}
 
 			err = w.tryBroadcast(t)
