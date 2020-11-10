@@ -122,7 +122,7 @@ func (wtx *Tx) WithdrawNotifyFormat() map[string]interface{} {
 	data := make(map[string]interface{})
 	data["trans_id"] = wtx.TransID
 	data["address_to"] = wtx.Address
-	data["amount"] = wtx.Amount.Sub(wtx.Fees).String()
+	data["amount"] = wtx.Amount.String()
 	data["symbol"] = strings.ToLower(wtx.Symbol)
 	data["txid"] = wtx.Hash
 	data["confirm"] = wtx.Confirm
