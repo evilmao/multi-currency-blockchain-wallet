@@ -126,7 +126,7 @@ func (wtx *Tx) WithdrawNotifyFormat() map[string]interface{} {
     data["symbol"] = strings.ToLower(wtx.Symbol)
     data["txid"] = wtx.Hash
     data["confirm"] = wtx.Confirm
-    data["real_fee"] = ""
+    data["real_fee"] = wtx.Fees
     data["app_id"] = ""
     data["timestamp"] = time.Now().Unix()
     return data
