@@ -14,7 +14,7 @@ import (
 
 const (
     // StatusOK represents the api response status.
-    StatusOK = iota
+    StatusOK = "000"
 
     // RestyMaxRetryCount is the max retry times.
     RestyMaxRetryCount = 3
@@ -37,7 +37,7 @@ func restyStatusError(resp *resty.Response) error {
 
 // Response represents the server response message.
 type Response struct {
-    Status int         `json:"errno"`
+    Status string      `json:"errno"`
     Msg    string      `json:"errmsg"`
     Data   interface{} `json:"data"`
 }
@@ -53,7 +53,7 @@ func RestPost(data interface{}, url string) (interface{}, int, error) {
     var resp Response
     err = json.Unmarshal(respData, &resp)
     if err != nil {
-        return nil, RestyMaxRetryCount, fmt.Errorf("decode response from api fail, request url:%s, detail %v", url,err)
+        return nil, RestyMaxRetryCount, fmt.Errorf("decode response from api fail, request url:%s, detail %v", url, err)
     }
 
     if resp.Status == StatusOK && !strings.Contains(strings.ToLower(resp.Msg), "error") {

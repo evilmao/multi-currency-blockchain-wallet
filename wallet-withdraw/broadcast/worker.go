@@ -225,7 +225,6 @@ func (w *Worker) doProcess(t *Task) error {
             if err != nil {
                 return fmt.Errorf("%s, %v", ErrWithdrawNotify, err)
             }
-
         }
     case models.TxTypeGather, models.TxTypeSupplementaryFee, models.TxTypeCold:
         err = w.tryBroadcast(t)
