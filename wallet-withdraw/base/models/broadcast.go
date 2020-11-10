@@ -53,6 +53,6 @@ func IsBroadcastTaskExist(dbInst *gorm.DB, txSequenceID string) (bool, error) {
 // GetBroadcastTasksByStatus returns broadcast tasks in the status.
 func GetBroadcastTasksByStatus(dbInst *gorm.DB, status uint) []*BroadcastTask {
 	var tasks []*BroadcastTask
-	dbInst.Where("task_status = ?", status).Find(&tasks)
+	dbInst.Where("task_status = ? ", status).Find(&tasks)
 	return tasks
 }

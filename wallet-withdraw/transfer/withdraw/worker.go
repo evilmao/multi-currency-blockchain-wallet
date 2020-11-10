@@ -166,7 +166,7 @@ func (w *Worker) processTask(task *models.Tx) error {
 		return fmt.Errorf("wallet balance not enough, balance %v need %v", balance, total)
 	}
 
-	// will submit a transaction
+	// will build a transaction
 	txInfo, err := w.txBuilder.BuildWithdraw(task)
 	if err != nil {
 		return fmt.Errorf("build tx failed, %v", err)
