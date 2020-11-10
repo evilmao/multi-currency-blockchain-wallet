@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-base/util"
 )
 
@@ -117,7 +116,6 @@ func (api *ExAPI) DepositBalanceChangeNotify(data map[string]interface{}) (inter
 func (api *ExAPI) WithdrawNotify(data map[string]interface{}) (interface{}, int, error) {
 	signStr := api.Sign(data)
 	data = api.UpdateRequestSign(data, signStr)
-	log.Warnf("---444--request data:%v", data)
 	return util.RestPost(data, api.url+"withdrawNotify/")
 }
 
