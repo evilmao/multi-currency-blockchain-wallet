@@ -92,6 +92,10 @@ func (api *ExAPI) UpdateRequestSign(data map[string]interface{}, sign string) ma
 	return data
 }
 
+func (api *ExAPI)GetBrokerAppID() string{
+	return api.accessKey
+}
+
 // DepositNotify notify deposit.
 func (api *ExAPI) DepositNotify(data map[string]interface{}) (interface{}, int, error) {
 	// 签名
