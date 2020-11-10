@@ -5,7 +5,6 @@ import (
     "strings"
     "time"
 
-    "upex-wallet/wallet-base/newbitx/misclib/log"
     "upex-wallet/wallet-base/util"
 )
 
@@ -39,7 +38,6 @@ func (api *ExAPI) CommonRequestData(sign string) map[string]interface{} {
 
 func (api *ExAPI) Sign(data map[string]interface{}) string {
     mapStr := SortMapToString(data)
-    log.Warnf("----123---%s\n, privateKey=",mapStr,api.privateKey)
     return util.SignSHA1(mapStr, api.privateKey)
 }
 
