@@ -220,7 +220,8 @@ func (w *Worker) doProcess(t *Task) error {
             data := args.Task.WithdrawNotifyFormat()
             data["app_id"] = exAPI.GetBrokerAppID()
             log.Warnf("-----222--withdraw:%v",data)
-            _, _, err = exAPI.WithdrawNotify(data)
+            res, _, err := exAPI.WithdrawNotify(data)
+            log.Warnf("-----3333---res:%v",res)
             if err != nil {
                 return fmt.Errorf("%s, %v", ErrWithdrawNotify, err)
             }
