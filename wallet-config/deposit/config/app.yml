@@ -2,7 +2,7 @@
 # *** DO NOT EDIT ME ***
 
 currency: eth
-dsn: "root:Xxzx@789@tcp(43.254.54.79:3306)/wallet_eth_deposit?charset=utf8&parseTime=True&loc=Local"
+dsn: "root:Xxzx@789@tcp(43.254.54.79:3306)/wallet_eth?charset=utf8&parseTime=True&loc=Local"
 rpcUrl: "http://54.95.191.140:5003"
 
 # broker
@@ -12,7 +12,7 @@ brokerPrivateKey: "1f5ddxyyy1f2c0b58bbd8cxx7x79xxxx"    # appSecretKey
 minAmount: 0.001                                        # 0.001 eth, deposit min value
 
 # scan blockchain
-startHeight: 11149429               # 扫描区块的起始高度, 默认从数据库中最新的区块开始扫描
+startHeight: 11233510               # 扫描区块的起始高度, 默认从数据库中最新的区块开始扫描
 maxConfirmations: 30                 # 区块广播确认节点数
 
 # data-dog service

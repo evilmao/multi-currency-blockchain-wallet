@@ -100,8 +100,10 @@ func (wtx *Tx) FirstOrCreate() error {
     if wtx.TxStatus == TxStatusNotRecord {
         wtx.TxStatus = TxStatusRecord
     }
+    // fix same gather task repeat record
+    return db.Default().FirstOrCreate(wtx, "txid = ? ",  wtx.Hash).Error
 
-    return db.Default().FirstOrCreate(wtx, "sequence_id = ? and tx_type = ?", wtx.SequenceID, wtx.TxType).Error
+    // return db.Default().FirstOrCreate(wtx, "sequence_id = ? and tx_type = ?", wtx.SequenceID, wtx.TxType).Error
 }
 
 // Update updates the tx status.

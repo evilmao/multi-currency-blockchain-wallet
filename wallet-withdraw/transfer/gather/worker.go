@@ -104,6 +104,8 @@ func (w *Worker) gather(address string) {
 func (w *Worker) storeAndBroadcast(txInfo *txbuilder.TxInfo, task *models.Tx) error {
 
 	task.Hex = txInfo.TxHex
+	task.Fees = txInfo.Fee
+
 	if txInfo.Nonce != nil {
 		task.Nonce = *txInfo.Nonce
 	}
@@ -111,6 +113,7 @@ func (w *Worker) storeAndBroadcast(txInfo *txbuilder.TxInfo, task *models.Tx) er
 	if err != nil {
 		return fmt.Errorf("%s, db insert tx failed, %v", w.Name(), err)
 	}
+
 
 	// sign and send transaction
 	err = w.BroadcastTx(txInfo, task)
@@ -120,12 +123,13 @@ func (w *Worker) storeAndBroadcast(txInfo *txbuilder.TxInfo, task *models.Tx) er
 
 	err = task.Update(map[string]interface{}{
 		"tx_status": models.TxStatusBroadcast,
+		"fees":  txInfo.Fee,
 	}, nil)
 	if err != nil {
 		return fmt.Errorf("%s, db update tx failed, %v", w.Name(), err)
 	}
 
-	err = transfer.SpendTxIns(int(w.cfg.Code), task.SequenceID, txInfo.Inputs, txInfo.Nonce, txInfo.DiscardAddress)
+	err = transfer.SpendTxIns(w.cfg.Code, task.SequenceID, txInfo.Inputs, txInfo.Nonce, txInfo.DiscardAddress)
 	if err != nil {
 		return fmt.Errorf("%s, spend (sequenceID: %s) utxo failed, %v", w.Name(), task.SequenceID, err)
 	}
