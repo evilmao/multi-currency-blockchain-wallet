@@ -14,7 +14,7 @@ import (
 
 const (
     // StatusOK represents the api response status.
-    StatusOK = "000"
+    StatusOK = iota
 
     // RestyMaxRetryCount is the max retry times.
     RestyMaxRetryCount = 3
@@ -37,7 +37,7 @@ func restyStatusError(resp *resty.Response) error {
 
 // Response represents the server response message.
 type Response struct {
-    Status string      `json:"errno"`
+    Status int         `json:"errno"`
     Msg    string      `json:"errmsg"`
     Data   interface{} `json:"data"`
 }
