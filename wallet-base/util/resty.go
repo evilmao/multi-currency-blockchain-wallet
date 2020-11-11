@@ -37,7 +37,7 @@ func restyStatusError(resp *resty.Response) error {
 
 // Response represents the server response message.
 type Response struct {
-    Status int         `json:"errno"`
+    Status interface{} `json:"errno"`
     Msg    string      `json:"errmsg"`
     Data   interface{} `json:"data"`
 }
@@ -55,7 +55,7 @@ func RestPost(data interface{}, url string) (interface{}, int, error) {
     if err != nil {
         return nil, RestyMaxRetryCount, fmt.Errorf("decode response from api fail, request url:%s, detail %v", url, err)
     }
-
+  
     if resp.Status == StatusOK && !strings.Contains(strings.ToLower(resp.Msg), "error") {
         return resp.Data, 1, nil
     }
