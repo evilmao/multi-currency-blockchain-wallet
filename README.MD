@@ -246,6 +246,9 @@ make
 2. 需添加如下配置—-–使用 `wallet-config/deposit/config/app.yml` 配置文件
 
    ```shell
+   # 数据库使用提现数据库, 不同于充值
+   dsn: "root:Xxzx@789@tcp(43.254.54.79:3306)/wallet_eth?charset=utf8&parseTime=True&loc=Local"
+
    # special setting
    ignoreNotifyAudit: true           # in withdraw program,just need store deposit record, but not request broker notify
    # trxAirDropAddress: 0
