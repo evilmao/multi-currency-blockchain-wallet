@@ -14,8 +14,8 @@ import (
 
 const (
     // StatusOK represents the api response status.
-    StatusOK = iota
-
+    StatusOK          = iota
+    StatusOKForBroker = "000"
     // RestyMaxRetryCount is the max retry times.
     RestyMaxRetryCount = 3
 )
@@ -37,7 +37,7 @@ func restyStatusError(resp *resty.Response) error {
 
 // Response represents the server response message.
 type ResponseForBroker struct {
-    Status int         `json:"errno"`
+    Status string      `json:"errno"`
     Msg    string      `json:"errmsg"`
     Data   interface{} `json:"data"`
 }
@@ -60,10 +60,10 @@ func RestPostToBroker(data interface{}, url string) (interface{}, int, error) {
     )
     err = json.Unmarshal(respData, &resp)
     if err != nil {
-        return nil, RestyMaxRetryCount, fmt.Errorf("decode response from api fail, request url:%s, detail %v", url, err)
+        return nil, RestyMaxRetryCount, fmt.Errorf("decode response from broker api fail, request url:%s, detail %v", url, err)
     }
 
-    if resp.Status == StatusOK && !strings.Contains(strings.ToLower(resp.Msg), "error") {
+    if resp.Status == StatusOKForBroker && !strings.Contains(strings.ToLower(resp.Msg), "error") {
         return resp.Data, 1, nil
     }
 
@@ -82,7 +82,7 @@ func RestPostToBroadCast(data interface{}, url string) (int, error) {
     )
     err = json.Unmarshal(respData, &resp)
     if err != nil {
-        return RestyMaxRetryCount, fmt.Errorf("decode response from api fail, request url:%s, detail %v", url, err)
+        return RestyMaxRetryCount, fmt.Errorf("decode response from broadcast api fail, request url:%s, detail %v", url, err)
     }
 
     if resp.Status == StatusOK {
