@@ -61,11 +61,11 @@ func RestPost(data interface{}, url string) (interface{}, int, error) {
     }
 
     resStatus := resp.Status
-    switch resStatus {
-    case resStatus.(int):
-        requestOK = resStatus == StatusOK
-    case resStatus.(string):
-        requestOK = resStatus == Status200
+    switch resStatus.(type) {
+    case int:
+        requestOK = resStatus.(int) == StatusOK
+    case string:
+        requestOK = resStatus.(string) == Status200
     }
 
     if requestOK && !strings.Contains(strings.ToLower(resp.Msg), "error") {
