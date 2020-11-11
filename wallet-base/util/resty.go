@@ -14,7 +14,8 @@ import (
 
 const (
     // StatusOK represents the api response status.
-    StatusOK = iota
+    StatusOK  = iota
+    Status200 = "000"
 
     // RestyMaxRetryCount is the max retry times.
     RestyMaxRetryCount = 3
@@ -50,13 +51,24 @@ func RestPost(data interface{}, url string) (interface{}, int, error) {
         return nil, RestyMaxRetryCount, err
     }
 
-    var resp Response
+    var (
+        resp      Response
+        requestOK bool
+    )
     err = json.Unmarshal(respData, &resp)
     if err != nil {
         return nil, RestyMaxRetryCount, fmt.Errorf("decode response from api fail, request url:%s, detail %v", url, err)
     }
-  
-    if resp.Status == StatusOK && !strings.Contains(strings.ToLower(resp.Msg), "error") {
+
+    resStatus := resp.Status
+    switch resStatus {
+    case resStatus.(int):
+        requestOK = resStatus == StatusOK
+    case resStatus.(string):
+        requestOK = resStatus == Status200
+    }
+
+    if requestOK && !strings.Contains(strings.ToLower(resp.Msg), "error") {
         return resp.Data, 1, nil
     }
 
