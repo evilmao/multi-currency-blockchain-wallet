@@ -14,8 +14,7 @@ import (
 
 const (
     // StatusOK represents the api response status.
-    StatusOK  = iota
-    Status200 = "000"
+    StatusOK = iota
 
     // RestyMaxRetryCount is the max retry times.
     RestyMaxRetryCount = 3
@@ -37,53 +36,70 @@ func restyStatusError(resp *resty.Response) error {
 }
 
 // Response represents the server response message.
-type Response struct {
-    Status interface{} `json:"errno"`
+type ResponseForBroker struct {
+    Status int         `json:"errno"`
     Msg    string      `json:"errmsg"`
     Data   interface{} `json:"data"`
 }
 
-// RestPost wrappers a simple http restfull post request.
-func RestPost(data interface{}, url string) (interface{}, int, error) {
+type ResponseForBroadCast struct {
+    Status int         `json:"status"`
+    Msg    string      `json:"msg"`
+    Data   interface{} `json:"data"`
+}
 
+// RestPostToBroker wrappers a simple http restFul post request.
+func RestPostToBroker(data interface{}, url string) (interface{}, int, error) {
     respData, err := RestRawPost(url, data)
     if err != nil {
         return nil, RestyMaxRetryCount, err
     }
 
     var (
-        resp      Response
-        requestOK bool
+        resp ResponseForBroker
     )
     err = json.Unmarshal(respData, &resp)
     if err != nil {
         return nil, RestyMaxRetryCount, fmt.Errorf("decode response from api fail, request url:%s, detail %v", url, err)
     }
 
-    resStatus := resp.Status
-    switch resStatus.(type) {
-    case int:
-        requestOK = resStatus.(int) == StatusOK
-    case string:
-        requestOK = resStatus.(string) == Status200
-    }
-
-    log.Warnf("----2222---resStatus:%v, resp:%v",resStatus,resp)
-    if requestOK && !strings.Contains(strings.ToLower(resp.Msg), "error") {
+    if resp.Status == StatusOK && !strings.Contains(strings.ToLower(resp.Msg), "error") {
         return resp.Data, 1, nil
     }
 
     return nil, RestyMaxRetryCount, fmt.Errorf("api response failed, %s", string(respData))
 }
 
-// RestGet wrappers a simple http restfull get request.
+// RestPostToBroadCast wrappers for request broadcast rest-ful api
+func RestPostToBroadCast(data interface{}, url string) (int, error) {
+    respData, err := RestRawPost(url, data)
+    if err != nil {
+        return RestyMaxRetryCount, err
+    }
+
+    var (
+        resp ResponseForBroadCast
+    )
+    err = json.Unmarshal(respData, &resp)
+    if err != nil {
+        return RestyMaxRetryCount, fmt.Errorf("decode response from api fail, request url:%s, detail %v", url, err)
+    }
+
+    if resp.Status == StatusOK {
+        return 1, nil
+    }
+
+    return RestyMaxRetryCount, fmt.Errorf("api response failed, %s", string(respData))
+}
+
+// RestGet wrappers a simple http restFul get request.
 func RestGet(data map[string]string, url string) (interface{}, int, error) {
     respData, err := RestRawGet(url, data)
     if err != nil {
         return nil, RestyMaxRetryCount, err
     }
 
-    var resp Response
+    var resp ResponseForBroadCast
     json.Unmarshal(respData, &resp)
     if resp.Status == StatusOK {
         return resp.Data, 1, nil
@@ -92,17 +108,17 @@ func RestGet(data map[string]string, url string) (interface{}, int, error) {
     return nil, RestyMaxRetryCount, fmt.Errorf("api response failed, %s", string(respData))
 }
 
-// RestRawGet wrappers a simple http restfull get request.
+// RestRawGet wrappers a simple http restFul get request.
 func RestRawGet(url string, params map[string]string) ([]byte, error) {
     return RestRequest("get", url, map[string]string{"Accept": "application/json"}, params)
 }
 
-// RestRawPost wrappers a simple http restfull post request.
+// RestRawPost wrappers a simple http restFul post request.
 func RestRawPost(url string, data interface{}) ([]byte, error) {
     return RestRequest("post", url, map[string]string{"Accept": "application/json"}, data)
 }
 
-// RestRequest wrappers a simple http restfull request.
+// RestRequest wrappers a simple http restFul request.
 func RestRequest(method, url string, headers map[string]string, data interface{}) ([]byte, error) {
     req := resty.R()
     req.SetHeaders(headers)

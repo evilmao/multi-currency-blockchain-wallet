@@ -56,28 +56,28 @@ func (api *ExAPI) DepositNotify(data map[string]interface{}) (interface{}, int, 
     signStr := api.Sign(data)
     //  更新请求
     data = api.UpdateRequestSign(data, signStr)
-    return util.RestPost(data, api.url+"depositNotify")
+    return util.RestPostToBroker(data, api.url+"depositNotify")
 }
 
 // BalanceChangeNotify, response deposit result
 func (api *ExAPI) DepositBalanceChangeNotify(data map[string]interface{}) (interface{}, int, error) {
     signStr := api.Sign(data)
     data = api.UpdateRequestSign(data, signStr)
-    return util.RestPost(data, api.url+"balanceChangeNotify")
+    return util.RestPostToBroker(data, api.url+"balanceChangeNotify")
 }
 
 // WithdrawNotify updates the withdraw task status.
 func (api *ExAPI) WithdrawNotify(data map[string]interface{}) (interface{}, int, error) {
     signStr := api.Sign(data)
     data = api.UpdateRequestSign(data, signStr)
-    return util.RestPost(data, api.url+"withdrawNotify/")
+    return util.RestPostToBroker(data, api.url+"withdrawNotify/")
 }
 
 // BalanceChangeNotify, response  withdraw result
 func (api *ExAPI) WithdrawBalanceChangeNotify(data map[string]interface{}) (interface{}, int, error) {
     signStr := api.Sign(data)
     data = api.UpdateRequestSign(data, signStr)
-    return util.RestPost(data, api.url+"balanceChangeNotify")
+    return util.RestPostToBroker(data, api.url+"balanceChangeNotify")
 }
 
 // GetWithdraws gets withdraw list by currency.
@@ -85,7 +85,7 @@ func (api *ExAPI) WithdrawBalanceChangeNotify(data map[string]interface{}) (inte
 func (api *ExAPI) GetWithdraws(data map[string]interface{}) (interface{}, int, error) {
     signStr := api.Sign(data)
     data = api.UpdateRequestSign(data, signStr)
-    return util.RestPost(data, api.url+"withdrawConsume")
+    return util.RestPostToBroker(data, api.url+"withdrawConsume")
 }
 
 func SortMapToString(data map[string]interface{}) string {
