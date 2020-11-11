@@ -27,7 +27,7 @@ func Add(currencyType string, checker Checker) {
 	}
 
 	if _, ok := cs[checker.Name()]; ok {
-		log.Errorf("checker.Add, dunplicate of %s checker %s\n", currencyType, checker.Name())
+		log.Errorf("checker.Add, duplicate of %s checker %s\n", currencyType, checker.Name())
 		return
 	}
 

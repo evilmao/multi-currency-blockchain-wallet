@@ -219,8 +219,8 @@ func (w *Worker) doProcess(t *Task) error {
             // notify
             data := args.Task.WithdrawNotifyFormat()
             data["app_id"] = exAPI.GetBrokerAppID()
-
             _, _, err := exAPI.WithdrawNotify(data)
+
             if err != nil {
                 return fmt.Errorf("%s, %v", ErrWithdrawNotify, err)
             }
@@ -244,7 +244,7 @@ func (w *Worker) doProcess(t *Task) error {
 
         return args.Task.Update(map[string]interface{}{
             "tx_status": models.TxStatusSuccess,
-            "confirm": t.h.Ctrler().Confirms(),
+            "confirm":   t.h.Ctrler().Confirms(),
         }, t.h.DB())
     })
     if err != nil {
@@ -325,7 +325,7 @@ func (w *Worker) tryBroadcast(t *Task) error {
     err = util.TryWithInterval(3, time.Second, func(int) error {
         return args.Task.Update(map[string]interface{}{
             "tx_status": models.TxStatusBroadcastSuccess,
-            "confirm": t.h.Ctrler().Confirms(),
+            "confirm":   t.h.Ctrler().Confirms(),
         }, t.h.DB())
     })
     if err != nil {

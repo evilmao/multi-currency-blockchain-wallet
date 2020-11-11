@@ -68,6 +68,7 @@ func RestPost(data interface{}, url string) (interface{}, int, error) {
         requestOK = resStatus.(string) == Status200
     }
 
+    log.Warnf("----2222---resStatus:%v, resp:%v",resStatus,resp)
     if requestOK && !strings.Contains(strings.ToLower(resp.Msg), "error") {
         return resp.Data, 1, nil
     }
