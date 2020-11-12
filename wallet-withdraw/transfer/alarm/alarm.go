@@ -66,7 +66,6 @@ func sendEmailByHTML(cfg *config.Config, task *models.Tx, errMsg string) (err er
 		Currency        string
 		TxAddress       string
 		TxID            string
-		IntervalProcess string
 	}{
 		TxType:          txType,
 		ErrorDetail:     errMsg,
@@ -74,7 +73,6 @@ func sendEmailByHTML(cfg *config.Config, task *models.Tx, errMsg string) (err er
 		Currency:        currency,
 		TxAddress:       txAddress,
 		TxID:            txTransID,
-		IntervalProcess: intervalProcess.String(),
 	})
 
 	if err != nil {

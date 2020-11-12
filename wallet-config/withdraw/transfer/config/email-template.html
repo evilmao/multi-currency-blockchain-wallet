@@ -43,11 +43,12 @@
                    border="0" align="center">
                 <tbody>
                 <tr>
-                    <td style="padding:20px 0;text-align:center"><img
-                                src="https://gitee.com/oneTotwo/images/raw/master/img/20201030135505.svg"
+                    <td style="padding:20px 0;text-align:center">
+                        <img src="https://gitee.com/oneTotwo/images/raw/master/img/20201030135505.svg"
                                 alt="Upex"
-                                style="height:auto;font-family:sans-serif;font-size:15px;line-height:140%;color:#555"
-                                class="CToWUd" width="142" height="32" border="0"></td>
+                                style="height:auto;font-family:sans-serif;font-size:15px;line-height:140%;"
+                                class="CToWUd" width="142" height="32" border="0">
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -65,29 +66,20 @@
                             <tbody>
                             <tr>
 
-                                <td
-                                        style="padding:40px;font-family:sans-serif;font-size:15px;line-height:140%;color:#555">
-
-                                    <h4 style="margin:20px 0;color:#040807">亲爱的 Admin,您好！</h4>
+                                <td style="padding:40px;font-family:sans-serif;font-size:15px;line-height:140%;color:#555">
+                                    <h4 style="margin:20px 0;color:#040807">亲爱的管理员,您好！</h4>
                                     <p>
                                         <span>
-                                                            <strong>
-                                                                <span>{{.TxType}}</span>
-                                                            </strong>
-
-                                                            <span> 交易告警提示:</span>
-                                                        </span>
+                                            <strong> <span>{{.TxType}}</span></strong>
+                                            <span> 交易告警提示:</span>
+                                        </span>
                                     </p>
-
 
                                     <ul>
                                         <li>
                                             <p>
                                                 <span> 详情:</span>
-                                                <span id="detail"><strong>
-                                                                        {{.ErrorDetail}}
-                                                                    </strong>
-                                                                </span>
+                                                <span id="detail">{{.ErrorDetail}}</span>
                                             </p>
                                         </li>
 
@@ -95,28 +87,26 @@
                                             <p>
                                                 <span> 时间：</span>
                                                 <span>
-                                                                    <u>{{.TimeDate}}</u>
-                                                                </span>
+                                                    <u>{{.TimeDate}}</u>
+                                                </span>
                                             </p>
                                         </li>
-
 
                                         <li>
                                             <p>
                                                 <span> 币种:</span>
                                                 <span>
-                                                                    <strong>{{.Currency}}</strong>
-                                                                </span>
+                                                    <strong>{{.Currency}}</strong>
+                                                </span>
                                             </p>
                                         </li>
-
 
                                         <li>
                                             <p>
                                                 <span> 交易地址:</span>
                                                 <span>
-                                                                    <strong>{{.TxAddress}}</strong>
-                                                                </span>
+                                                    {{.TxAddress}}
+                                                </span>
                                             </p>
                                         </li>
 
@@ -124,16 +114,14 @@
                                             <p>
                                                 <span> 交易ID:</span>
                                                 <span>
-                                                                    <strong>{{.TxID}}</strong>
-                                                                </span>
+                                                   {{.TxID}}
+                                                </span>
                                             </p>
                                         </li>
-
                                     </ul>
-
                                     <p style="text-align:left;color:#040807;margin:20px 0">
                                         <strong>
-                                            <span>请在{{.IntervalProcess}}分钟内进行处理!</span>
+                                            <span>请知悉,并做相应处理!</span>
                                         </strong>
                                     </p>
                                 </td>

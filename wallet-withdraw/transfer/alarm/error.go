@@ -101,7 +101,7 @@ type WarnCoolWalletBalanceChange struct {
 
 func NewWarnCoolWalletBalanceChange(maxRemainBalance, amount decimal.Decimal, coldAddress, c string) *WarnCoolWalletBalanceChange {
 	return &WarnCoolWalletBalanceChange{
-		WarnDetail: fmt.Sprintf("钱包资金超过预留最大值: %s, 当前余额为:%s, 已转入冷钱包(%s),交易哈希值为:%s", maxRemainBalance.String(), amount.String(), coldAddress, coldAddress),
+		WarnDetail: fmt.Sprintf("钱包资金超过预留最大值: %s, 当前余额为:%s, 已转入冷钱包(%s),交易哈希值为:%s", maxRemainBalance.String(), amount.String(), coldAddress, c),
 	}
 }
 
