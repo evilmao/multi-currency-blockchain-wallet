@@ -129,8 +129,8 @@ func (b *ETHBuilder) DoBuild(info *txbuilder.AccountModelBuildInfo) (*txbuilder.
 	if info.Task.Symbol == b.cfg.Currency {
 
 		if info.Task.TxType == models.TxTypeCold{
-			info.Task.Amount = cost.Add(info.FeeMeta.Fee)
-			cost = cost.Sub(info.FeeMeta.Fee)
+			info.Task.Amount = cost.Sub(info.FeeMeta.Fee)
+			cost = info.Task.Amount
 		}
 
 		cost = cost.Add(info.FeeMeta.Fee)
@@ -180,11 +180,10 @@ func (b *ETHBuilder) DoBuild(info *txbuilder.AccountModelBuildInfo) (*txbuilder.
 	if needFee.LessThan(info.FeeMeta.Fee) {
 		costExchange := info.FeeMeta.Fee.Sub(needFee)
 		bigAmountExchange, _ := decimalToBigInt(costExchange.Mul(decimal.New(1, geth.Precision)))
+		cost = cost.Sub(costExchange)
+
 		switch taskType {
-		case models.TxTypeWithdraw:
-			cost = cost.Sub(costExchange)
 		case models.TxTypeGather,models.TxTypeCold:
-			info.Task.Amount = cost.Sub(costExchange)
 			bigAmount = bigAmount.Add(bigAmount, bigAmountExchange)
 		}
 	}

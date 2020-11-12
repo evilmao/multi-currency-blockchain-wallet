@@ -127,6 +127,7 @@ func (w *Worker) cooldown() error {
 
 	err = task.Update(map[string]interface{}{
 		"tx_status": models.TxStatusBroadcast,
+		"fees":  txInfo.Fee,
 	}, nil)
 	if err != nil {
 		return fmt.Errorf("db update tx failed, %v", err)
