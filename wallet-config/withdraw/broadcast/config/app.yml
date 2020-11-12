@@ -12,7 +12,7 @@ eth:
   maxConfirm: 30
   dsn: "root:Xxzx@789@tcp(43.254.54.79:3306)/wallet_eth?charset=utf8&parseTime=True&loc=Local"
   rpcUrl: "http://54.95.191.140:5003"
-  verifyInterval: 1
+  verifyInterval: 10                                   # verify tx interval from online, unit: second
   # broadcast 私钥
   rsaKey: |
   -----BEGIN RSA PRIVATE KEY-----

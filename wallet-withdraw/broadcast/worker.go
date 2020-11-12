@@ -312,6 +312,7 @@ func (w *Worker) tryBroadcast(t *Task) error {
             updateTxID(txID)
         }
 
+        // wait for online confirm
         time.Sleep(t.h.Ctrler().VerifyInterval())
     }
 
@@ -341,11 +342,13 @@ func (w *Worker) tryBroadcast(t *Task) error {
 func (w *Worker) retry(t *Task, costRetry bool) {
     if t.retry >= maxRetryTimes {
         err := util.TryWithInterval(3, time.Second, func(int) error {
+            // update broadcast task status, stop broadcast
             err := t.record.Done(t.h.DB())
             if err != nil {
                 return err
             }
 
+            // update tx task status, record task is "fail"
             return t.args.Task.Update(map[string]interface{}{
                 "tx_status": models.TxStatusBroadcastFailed,
             }, t.h.DB())
@@ -356,6 +359,7 @@ func (w *Worker) retry(t *Task, costRetry bool) {
         return
     }
 
+    //
     time.Sleep(t.h.Ctrler().VerifyInterval())
 
     if costRetry {
