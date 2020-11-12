@@ -31,7 +31,6 @@ func sendEmailByHTML(cfg *config.Config, task *models.Tx, errMsg string) (err er
 		password        = cfg.EmailCfg.Pwd
 		host            = cfg.EmailCfg.Host
 		port            = cfg.EmailCfg.Port
-		intervalProcess = cfg.ErrorAlarmInterval
 
 		server  = fmt.Sprintf("%s:%s", host, port)
 		txType  = models.TxTypeName(task.TxType)
