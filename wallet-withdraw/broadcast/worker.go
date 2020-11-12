@@ -230,7 +230,6 @@ func (w *Worker) doProcess(t *Task) error {
         if err != nil {
             return fmt.Errorf("broadcast transaction failed, %v", err)
         }
-
     default:
         t.retry = maxRetryTimes
         return fmt.Errorf("unsupport tx type: %d", args.Task.TxType)

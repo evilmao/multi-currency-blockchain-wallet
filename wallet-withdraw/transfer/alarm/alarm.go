@@ -11,10 +11,9 @@ import (
 	"text/template"
 	"time"
 
-	"upex-wallet/wallet-base/newbitx/misclib/log"
-
 	"github.com/jordan-wright/email"
 
+	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/base/models"
 )
@@ -26,11 +25,11 @@ var (
 func sendEmailByHTML(cfg *config.Config, task *models.Tx, errMsg string) (err error) {
 
 	var (
-		fromAddress     = cfg.EmailCfg.From
-		toAddress       = cfg.EmailCfg.To
-		password        = cfg.EmailCfg.Pwd
-		host            = cfg.EmailCfg.Host
-		port            = cfg.EmailCfg.Port
+		fromAddress = cfg.EmailCfg.From
+		toAddress   = cfg.EmailCfg.To
+		password    = cfg.EmailCfg.Pwd
+		host        = cfg.EmailCfg.Host
+		port        = cfg.EmailCfg.Port
 
 		server  = fmt.Sprintf("%s:%s", host, port)
 		txType  = models.TxTypeName(task.TxType)
@@ -59,19 +58,19 @@ func sendEmailByHTML(cfg *config.Config, task *models.Tx, errMsg string) (err er
 	body := new(bytes.Buffer)
 
 	err = t.Execute(body, struct {
-		TxType          string
-		ErrorDetail     string
-		TimeDate        string
-		Currency        string
-		TxAddress       string
-		TxID            string
+		TxType      string
+		ErrorDetail string
+		TimeDate    string
+		Currency    string
+		TxAddress   string
+		TxID        string
 	}{
-		TxType:          txType,
-		ErrorDetail:     errMsg,
-		TimeDate:        errTime,
-		Currency:        currency,
-		TxAddress:       txAddress,
-		TxID:            txTransID,
+		TxType:      txType,
+		ErrorDetail: errMsg,
+		TimeDate:    errTime,
+		Currency:    currency,
+		TxAddress:   txAddress,
+		TxID:        txTransID,
 	})
 
 	if err != nil {
@@ -98,6 +97,7 @@ func SendEmail(cfg *config.Config, task *models.Tx, err error, msg string) {
 		if err != nil {
 			log.Errorf("send email error,%v", err)
 		}
+		log.Infof("send email successfully for %s task", models.TxTypeName(task.TxType))
 	}
 }
 
