@@ -2,7 +2,7 @@
 # *** DO NOT EDIT ME ***
 
 currency: eth
-dsn: "root:Xxzx@789@tcp(43.254.54.79:3306)/wallet_eth_deposit?charset=utf8&parseTime=True&loc=Local"
+dsn: "root:Xxzx@789@tcp(43.254.54.79:3306)/wallet_eth?charset=utf8&parseTime=True&loc=Local"
 rpcUrl: "http://54.95.191.140:5003"
 
 # broker
