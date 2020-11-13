@@ -14,6 +14,6 @@ fi
 
 set -e
 go install -tags=${tags} ../cmd/"${main_folder}"
-go build -tags=${tags} -o ./bin/"${service_name}" ../cmd/"${main_folder}"/main.go
+go build -tags=${tags} -o ./bin/"${service_name}" ../cmd/"${main_folder}"
 
 echo

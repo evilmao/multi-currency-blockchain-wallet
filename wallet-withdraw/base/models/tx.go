@@ -196,7 +196,7 @@ func CheckTxIsFinished(sequenceID string) bool {
     var tx Tx
     _ = db.Default().Where("sequence_id = ?", sequenceID).First(&tx).Error
 
-    return tx.TxStatus == TxStatusSuccess
+    return tx.TxStatus == TxStatusSuccess && tx.Hash != ""
 }
 
 // GetTxBySequenceID gets tx by sequence id.

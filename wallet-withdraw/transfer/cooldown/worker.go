@@ -91,8 +91,12 @@ func (w *Worker) cooldown() error {
     task.Symbol = strings.ToLower(w.cfg.Currency)
     task.TxType = models.TxTypeCold
     task.Address = info.coldAddress
-    task.Amount = balance.Sub(info.maxAccountRemain)
+    task.Amount = balance.Sub(info.maxAccountRemain).Sub(decimal.NewFromFloat(w.cfg.MinFee))
     task.UpdateLocalTransIDSequenceID()
+
+    if task.Amount.LessThan(decimal.Zero){
+        return nil
+    }
 
     txInfo, err := w.txBuilder.BuildWithdraw(task)
     if err != nil {
