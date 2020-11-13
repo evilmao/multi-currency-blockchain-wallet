@@ -101,7 +101,7 @@ func (wtx *Tx) FirstOrCreate() error {
         wtx.TxStatus = TxStatusRecord
     }
     // fix same gather task repeat record
-    return db.Default().FirstOrCreate(wtx, "txid = ? ",  wtx.Hash).Error
+    return db.Default().FirstOrCreate(wtx, "txid = ? ", wtx.Hash).Error
 
     // return db.Default().FirstOrCreate(wtx, "sequence_id = ? and tx_type = ?", wtx.SequenceID, wtx.TxType).Error
 }
@@ -188,6 +188,15 @@ func GetTxsByStatus(status uint) []*Tx {
     var txs []*Tx
     db.Default().Where("tx_status = ? ", status).Limit(10).Find(&txs)
     return txs
+}
+
+// CheckTxIsFinished, return success or not
+func CheckTxIsFinished(sequenceID string) bool {
+
+    var tx Tx
+    _ = db.Default().Where("sequence_id = ?", sequenceID).First(&tx).Error
+
+    return tx.TxStatus == TxStatusSuccess
 }
 
 // GetTxBySequenceID gets tx by sequence id.
