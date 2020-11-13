@@ -145,9 +145,9 @@ func (w *Worker) cooldown() error {
 
     // if cool_down tx success, will send email
     for {
-        finished := models.CheckTxIsFinished(task.SequenceID)
-        if finished {
-            e := alarm.NewWarnCoolWalletBalanceChange(info.maxAccountRemain, *balance, info.coldAddress, task.Hash)
+        TxHash := models.GetTxHashBySequenceID(task.SequenceID)
+        if TxHash != "" {
+            e := alarm.NewWarnCoolWalletBalanceChange(info.maxAccountRemain, *balance, info.coldAddress, TxHash)
             go alarm.SendEmail(w.cfg, task, e, e.WarnDetail)
             break
         }

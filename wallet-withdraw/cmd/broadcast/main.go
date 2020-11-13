@@ -97,6 +97,7 @@ func main() {
 	gin.DefaultErrorWriter = util.NewLogWriter(log.Error)
 
 	r := gin.Default()
+
 	r.Use(gintrace.Middleware("wallet-broadcast"))
 	r.GET("/info", gin.WrapF(monitor.Info))
 	v1 := r.Group("v1")

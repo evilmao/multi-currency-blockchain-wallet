@@ -199,6 +199,15 @@ func CheckTxIsFinished(sequenceID string) bool {
     return tx.TxStatus == TxStatusSuccess && tx.Hash != ""
 }
 
+// GetTxHash, get TxHash by sequenceID
+func GetTxHashBySequenceID(sequenceID string) string {
+
+    var tx Tx
+    _ = db.Default().Where("sequence_id = ?", sequenceID).First(&tx).Error
+
+    return tx.Hash
+}
+
 // GetTxBySequenceID gets tx by sequence id.
 func GetTxBySequenceID(dbInst *gorm.DB, sequenceID string) (*Tx, error) {
     if dbInst == nil {
