@@ -1,10 +1,10 @@
 package cmd
 
 const (
-	VersionString = "v1.0"
-	VersionTag    = ""
+    VersionHash = "6491657"
+    VersionTag  = ""
 )
 
 func Version() string {
-	return VersionTag + "(" + VersionString + ")"
+	return VersionTag + "(" + VersionHash + ")"
 }
