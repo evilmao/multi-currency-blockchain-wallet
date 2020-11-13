@@ -2,7 +2,7 @@
 # *** DO NOT EDIT ME ***
 
 currency: eth
-dsn: "root:Xxzx@789@tcp(43.254.54.79:3306)/wallet_eth_deposit?charset=utf8&parseTime=True&loc=Local"
+dsn: "root:Xxzx@789@tcp(43.254.54.79:3306)/wallet_eth?charset=utf8&parseTime=True&loc=Local"
 rpcUrl: "http://54.95.191.140:5003"
 
 # broker
@@ -12,11 +12,11 @@ brokerPrivateKey: "1f5ddxyyy1f2c0b58bbd8cxx7x79xxxx"    # appSecretKey
 minAmount: 0.001                                        # 0.001 eth, deposit min value
 
 # scan blockchain
-#startHeight: 11241480                # 扫描区块的起始高度, 默认从数据库中最新的区块开始扫描
+#startHeight: 11246500                # 扫描区块的起始高度, 默认从数据库中最新的区块开始扫描
 maxConfirmations: 30                 # 区块广播确认节点数
 
-# data-dog service
-listenAddress: ":8555"
+# data-dog service, can not be set
+# listenAddress: ":8555"
 
 # special setting
 # ignoreNotifyAudit: true           # in withdraw program,just need store deposit record, but not request broker notify
