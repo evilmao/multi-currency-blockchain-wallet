@@ -234,48 +234,57 @@ make
 - signer 交易签名
 - transfer (提现, 热转冷, 归集, 资产余额检查, 告警)
 
-**可使用如下两种方式构建,启动服务**
 
-#### 4.1 一次性构建服务
+
+#### 4.1 方式一: 使用make一次性构建服务
 
 1. 切换至 `upex-wallet-eth-new/wallet-withdraw/build`
-```shell script
-ls
-├── make
-│   ├── build_monero.sh
-│   ├── make_gitversion.sh
-│   ├── make_import_claim.sh
-│   ├── make_import.sh
-│   └── make.sh
-└── Makefile
-``` 
+
+   ```shell
+   ls
+   ├── make
+   │   ├── build_monero.sh
+   │   ├── make_gitversion.sh
+   │   ├── make_import_claim.sh
+   │   ├── make_import.sh
+   │   └── make.sh
+   └── Makefile
+   ```
+
 2. 构建
-> 非管理员权限, 需要修改`make`目录下构建脚本
-> ```shell script
->  chmod 700 make/*
->   ```
 
-执行make指令
-```shell script
-make 
-# 如下服务
-.
-├── bin
-│   ├── broadcast   # 广播服务
-│   ├── signer      # 签名机服务
-│   ├── syncd       # 区块同步
-│   └── transfer    # 交易服务
-├── make
-│   ├── build_monero.sh
-│   ├── make_gitversion.sh
-│   ├── make_import_claim.sh
-│   ├── make_import.sh
-│   └── make.sh
-└── Makefile
-```
-3. 配置相应文件后, 分别启动服务
+   > 非管理员权限, 需要修改`make`目录下构建脚本的权限
+   >
+   > ```shell
+   > chmod 700 make/*
+   > ```
 
-#### 4.2 单独构建
+
+3. 执行make指令
+
+   ```shell
+   make 
+   # 如下服务
+   .
+   ├── bin
+   │   ├── broadcast   # 广播服务
+   │   ├── signer      # 签名机服务
+   │   ├── syncd       # 区块同步
+   │   └── transfer    # 交易服务
+   ├── make
+   │   ├── build_monero.sh
+   │   ├── make_gitversion.sh
+   │   ├── make_import_claim.sh
+   │   ├── make_import.sh
+   │   └── make.sh
+   └── Makefile
+   ```
+
+4. 配置相应文件后, 分别启动服务
+
+   
+
+#### 4.2 方式二: 单独构建
 ##### 1. syncd 区块同步
 
 1. 构建
@@ -314,9 +323,11 @@ make
 2. 修改配置文件— 使用(`wallet-config/withdraw/broadcast/config/app.yml`)
 
    ```shell
-   # 添加broadcast的私钥文件, 使用wallet-tools生成
+   
    eth:
-   	rsaKey:---
+     	maxConfirm: 30       # 链上交易网络节点确认数
+       verifyInterval: 10   # 链上交易 网络请求间隔, 单位秒
+   	rsaKey:---			 # broadcast的私钥文件, 使用wallet-tools生成
    ```
 3. 运行
 
@@ -334,7 +345,7 @@ make
    ```
 
 2. 修改配置—使用(`wallet-config/withdraw/signer/config/app.yml`)
-    
+   
    ```shell
    # signer服务私钥
    rsaKey: |
@@ -380,12 +391,13 @@ make
    wallet:
      # broadcast 服务----注意端口
      broadcastUrl: "http://127.0.0.1:8880/v1/tx/broadcast"
-     # 交易手续费配置
-     maxFee: 1
-     alarmTimeout: 30
-     maxAccountRemain: 10  # 10 eth, grater than value, will do cool-down tx
-     minAccountRemain: 6   # 6 eth , less than value, will alarm
-     coldAddress: ""       # cold wallet address
+     minFee: 0.0003                 # 最低交易手续费配置 0.003 eth
+     maxFee: 0.0144                 # 最高交易手续费配置 0.0144 eth
+     maxAccountRemain: 1  		 	 # 系统地址最大预留金额 1 eth
+     minAccountRemain: 0.8   		 # 系统地址小于预留金额会触发报警 0.8eth
+     coldAddress: ""       		 # 冷钱包地址
+     coolDownTaskInterval: 15       # 人转冷时间间隔, 单位分钟
+     #alarmTimeout: 30
    ```
 
 3. 启动
@@ -414,7 +426,7 @@ email:
 ├── withdraw						
 │   ├── transfer                    # transfer 主程序
 │   ├── app.yml                     # transfer config    
-│   ├──email-template.html          # email HTML 模板
+│   ├── email-template.html         # email HTML 模板
 ...
 ```
 
