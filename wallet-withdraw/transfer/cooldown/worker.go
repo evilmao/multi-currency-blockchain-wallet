@@ -91,10 +91,10 @@ func (w *Worker) cooldown() error {
     task.Symbol = strings.ToLower(w.cfg.Currency)
     task.TxType = models.TxTypeCold
     task.Address = info.coldAddress
-    task.Amount = balance.Sub(info.maxAccountRemain).Sub(decimal.NewFromFloat(w.cfg.MinFee))
+    task.Amount = balance.Sub(info.maxAccountRemain)
     task.UpdateLocalTransIDSequenceID()
 
-    if task.Amount.LessThan(decimal.Zero){
+    if task.Amount.LessThan(decimal.NewFromFloat(w.cfg.MinFee)){
         return nil
     }
 
