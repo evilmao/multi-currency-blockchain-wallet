@@ -234,7 +234,49 @@ make
 - signer 交易签名
 - transfer (提现, 热转冷, 归集, 资产余额检查, 告警)
 
-#### 1. syncd 区块同步
+**可使用如下两种方式构建,启动服务**
+
+#### 4.1 一次性构建服务
+
+1. 切换至 `upex-wallet-eth-new/wallet-withdraw/build`
+```shell script
+ls
+├── make
+│   ├── build_monero.sh
+│   ├── make_gitversion.sh
+│   ├── make_import_claim.sh
+│   ├── make_import.sh
+│   └── make.sh
+└── Makefile
+``` 
+2. 构建
+> 非管理员权限, 需要修改`make`目录下构建脚本
+> ```shell script
+>  chmod 700 make/*
+>   ```
+
+执行make指令
+```shell script
+make 
+# 如下服务
+.
+├── bin
+│   ├── broadcast   # 广播服务
+│   ├── signer      # 签名机服务
+│   ├── syncd       # 区块同步
+│   └── transfer    # 交易服务
+├── make
+│   ├── build_monero.sh
+│   ├── make_gitversion.sh
+│   ├── make_import_claim.sh
+│   ├── make_import.sh
+│   └── make.sh
+└── Makefile
+```
+3. 配置相应文件后, 分别启动服务
+
+#### 4.2 单独构建
+##### 1. syncd 区块同步
 
 1. 构建
 
@@ -260,7 +302,7 @@ make
    ./syncd-eth -c path/to/app.yml
    ```
 
-#### 2. broadcast( 广播交易) 
+##### 2. broadcast( 广播交易) 
 
 1. 构建
 
@@ -282,7 +324,7 @@ make
    ./broadcast -c path/to/app.yml
    ```
 
-#### 3. signer (交易签名服务)
+##### 3. signer (交易签名服务)
 
 1. 构建
 
@@ -314,7 +356,7 @@ make
    password: 123
    ```
 
-#### 4. transfer (提现服务)
+##### 4. transfer (提现服务)
 
 1. 构建
 
@@ -330,7 +372,7 @@ make
      # 签名服务
      url: "http://127.0.0.1:8998"
      # 使用signer公钥对生成交易地址的密码后三位进行加密----"456"
-     # 使用 `wallet-withdraw/cmd/transfer/util.go 脚本`
+     # 使用 `wallet-withdraw/cmd/transfer/util/util.go 脚本`
      # 加密使用
      pass: "kCUU2+lCEuN67mPK91LgCBRimV0t5BN1shHmZ9xo8HOtmRzdDvP5lITRi9WyYWEMRHWP1JZzs9DMT2KtmKQ4W8HYOGb1SRbHN9w4dkPYCcSXvIlWhzDm4bZN45VTR0FYljVE7Nxeatwe5nzx6zz0dVgyuPZAO61WiuZ4ZGAdniAOjkjdbfyPravjRTeg/nD8z6FqP2fL7AVMU910rnUzcoO7wLy0+TnzD8g9v4vd3Or4Dh285NjVxY2zipAOwfv64DnNSbUat+szCmgcT0ygmPEoVd6whfjv1RGg2mGyFojOguRwaVPJi3PZwVid2DXwUn1NapmOvoXDk8Vv4t0Jjg=="
      timeout: 5
