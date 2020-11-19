@@ -30,7 +30,6 @@ type utxoSelector func(acc *bmodels.Account, limitLen int) ([]*bmodels.UTXO, dec
 // maxOutAmount = decimal.Zero= 0
 func createBuildExtInfo(fromAccounts []*bmodels.Account, selectUTXO utxoSelector, maxTxInLen int, maxOutAmount decimal.Decimal) (*BuildExtInfo, error) {
 	var (
-		// 实例化 BuildExtInfo
 		extInfo = &BuildExtInfo{
 			MaxOutAmount: maxOutAmount, // 0
 		}
