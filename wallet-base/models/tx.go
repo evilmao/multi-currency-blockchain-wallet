@@ -76,7 +76,7 @@ func (tx *Tx) Insert() (err error) {
 	}
 
 	var acc Account
-	err = db.Default().Where(Account{Address: tx.Address}).First(&acc).Error
+	err = db.Default().Where(Account{Symbol: tx.Symbol, Address: tx.Address}).First(&acc).Error
 	if err != nil && err == gorm.ErrRecordNotFound {
 		addressInfo := GetAddressInfo(nil, tx.Address)
 		if addressInfo.Address != tx.Address {

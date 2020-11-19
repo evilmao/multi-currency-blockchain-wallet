@@ -38,7 +38,7 @@ func (act *Account) ForUpdate(data M) error {
 	}
 
 	delete(data, "op")
-	err := db.Default().Model(act).Where("address = ?", act.Address).Updates(data).Error
+	err := db.Default().Model(act).Where("symbol = ? and address = ?", act.Symbol, act.Address).Updates(data).Error
 	if err != nil {
 		return err
 	}
