@@ -63,7 +63,6 @@ func (w *Worker) Work() {
 		return
 	}
 
-	log.Warnf("symbols=%v", symbols)
 	for _, symbol := range symbols {
 		err = w.cooldown(symbol)
 		if err != nil {
@@ -187,7 +186,6 @@ func (w *Worker) verifyColdInfo(symbol string) (*ColdWalletInfo, error) {
 		maxRemain = decimal.NewFromFloat(w.cfg.MaxAccountRemain)
 	} else {
 		s := bmodels.GetCurrency(w.cfg.Currency, symbol)
-		log.Warnf("symbol=%s,detail: %v", symbol, s)
 		minRemain, _ = decimal.NewFromString(s.MinBalance)
 		maxRemain, _ = decimal.NewFromString(s.MaxBalance)
 	}
