@@ -67,9 +67,9 @@ func GetCurrencies() []Currency {
 }
 
 // GetCurrencies gets token currency list.
-func GetCurrency(maincurrency, symbol string) *Currency {
+func GetCurrency(mainCurrency, symbol string) *Currency {
 	var currency Currency
-	err := db.Default().Where("blockchain = ? symbol= ?", maincurrency, symbol).First(&currency).Error
+	err := db.Default().Where("blockchain = ? and symbol= ?", mainCurrency, symbol).First(&currency).Error
 	if err != nil {
 		return nil
 	}
