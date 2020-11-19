@@ -63,6 +63,7 @@ func (w *Worker) Work() {
 		return
 	}
 
+	log.Warnf("symbols=%v", symbols)
 	for _, symbol := range symbols {
 		err = w.cooldown(symbol)
 		if err != nil {

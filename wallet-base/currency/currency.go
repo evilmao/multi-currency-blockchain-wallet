@@ -281,13 +281,12 @@ func Symbols(mainCurrency string) []string {
 
 	var (
 		currencies = models.GetCurrencies()
-		symbols    = make([]string, len(currencies)+1)
+		symbols    = []string{mainCurrency}
 	)
 
 	for i := 0; i < len(currencies); i++ {
 		symbols = append(symbols, strings.ToLower(currencies[i].Symbol))
 	}
 
-	symbols = append(symbols, mainCurrency)
 	return symbols
 }
