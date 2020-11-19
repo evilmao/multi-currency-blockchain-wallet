@@ -1,187 +1,203 @@
 package main
 
 import (
-    "fmt"
-    "os"
-    "runtime"
-    "strings"
-    "syscall"
+	"fmt"
+	"os"
+	"runtime"
+	"strings"
+	"syscall"
+	"time"
 
-    _ "upex-wallet/wallet-withdraw/cmd/transfer/imports"
+	_ "upex-wallet/wallet-withdraw/cmd/transfer/imports"
 
-    "upex-wallet/wallet-base/cmd"
-    "upex-wallet/wallet-base/db"
-    "upex-wallet/wallet-base/newbitx/misclib/log"
-    "upex-wallet/wallet-base/newbitx/misclib/utils"
-    "upex-wallet/wallet-base/service"
-    "upex-wallet/wallet-base/util"
-    bviper "upex-wallet/wallet-base/viper"
-    "upex-wallet/wallet-config/withdraw/transfer/config"
-    "upex-wallet/wallet-withdraw/base/models"
-    lcmd "upex-wallet/wallet-withdraw/cmd"
-    "upex-wallet/wallet-withdraw/transfer/checker"
-    "upex-wallet/wallet-withdraw/transfer/cooldown"
-    "upex-wallet/wallet-withdraw/transfer/gather"
-    "upex-wallet/wallet-withdraw/transfer/rollback"
-    "upex-wallet/wallet-withdraw/transfer/txbuilder"
-    "upex-wallet/wallet-withdraw/transfer/utxofee"
-    "upex-wallet/wallet-withdraw/transfer/withdraw"
+	"upex-wallet/wallet-base/cmd"
+	"upex-wallet/wallet-base/db"
+	"upex-wallet/wallet-base/newbitx/misclib/log"
+	"upex-wallet/wallet-base/newbitx/misclib/utils"
+	"upex-wallet/wallet-base/service"
+	"upex-wallet/wallet-base/util"
+	bviper "upex-wallet/wallet-base/viper"
+	"upex-wallet/wallet-config/withdraw/transfer/config"
+	"upex-wallet/wallet-withdraw/base/models"
+	lcmd "upex-wallet/wallet-withdraw/cmd"
+	"upex-wallet/wallet-withdraw/transfer/checker"
+	bchecker "upex-wallet/wallet-withdraw/transfer/checker/checker"
+	"upex-wallet/wallet-withdraw/transfer/cooldown"
+	"upex-wallet/wallet-withdraw/transfer/gather"
+	"upex-wallet/wallet-withdraw/transfer/rollback"
+	"upex-wallet/wallet-withdraw/transfer/txbuilder"
+	"upex-wallet/wallet-withdraw/transfer/utxofee"
+	"upex-wallet/wallet-withdraw/transfer/withdraw"
 
-    "github.com/spf13/cobra"
-    "github.com/spf13/viper"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
-    cfgFile     string
-    serviceName string
-    cfg         = config.DefaultConfig()
+	cfgFile     string
+	serviceName string
+	cfg         = config.DefaultConfig()
 )
 
 func main() {
-    runtime.GOMAXPROCS(runtime.NumCPU())
-    cobra.OnInitialize(initConfig)
+	runtime.GOMAXPROCS(runtime.NumCPU())
+	cobra.OnInitialize(initConfig)
 
-    c := cmd.New("withdraw", "withdraw is a hot wallet for crypto currency exchange", "", run)
-    c.Flags().StringVarP(&cfgFile, "config", "c", "app.yml", "config file (default is app.yml)")
+	c := cmd.New("withdraw", "withdraw is a hot wallet for crypto currency exchange", "", run)
+	c.Flags().StringVarP(&cfgFile, "config", "c", "app.yml", "config file (default is app.yml)")
 
-    if err := c.Execute(); err != nil {
-        fmt.Println(err)
-        os.Exit(1)
-    }
+	if err := c.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
 func initConfig() {
-    if cfgFile != "" && utils.FileExist(cfgFile) {
-        viper.SetConfigFile(cfgFile)
-    } else {
-        viper.SetConfigName("app")
-        viper.AddConfigPath(".")
-    }
+	if cfgFile != "" && utils.FileExist(cfgFile) {
+		viper.SetConfigFile(cfgFile)
+	} else {
+		viper.SetConfigName("app")
+		viper.AddConfigPath(".")
+	}
 
-    err := viper.ReadInConfig()
-    if err != nil {
-        log.Errorf("read config failed, %v", err)
-        log.Warnf("run with default config")
-    } else {
-        err = bviper.MergeExtIfNecessary()
-        if err != nil {
-            log.Errorf("merge config failed, %v", err)
-        }
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Errorf("read config failed, %v", err)
+		log.Warnf("run with default config")
+	} else {
+		err = bviper.MergeExtIfNecessary()
+		if err != nil {
+			log.Errorf("merge config failed, %v", err)
+		}
 
-        cfg = config.New()
-    }
+		cfg = config.New()
+	}
 
-    serviceName = fmt.Sprintf("wallet-withdraw-%s", strings.ToLower(cfg.Currency))
+	serviceName = fmt.Sprintf("wallet-withdraw-%s", strings.ToLower(cfg.Currency))
+}
+
+func initBalanceChecker(cfg *config.Config) {
+	now := time.Now()
+	bchecker.Add(strings.ToLower(cfg.Currency), bchecker.NewBalanceChecker(cfg, now))
+	log.Infof("Hot wallet balance checker init...")
 }
 
 func createTxBuilder(cfg *config.Config) txbuilder.Builder {
-    if cfg == nil {
-        return nil
-    }
+	if cfg == nil {
+		return nil
+	}
 
-    creator, ok := txbuilder.Find(strings.ToUpper(cfg.Currency))
-    if !ok {
-        log.Errorf("can't find transfer of %s", cfg.Currency)
-        return nil
-    }
-    return creator(cfg)
+	creator, ok := txbuilder.Find(strings.ToUpper(cfg.Currency))
+	if !ok {
+		log.Errorf("can't find transfer of %s", cfg.Currency)
+		return nil
+	}
+	return creator(cfg)
 }
 
 // initFeeService , update UTXO-LIKE transaction fee to db
 func initFeeService(txBuilder txbuilder.Builder, cfg *config.Config) (uf *utxofee.UpdateFee, err error) {
-    log.Infof("suggest fee service for %s start...", cfg.Currency)
 
-    if cfg == nil {
-        return nil, fmt.Errorf("config did not loading ")
-    }
+	if cfg == nil {
+		return nil, fmt.Errorf("config did not loading ")
+	}
 
-    if txBuilder.Model() == txbuilder.UTXOModel {
-        var (
-            sf = models.SuggestFee{
-                Symbol: strings.ToLower(cfg.Currency),
-            }
-        )
+	if cfg.FeeLimitMap == nil {
+		return nil, nil
+	}
 
-        err = sf.InitCurrencyFee()
-        if err != nil {
-            log.Errorf("Init suggest fee table for %s fail", cfg.Currency)
-            return nil, err
-        }
-        return utxofee.NewUpdateFee(cfg), nil
-    }
+	log.Infof("suggest fee service for %s start...", cfg.Currency)
+	if txBuilder.Model() == txbuilder.UTXOModel {
+		var (
+			sf = models.SuggestFee{
+				Symbol: strings.ToLower(cfg.Currency),
+			}
+		)
 
-    return nil, nil
+		err = sf.InitCurrencyFee()
+		if err != nil {
+			log.Errorf("Init suggest fee table for %s fail", cfg.Currency)
+			return nil, err
+		}
+		return utxofee.NewUpdateFee(cfg), nil
+	}
+
+	return nil, nil
 }
 
 func run(*cmd.Command) error {
-    defer util.DeferRecover(serviceName, nil)()
+	defer util.DeferRecover(serviceName, nil)()
 
-    err := util.InitDaysJSONRotationLogger("./log/", serviceName+".log", 60)
-    if err != nil {
-        panic(err)
-    }
+	err := util.InitDaysJSONRotationLogger("./log/", serviceName+".log", 60)
+	if err != nil {
+		panic(err)
+	}
 
-    log.Infof("%s %s service start", serviceName, lcmd.Version())
+	log.Infof("%s %s service start", serviceName, lcmd.Version())
 
-    // initial db
-    dbInst, err := db.New(cfg.DSN, serviceName)
-    if err != nil {
-        panic(err)
-    }
-    defer dbInst.Close()
-    err = models.Init(dbInst)
-    if err != nil {
-        panic(err)
-    }
+	// initial db
+	dbInst, err := db.New(cfg.DSN, serviceName)
+	if err != nil {
+		panic(err)
+	}
+	defer dbInst.Close()
+	err = models.Init(dbInst)
+	if err != nil {
+		panic(err)
+	}
 
-    txBuilder := createTxBuilder(cfg)
-    if txBuilder == nil {
-        panic("failed to create tx builder")
-    }
+	txBuilder := createTxBuilder(cfg)
+	if txBuilder == nil {
+		panic("failed to create tx builder")
+	}
 
-    // update transaction fee
-    suggestFee, err := initFeeService(txBuilder, cfg)
-    if suggestFee != nil {
-        go suggestFee.FeeService(strings.ToLower(cfg.Currency))
-    } else if err != nil {
-        panic(err)
-    }
+	// update transaction fee
+	suggestFee, err := initFeeService(txBuilder, cfg)
+	if suggestFee != nil {
+		go suggestFee.FeeService(strings.ToLower(cfg.Currency))
+	} else if err != nil {
+		panic(err)
+	}
 
-    // register service
-    var services []*service.Service
-    util.RegisterSignalHandler(func(s os.Signal) {
-        close(cfg.ExitSignal)
+	// symbol balance checker init
+	initBalanceChecker(cfg)
 
-        for _, srv := range services {
-            srv.Stop()
-        }
-        os.Exit(0)
-    }, syscall.SIGINT, syscall.SIGTERM)
+	// register service
+	var services []*service.Service
+	util.RegisterSignalHandler(func(s os.Signal) {
+		close(cfg.ExitSignal)
 
-    services = append(services, service.New(checker.New(cfg)))
+		for _, srv := range services {
+			srv.Stop()
+		}
+		os.Exit(0)
+	}, syscall.SIGINT, syscall.SIGTERM)
 
-    // withdraw service
-    if cfg.Withdraw {
-        services = append(services, service.NewWithInterval(withdraw.New(cfg, txBuilder), cfg.WithdrawInterval))
-    }
+	// checker service
+	services = append(services, service.New(checker.New(cfg)))
 
-    // coolDown service
-    if cfg.CoolDown {
-        services = append(services, service.New(cooldown.New(cfg, txBuilder)))
-    }
+	// withdraw service
+	if cfg.Withdraw {
+		services = append(services, service.NewWithInterval(withdraw.New(cfg, txBuilder), cfg.WithdrawInterval))
+	}
 
-    // gather service
-    if cfg.Gather {
-        services = append(services, service.NewWithInterval(gather.New(cfg, txBuilder), cfg.GatherInterval))
-    }
+	// coolDown service
+	if cfg.CoolDown {
+		services = append(services, service.New(cooldown.New(cfg, txBuilder)))
+	}
 
-    if cfg.AutoRollback {
-        services = append(services, service.New(rollback.New(cfg)))
-    }
+	// gather service
+	if cfg.Gather {
+		services = append(services, service.NewWithInterval(gather.New(cfg, txBuilder), cfg.GatherInterval))
+	}
 
-    for _, s := range services {
-        go s.Start()
-    }
+	if cfg.AutoRollback {
+		services = append(services, service.New(rollback.New(cfg)))
+	}
 
-    select {}
+	for _, s := range services {
+		go s.Start()
+	}
+
+	select {}
 }

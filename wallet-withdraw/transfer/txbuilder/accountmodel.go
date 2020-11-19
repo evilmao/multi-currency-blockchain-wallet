@@ -53,7 +53,6 @@ type AccountModelBuildInfo struct {
 }
 
 type AccountModelTxBuilder interface {
-	Support(string) bool
 	DefaultFeeMeta() FeeMeta
 	EstimateFeeMeta(string, int8) *FeeMeta
 	DoBuild(*AccountModelBuildInfo) (*TxInfo, error)
@@ -170,10 +169,6 @@ func (b *AccountModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 	return txInfo, err
 }
 
-func (b *AccountModelBuilder) FeeSymbol() string {
-	return b.feeMeta.Symbol
-}
-
 func (b *AccountModelBuilder) BuildSupplementaryFee(task *models.Tx) (*TxInfo, error) {
 	return BuildByFeeMeta(b.cfg, b.feeMeta, b.builder.EstimateFeeMeta(task.Symbol, task.TxType), task, b.buildWithdraw)
 }
@@ -188,20 +183,20 @@ func (b *AccountModelBuilder) buildWithdraw(feeMeta FeeMeta, task *models.Tx) (*
 		feeAccount  *bmodels.Account
 	)
 	if b.isFeeSymbol(task.Symbol) {
-		fromAccount = bmodels.GetMatchedAccount(task.Amount.Add(feeMeta.Fee).String(), bmodels.AddressTypeSystem)
+		fromAccount = bmodels.GetMatchedAccount(task.Amount.Add(feeMeta.Fee).String(), task.Symbol, bmodels.AddressTypeSystem)
 	} else {
-		fromAccount = bmodels.GetMatchedAccount(task.Amount.String(), bmodels.AddressTypeSystem)
-
-		feeAccount = bmodels.GetMatchedAccount(feeMeta.Fee.String(), bmodels.AddressTypeSystem)
+		fromAccount = bmodels.GetMatchedAccount(task.Amount.String(), task.Symbol, bmodels.AddressTypeSystem)
+		// main currency
+		feeAccount = bmodels.GetMatchedAccount(feeMeta.Fee.String(), b.cfg.Currency, bmodels.AddressTypeSystem)
 	}
 
 	if len(fromAccount.Address) == 0 {
-		account := bmodels.GetMaxBalanceAccount(bmodels.AddressTypeSystem)
+		account := bmodels.GetMaxBalanceAccount(task.Symbol, bmodels.AddressTypeSystem)
 		return nil, alarm.NewNotMatchAccount(feeMeta.Fee, task.Amount.Add(feeMeta.Fee), *account.Balance, account.Address)
 	}
 
 	if feeAccount != nil && len(feeAccount.Address) == 0 {
-		account := bmodels.GetMaxBalanceAccount(bmodels.AddressTypeSystem)
+		account := bmodels.GetMaxBalanceAccount(task.Symbol, bmodels.AddressTypeSystem)
 		return nil, alarm.NewNotMatchAccount(feeMeta.Fee, task.Amount, *account.Balance, account.Address)
 	}
 
@@ -219,25 +214,23 @@ func (b *AccountModelBuilder) buildGather(feeMeta FeeMeta, task *models.Tx) (*Tx
 	)
 
 	if b.isFeeSymbol(task.Symbol) {
-		// maxRemain := decimal.NewFromFloat(b.cfg.MaxAccountRemain)
-		// wideRemainWithFee := maxRemain.Mul(decimal.NewFromFloat(1.5)).Add(feeMeta.Fee)
-		// fromAccount = bmodels.GetMatchedAccount(wideRemainWithFee.String(), bmodels.AddressTypeNormal)
-		fee := feeMeta.Fee
-		fromAccount = bmodels.GetMatchedAccount(fee.String(), bmodels.AddressTypeNormal)
+		maxRemain := decimal.NewFromFloat(b.cfg.MaxAccountRemain)
+		wideRemainWithFee := maxRemain.Mul(decimal.NewFromFloat(1.5)).Add(feeMeta.Fee)
+		fromAccount = bmodels.GetMatchedAccount(wideRemainWithFee.String(), task.Symbol, bmodels.AddressTypeNormal)
 
 		if fromAccount.Address == "" {
 			return nil, nil
 		}
-
-		// maxRemainWithFee := maxRemain.Add(feeMeta.Fee)
-		task.Amount = fromAccount.Balance.Sub(fee)
+		// fee := feeMeta.Fee
+		maxRemainWithFee := maxRemain.Add(feeMeta.Fee)
+		task.Amount = fromAccount.Balance.Sub(maxRemainWithFee)
 	} else {
-		fromAccount = bmodels.GetMatchedAccount("0", bmodels.AddressTypeNormal)
+		fromAccount = bmodels.GetMatchedAccount("0", task.Symbol, bmodels.AddressTypeNormal)
 		if fromAccount.Address == "" {
 			return nil, nil
 		}
 
-		feeAccount = bmodels.GetAccountByAddress(fromAccount.Address, strings.ToLower(b.cfg.Currency))
+		feeAccount = bmodels.GetAccountByAddress(fromAccount.Address, b.cfg.Currency)
 		if feeAccount.Address == "" || feeAccount.Balance == nil || feeAccount.Balance.LessThan(feeMeta.Fee) {
 			return nil, NewErrBalanceForFeeNotEnough(fromAccount.Address, feeMeta.Fee)
 		}
@@ -259,7 +252,7 @@ func (b *AccountModelBuilder) buildSupplementaryFee(feeMeta FeeMeta, task *model
 
 	task.Amount = minRemain
 
-	fromAccount := bmodels.GetMatchedAccount(task.Amount.Add(feeMeta.Fee).String(), bmodels.AddressTypeSystem)
+	fromAccount := bmodels.GetMatchedAccount(task.Amount.Add(feeMeta.Fee).String(), task.Symbol, bmodels.AddressTypeSystem)
 	if len(fromAccount.Address) == 0 {
 		return nil, fmt.Errorf("wallet balance not enough")
 	}
@@ -267,12 +260,8 @@ func (b *AccountModelBuilder) buildSupplementaryFee(feeMeta FeeMeta, task *model
 	return b.doBuild(fromAccount, feeMeta, task, nil)
 }
 
-func (b *AccountModelBuilder) feeCode() (int, error) {
-	code, ok := config.CC.Code(b.FeeSymbol())
-	if !ok {
-		return 0, fmt.Errorf("can't find code of currency %s", b.FeeSymbol())
-	}
-	return code, nil
+func (b *AccountModelBuilder) FeeSymbol() string {
+	return b.feeMeta.Symbol
 }
 
 func (b *AccountModelBuilder) isFeeSymbol(symbol string) bool {

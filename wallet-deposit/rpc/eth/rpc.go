@@ -46,6 +46,7 @@ func New(cfg *config.Config) rpc.RPC {
 func (r *RPC) GetLastBlockHeight() (uint64, error) {
 	return r.client.GetLatestBlockNumber()
 }
+
 func (r *RPC) GetBlockHashByHeight(height uint64) (string, error) {
 	block, err := r.client.GetBlockByNumber(height)
 	if err != nil {
@@ -57,6 +58,7 @@ func (r *RPC) GetBlockHashByHeight(height uint64) (string, error) {
 	return jsonparser.GetString(block, "hash")
 
 }
+
 func (r *RPC) GetBlockByHeight(height uint64) (interface{}, error) {
 	return r.client.GetBlockByNumber(height)
 }
@@ -88,6 +90,7 @@ func (r *RPC) GetTx(hash string) (interface{}, error) {
 	return r.client.GetTransactionByHash(hash)
 
 }
+
 func (r *RPC) GetTxConfirmations(hash string) (uint64, error) {
 	tx, err := r.client.GetTransactionByHash(hash)
 	if err != nil {
@@ -207,14 +210,11 @@ func (r *RPC) parseTokenTx(contractAddress, hash string, receipt []byte) ([]*mod
 
 	// check contract address
 	detail, ok := currency.CurrencyDetailByAddress(contractAddress)
-	if !ok || !detail.ChainBelongTo(r.cfg.Currency) {
+	if !ok {
 		return nil, nil
 	}
-	symbol = detail.Symbol
+	symbol = strings.ToLower(detail.Symbol)
 	precision = int32(detail.Decimal)
-	if _, ok := currency.Code(symbol); !ok {
-		return nil, fmt.Errorf("can't find currency code, symbol: %s", symbol)
-	}
 
 	err := util.JSONParserArrayEach(receipt, func(log []byte, _ jsonparser.ValueType) error {
 		eventId, err := jsonparser.GetString(log, "topics", "[0]")
@@ -224,6 +224,7 @@ func (r *RPC) parseTokenTx(contractAddress, hash string, receipt []byte) ([]*mod
 		if eventId != hexutil.Encode(token.TransferEventID) {
 			return nil
 		}
+
 		address, err := jsonparser.GetString(log, "topics", "[2]")
 		if err != nil {
 			return fmt.Errorf("parse log topics[2] failed, %v", err)
@@ -248,6 +249,7 @@ func (r *RPC) parseTokenTx(contractAddress, hash string, receipt []byte) ([]*mod
 		amount = geth.HEX_PREFIX + amount
 		a := hexutil.MustDecodeBig(amount)
 		amt := decimal.NewFromBigInt(a, -precision)
+
 		mtxs = append(mtxs, &models.Tx{
 			Hash:    hash,
 			Address: address,
@@ -263,29 +265,6 @@ func (r *RPC) parseTokenTx(contractAddress, hash string, receipt []byte) ([]*mod
 	}
 	return mtxs, nil
 
-}
-
-func ParseInternalTx(contractAddress, inputHex string) (string, *big.Int, error) {
-	caller, ok := contracts.Caller(contractAddress)
-	if !ok {
-		return "", nil, nil
-	}
-
-	input, err := hexutil.Decode(inputHex)
-	if err != nil {
-		return "", nil, fmt.Errorf("decode txInput %s failed, %v", inputHex, err)
-	}
-
-	if !bytes.Equal(caller.MethodID(), input[:4]) {
-		return "", nil, nil
-	}
-
-	addr, amount, err := caller.UnpackParams(input[4:])
-	if err != nil {
-		return "", nil, err
-	}
-
-	return addr.String(), amount, nil
 }
 
 func (r *RPC) parseInternalTx(contractAddress, hash, txInput string) (*models.Tx, error) {
@@ -310,4 +289,27 @@ func (r *RPC) parseInternalTx(contractAddress, hash, txInput string) (*models.Tx
 		Confirm: 1,
 		Symbol:  r.cfg.Currency,
 	}, nil
+}
+
+func ParseInternalTx(contractAddress, inputHex string) (string, *big.Int, error) {
+	caller, ok := contracts.Caller(contractAddress)
+	if !ok {
+		return "", nil, nil
+	}
+
+	input, err := hexutil.Decode(inputHex)
+	if err != nil {
+		return "", nil, fmt.Errorf("decode txInput %s failed, %v", inputHex, err)
+	}
+
+	if !bytes.Equal(caller.MethodID(), input[:4]) {
+		return "", nil, nil
+	}
+
+	addr, amount, err := caller.UnpackParams(input[4:])
+	if err != nil {
+		return "", nil, err
+	}
+
+	return addr.String(), amount, nil
 }

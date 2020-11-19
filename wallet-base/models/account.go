@@ -89,23 +89,23 @@ func GetBalance(symbol string) *decimal.Decimal {
 	var data struct {
 		Balance decimal.Decimal
 	}
-	db.Default().Model(&Account{}).Select("sum(balance) as balance").Where("symbol = ?", symbol).Scan(&data)
+	db.Default().Model(&Account{}).Select("sum(balance) as balance").Where("symbol = ? and account_type= ? ", symbol, AddressTypeSystem).Scan(&data)
 	return &data.Balance
 }
 
 // GetSystemBalance returns the balance of system accounts.
-func GetSystemBalance() *decimal.Decimal {
+func GetSystemBalance(symbol string) *decimal.Decimal {
 	var data struct {
 		Balance decimal.Decimal
 	}
-	db.Default().Model(&Account{}).Select("sum(balance) as balance").Where("`account_type` = ?", AddressTypeSystem).Scan(&data)
+	db.Default().Model(&Account{}).Select("sum(balance) as balance").Where("symbol = ? and `account_type` = ?", symbol, AddressTypeSystem).Scan(&data)
 	return &data.Balance
 }
 
 // GetMatchedAccount gets matched account for withdraw.
-func GetMatchedAccount(amount string, addressType uint) *Account {
+func GetMatchedAccount(amount, symbol string, addressType uint) *Account {
 	account := Account{Balance: &decimal.Zero}
-	db.Default().Where("balance > ? and `account_type` = ?", amount, addressType).First(&account)
+	db.Default().Where("balance > ? and symbol_id = ? and `account_type` = ?", amount, symbol, addressType).First(&account)
 	return &account
 }
 
@@ -167,8 +167,8 @@ func (act *Account) ForUpdateWithDB(db *gorm.DB, data map[string]interface{}) er
 }
 
 // GetMaxBalanceAccount gets max balance account
-func GetMaxBalanceAccount(addressType uint) *Account {
+func GetMaxBalanceAccount(symbol string, addressType uint) *Account {
 	account := Account{Balance: &decimal.Zero}
-	db.Default().Where("`account_type` = ?", addressType).Order("balance DESC").Limit(1).Find(&account)
+	db.Default().Where("symbol = ? and `account_type` = ?", symbol, addressType).Order("balance DESC").Limit(1).Find(&account)
 	return &account
 }

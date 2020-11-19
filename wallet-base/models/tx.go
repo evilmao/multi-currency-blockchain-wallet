@@ -52,10 +52,6 @@ type Tx struct {
 // TableName defines the table name of deposit_tx.
 func (tx Tx) TableName() string { return "deposit_tx" }
 
-var (
-	GetCode func(string) (int, bool)
-)
-
 // Insert inserts tx to transaction table.
 func (tx *Tx) Insert() (err error) {
 	defer func() {
@@ -159,8 +155,8 @@ func GetUnfinishedTxs(symbol string) []Tx {
 	}
 
 	var (
-		txs []Tx
-		// tokens []Tx
+		txs    []Tx
+		tokens []Tx
 
 		conditions = strings.Join([]string{
 			"(notify_status = 0)",
@@ -173,11 +169,11 @@ func GetUnfinishedTxs(symbol string) []Tx {
 		Find(&txs, fmt.Sprintf("symbol = ? and %s", conditions), symbol).
 		Limit(500)
 
-	// db.Default().
-	// 	Find(&tokens, fmt.Sprintf("(symbol in (select symbol from currency where blockchain = '%s')) and %s", symbols[0], conditions)).
-	// 	Limit(500)
+	db.Default().
+		Find(&tokens, fmt.Sprintf("(symbol in (select symbol from currency where blockchain = '%s')) and %s", symbol, conditions)).
+		Limit(500)
 
-	// txs = append(txs, tokens...)
+	txs = append(txs, tokens...)
 	return txs
 }
 
@@ -207,7 +203,6 @@ func LoadTxByHash(txHash string) (*Tx, error) {
 		return nil, err
 	}
 	return &tx, nil
-
 }
 
 func TxExistedBySeqID(sequenceID string) bool {

@@ -299,7 +299,7 @@ func (b *UTXOModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 			if err != nil {
 				return nil, fmt.Errorf("build by MetaData for %s fail, %v", txType, err)
 			}
-			log.Infof("-----------------%s metaData.Fee ------------- %s", txType, metaData.Fee.String())
+
 			task.Amount = extInfo.TotalInput.Sub(metaData.Fee)
 
 			if task.Amount.LessThan(decimal.Zero) {

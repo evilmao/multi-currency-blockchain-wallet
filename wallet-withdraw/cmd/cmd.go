@@ -14,6 +14,7 @@ import (
 	"upex-wallet/wallet-base/util"
 	"upex-wallet/wallet-config/deposit/config"
 	"upex-wallet/wallet-deposit/base/models"
+	"upex-wallet/wallet-deposit/deposit"
 	"upex-wallet/wallet-deposit/rpc"
 	"upex-wallet/wallet-withdraw/syncd"
 
@@ -152,6 +153,9 @@ func Exec(createRPCClient rpc.RPCCreator) error {
 		if err != nil {
 			panic(err)
 		}
+
+		// init currency
+		deposit.CurrencyInit(cfg)
 
 		rpcClient := createRPCClient(cfg)
 		if rpcClient == nil {

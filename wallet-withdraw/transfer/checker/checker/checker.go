@@ -18,23 +18,23 @@ type Checker interface {
 	Check() error
 }
 
-func Add(currencyType string, checker Checker) {
-	currencyType = strings.ToUpper(currencyType)
-	cs, ok := checkers[currencyType]
+func Add(checkerType string, checker Checker) {
+	checkerType = strings.ToUpper(checkerType)
+	cs, ok := checkers[checkerType]
 	if !ok {
 		cs = make(map[string]Checker)
-		checkers[currencyType] = cs
+		checkers[checkerType] = cs
 	}
 
 	if _, ok := cs[checker.Name()]; ok {
-		log.Errorf("checker.Add, duplicate of %s checker %s\n", currencyType, checker.Name())
+		log.Errorf("checker.Add, duplicate of %s checker %s\n", checkerType, checker.Name())
 		return
 	}
 
 	cs[checker.Name()] = checker
 }
 
-func Find(currencyType string) map[string]Checker {
-	currencyType = strings.ToUpper(currencyType)
-	return checkers[currencyType]
+func Find(checkerType string) map[string]Checker {
+	checkerType = strings.ToUpper(checkerType)
+	return checkers[checkerType]
 }
