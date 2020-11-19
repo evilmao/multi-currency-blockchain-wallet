@@ -105,7 +105,7 @@ func GetSystemBalance(symbol string) *decimal.Decimal {
 // GetMatchedAccount gets matched account for withdraw.
 func GetMatchedAccount(amount, symbol string, addressType uint) *Account {
 	account := Account{Balance: &decimal.Zero}
-	db.Default().Where("balance > ? and symbol_id = ? and `account_type` = ?", amount, symbol, addressType).First(&account)
+	db.Default().Where("balance > ? and symbol = ? and `account_type` = ?", amount, symbol, addressType).First(&account)
 	return &account
 }
 
@@ -117,13 +117,13 @@ func GetAllMatchedAccounts(amount string, addressType uint) []*Account {
 }
 
 // GetAccounts return accounts info.
-func GetAccounts(symbolID uint, index, pageSize int64) (*[]Account, int64) {
+func GetAccounts(symbol string, index, pageSize int64) (*[]Account, int64) {
 	var (
 		count    int64
 		accounts []Account
 	)
 
-	db.Default().Table("tx").Select("address, sum(amount) as balance").Where("symbol_id = ?", symbolID).
+	db.Default().Table("tx").Select("address, sum(amount) as balance").Where("symbol = ?", symbol).
 		Group("address").Count(&count).Offset(pageSize * (index - 1)).Limit(pageSize).Find(&accounts)
 
 	return &accounts, count
