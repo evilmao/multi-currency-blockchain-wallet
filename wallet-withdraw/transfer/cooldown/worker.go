@@ -52,8 +52,9 @@ func (w *Worker) Name() string {
 func (w *Worker) Work() {
 	// per 15 minutes, scan system address balance,then do cool down task
 	var (
-		now = time.Now()
-		err = fmt.Errorf("")
+		now     = time.Now()
+		err     = fmt.Errorf("")
+		symbols = currency.Symbols(w.cfg.Currency)
 	)
 	if now.Sub(w.lastCoolDownTxTime) > w.coolDownTaskInterval {
 		log.Infof("cool down worker process...")
@@ -62,7 +63,7 @@ func (w *Worker) Work() {
 		return
 	}
 
-	for _, symbol := range currency.Symbols(w.cfg.Currency) {
+	for _, symbol := range symbols {
 		err = w.cooldown(symbol)
 		if err != nil {
 			log.Errorf("cooldown %s start failed, %v ", err)
@@ -170,10 +171,10 @@ func (w *Worker) cooldown(symbol string) error {
 func (w *Worker) verifyColdInfo(symbol string) (*ColdWalletInfo, error) {
 
 	var (
-		coldAddress      = w.cfg.ColdAddress
-		minAccountRemain = decimal.Zero
-		maxAccountRemain = decimal.Zero
-		err              = "verify Cold wallet Info fail "
+		minRemain   decimal.Decimal
+		maxRemain   decimal.Decimal
+		coldAddress = w.cfg.ColdAddress
+		err         = "verify Cold wallet Info fail "
 	)
 
 	if coldAddress == "" {
@@ -181,22 +182,23 @@ func (w *Worker) verifyColdInfo(symbol string) (*ColdWalletInfo, error) {
 	}
 
 	if symbol == w.cfg.Currency {
-		minAccountRemain = decimal.NewFromFloat(w.cfg.MinAccountRemain)
-		maxAccountRemain = decimal.NewFromFloat(w.cfg.MaxAccountRemain)
+		minRemain = decimal.NewFromFloat(w.cfg.MinAccountRemain)
+		maxRemain = decimal.NewFromFloat(w.cfg.MaxAccountRemain)
 	} else {
 		s := bmodels.GetCurrency(w.cfg.Currency, symbol)
-		minAccountRemain, _ = decimal.NewFromString(s.MinBalance)
-		maxAccountRemain, _ = decimal.NewFromString(s.MaxBalance)
+		log.Warnf("symbol=%s,detail: %v", symbol, s)
+		minRemain, _ = decimal.NewFromString(s.MinBalance)
+		maxRemain, _ = decimal.NewFromString(s.MaxBalance)
 	}
 
-	if minAccountRemain.GreaterThan(maxAccountRemain) {
+	if minRemain.GreaterThan(maxRemain) {
 		return nil, fmt.Errorf("%s,remain-balance (%s) is greater than max-balance (%s) ",
-			err, minAccountRemain.String(), maxAccountRemain.String())
+			err, minRemain.String(), maxRemain.String())
 	}
 
 	return &ColdWalletInfo{
 		coldAddress:      coldAddress,
-		maxAccountRemain: maxAccountRemain,
-		minAccountRemain: minAccountRemain,
+		maxAccountRemain: maxRemain,
+		minAccountRemain: minRemain,
 	}, nil
 }
