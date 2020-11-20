@@ -120,9 +120,6 @@ func (w *Worker) storeAndBroadcast(txInfo *txbuilder.TxInfo, task *models.Tx) er
 	}
 
 	// sign and send transaction
-	log.Warnf("txInfo=%v", txInfo)
-	panic("eeeee")
-
 	err = w.BroadcastTx(txInfo, task)
 	if err != nil {
 		return fmt.Errorf("%s, broadcast tx failed, %v", w.Name(), err)
