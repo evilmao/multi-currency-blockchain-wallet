@@ -384,9 +384,8 @@ func findHandler(task *models.Tx) (handler.Handler, error) {
 
 	// Tokens use main-chain's handler.
 	currencyDetail := currency.CurrencyDetail(task.Symbol)
-	if currencyDetail.BlockchainName == task.BlockchainName {
-		h, ok = handler.Find(currencyDetail.BelongChainName())
-	}
+
+	h, ok = handler.Find(currencyDetail.BlockchainName)
 
 	if ok {
 		return h, nil
