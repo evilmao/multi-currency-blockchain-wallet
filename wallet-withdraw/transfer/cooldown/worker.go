@@ -89,7 +89,7 @@ func (w *Worker) cooldown(symbol string) error {
 	}
 
 	if w.txBuilder.Model() == txbuilder.AccountModel {
-		fromAccount := bmodels.GetMatchedAccount(info.maxAccountRemain.String(), symbol, bmodels.AddressTypeSystem)
+		fromAccount := bmodels.GetMatchedAccount(info.maxAccountRemain.String(), w.cfg.Currency, bmodels.AddressTypeSystem)
 		if len(fromAccount.Address) == 0 {
 			return nil
 		}
