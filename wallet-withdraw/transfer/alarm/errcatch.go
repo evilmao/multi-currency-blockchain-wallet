@@ -8,8 +8,6 @@ import (
 
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/base/models"
-
-	"upex-wallet/wallet-base/newbitx/misclib/log"
 )
 
 /* errorCatch format
@@ -58,7 +56,6 @@ func Update(cfg *config.Config, task *models.Tx, err error) bool {
 
 	flag := false
 	for i, e := range errorDetails {
-		log.Warnf("errorDetails====%+v", e)
 		eMsg := fmt.Sprintf("%v", e.Error)
 		if txType == e.TxType && errMsg == eMsg {
 			// warning time over 15 minutes: update error

@@ -157,7 +157,7 @@ func (b *AccountModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 			errMsg = err.(*alarm.NotMatchAccount).ErrorDetail
 		case *ErrBalanceForFeeNotEnough:
 			address, fee := err.(*ErrBalanceForFeeNotEnough).Address, err.(*ErrBalanceForFeeNotEnough).NeedFee
-			feeAccount := bmodels.GetAccountByAddress(address, task.Symbol)
+			feeAccount := bmodels.GetAccountByAddress(address, b.cfg.Currency)
 			err = alarm.NewErrorAccountBalanceNotEnough(address, *feeAccount.Balance, fee)
 			errMsg = err.(*alarm.ErrorAccountBalanceNotEnough).ErrorDetail
 		}
@@ -229,7 +229,7 @@ func (b *AccountModelBuilder) buildGather(feeMeta FeeMeta, task *models.Tx) (*Tx
 		if fromAccount.Address == "" {
 			return nil, nil
 		}
-
+		// main blockChain balance -- for pay transaction fees
 		feeAccount = bmodels.GetAccountByAddress(fromAccount.Address, b.cfg.Currency)
 		if feeAccount.Address == "" || feeAccount.Balance == nil || feeAccount.Balance.LessThan(feeMeta.Fee) {
 			return nil, NewErrBalanceForFeeNotEnough(fromAccount.Address, feeMeta.Fee)

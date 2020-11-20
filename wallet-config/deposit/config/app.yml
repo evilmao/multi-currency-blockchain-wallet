@@ -12,7 +12,7 @@ brokerPrivateKey: "1f5ddxyyy1f2c0b58bbd8cxx7x79xxxx"    # appSecretKey
 minAmount: 0.001                                        # 0.001 eth, deposit min value
 
 # scan blockchain
-startHeight: 11289360
+#startHeight: 11287888
 # 扫描区块的起始高度, 默认从数据库中最新的区块开始扫描
 maxConfirmations: 30                 # 区块广播确认节点数
 
@@ -28,8 +28,8 @@ symbols:
     precision: 6
     address: "0xdac17f958d2ee523a2206206994597c13d831ec7"
     minDepositAmount: 0.2
-    minBalanceRemain: 5000
-    maxBalanceRemain: 10000
+    minBalanceRemain: 2
+    maxBalanceRemain: 4
   qos:
     precision: 10
     address: "0x7b188A8b3A2113621895Fb35fC67a779CAFFA92D"
