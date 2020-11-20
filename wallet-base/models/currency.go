@@ -76,6 +76,16 @@ func GetCurrency(mainCurrency, symbol string) *Currency {
 	return &currency
 }
 
+// GetCurrencies gets token currency list.
+func GetCurrencyByContractAddress(address string) *Currency {
+	var currency Currency
+	err := db.Default().Where("address= ?", address).First(&currency).Error
+	if err != nil {
+		return nil
+	}
+	return &currency
+}
+
 func CurrencyExistedBySymbol(blockchain, symbol string) bool {
 	var c Currency
 	db.Default().Where(c.whereQuery(), blockchain, symbol).First(&c)

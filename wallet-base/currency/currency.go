@@ -134,44 +134,68 @@ func updateCurrencyTable(cfg *config.Config) {
 	insertOrUpdateCurrencyTable(cfg)
 }
 
+// func CurrencyDetail(symbol string) ([]*CurrencyInfo, bool) {
+// 	rwMutex.RLock()
+// 	defer rwMutex.RUnlock()
+//
+// 	symbol = strings.ToUpper(symbol)
+// 	cs, ok := symbolDetailIndex[symbol]
+// 	if !ok {
+// 		return nil, false
+// 	}
+// 	return cs, ok
+// }
+
 func CurrencyDetail(symbol string) ([]*CurrencyInfo, bool) {
-	rwMutex.RLock()
-	defer rwMutex.RUnlock()
 
 	symbol = strings.ToUpper(symbol)
-	cs, ok := symbolDetailIndex[symbol]
-	if !ok {
+	currencies := models.GetCurrencies()
+	if len(currencies) == 0 {
 		return nil, false
 	}
-	return cs, ok
+
+	mainCurrency := currencies[0].Blockchain
+	cs := []*CurrencyInfo{&CurrencyInfo{BlockchainName: mainCurrency}}
+	for i := 0; i < len(currencies); i++ {
+		c := currencies[i]
+		cs = append(cs, &CurrencyInfo{
+			BlockchainName: mainCurrency,
+			Address:        c.Address,
+			Decimal:        int(c.Decimals),
+			Symbol:         c.Symbol,
+		})
+	}
+
+	return cs, true
 }
+
+// func CurrencyDetailByAddress(address string) (*CurrencyInfo, bool) {
+// 	rwMutex.RLock()
+// 	defer rwMutex.RUnlock()
+//
+// 	address = strings.ToLower(address)
+// 	c, ok := addressIndex[address]
+// 	if !ok {
+// 		return nil, false
+// 	}
+// 	return c, ok
+// }
 
 func CurrencyDetailByAddress(address string) (*CurrencyInfo, bool) {
-	rwMutex.RLock()
-	defer rwMutex.RUnlock()
 
 	address = strings.ToLower(address)
-	c, ok := addressIndex[address]
-	if !ok {
+	c := models.GetCurrencyByContractAddress(address)
+	if c == nil {
 		return nil, false
 	}
-	return c, ok
-}
 
-func ForeachCurrencyDetail(h func(*CurrencyInfo) (bool, error)) error {
-	for _, details := range symbolDetailIndex {
-		for _, detail := range details {
-			ok, err := h(detail)
-			if err != nil {
-				return err
-			}
+	return &CurrencyInfo{
+		BlockchainName: c.Blockchain,
+		Symbol:         c.Symbol,
+		Address:        c.Address,
+		Decimal:        int(c.Decimals),
+	}, true
 
-			if !ok {
-				return nil
-			}
-		}
-	}
-	return nil
 }
 
 func firstDetailWithBlockchainName(symbol string) (*CurrencyInfo, bool) {
@@ -289,4 +313,20 @@ func Symbols(mainCurrency string) []string {
 	}
 
 	return symbols
+}
+
+func ForeachCurrencyDetail(h func(*CurrencyInfo) (bool, error)) error {
+	for _, details := range symbolDetailIndex {
+		for _, detail := range details {
+			ok, err := h(detail)
+			if err != nil {
+				return err
+			}
+
+			if !ok {
+				return nil
+			}
+		}
+	}
+	return nil
 }
