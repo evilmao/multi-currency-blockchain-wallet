@@ -177,6 +177,7 @@ func CurrencyDetail(symbol string) *CurrencyInfo {
 		BlockchainName: c.Blockchain,
 		Address:        c.Address,
 		Decimal:        int(c.Decimals),
+		Symbol:         c.Symbol,
 	}
 }
 

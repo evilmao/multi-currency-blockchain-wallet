@@ -140,8 +140,6 @@ func (b *ETHBuilder) DoBuild(info *txbuilder.AccountModelBuildInfo) (*txbuilder.
 	} else {
 		// Token transfer.
 		contractAddr, precision, err := contractAddress(info.Task.Symbol, b.cfg.Currency)
-		// TODO: 删除
-		log.Warnf("contractAddress==  %s,%s", info.Task.Symbol, contractAddr)
 		if err != nil {
 			return nil, err
 		}
@@ -158,6 +156,9 @@ func (b *ETHBuilder) DoBuild(info *txbuilder.AccountModelBuildInfo) (*txbuilder.
 
 		toAddress = contractAddr
 		bigAmount = big.NewInt(0)
+		// TODO: 删除
+		log.Warnf("contractAddress==  %s,%s", info.Task.Symbol, toAddress)
+		panic("111")
 	}
 
 	gasLimit, err := estimateGasLimit(b.client, info.Task.Symbol, b.cfg.Currency, fromAddress, &toAddress, bigAmount, payload)
@@ -219,11 +220,10 @@ func contractAddress(symbol, mainCurrency string) (addr common.Address, precisio
 		err = fmt.Errorf("can't find currency detail of %s", symbol)
 		return
 	}
-	log.Warnf("CurrencyInfo==%v", currentDetail)
+
 	if currentDetail.IsToken() && currentDetail.ChainBelongTo(mainCurrency) {
 		addr = common.HexToAddress(currentDetail.Address)
 		precision = currentDetail.Decimal
-		panic("err")
 		return
 
 	}
