@@ -2,7 +2,6 @@ package cooldown
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"upex-wallet/wallet-base/currency"
@@ -28,9 +27,9 @@ type Worker struct {
 }
 
 type ColdWalletInfo struct {
-	coldAddress      string
-	minAccountRemain decimal.Decimal
-	maxAccountRemain decimal.Decimal
+	ColdAddress   string
+	RemainBalance decimal.Decimal
+	MaxBalance    decimal.Decimal
 }
 
 func New(cfg *config.Config, txBuilder txbuilder.Builder) *Worker {
@@ -84,12 +83,12 @@ func (w *Worker) cooldown(symbol string) error {
 
 	// get balance from db
 	balance := bmodels.GetSystemBalance(symbol)
-	if balance.LessThanOrEqual(info.maxAccountRemain) {
+	if balance.LessThanOrEqual(info.MaxBalance) {
 		return nil
 	}
 
 	if w.txBuilder.Model() == txbuilder.AccountModel {
-		fromAccount := bmodels.GetMatchedAccount(info.maxAccountRemain.String(), w.cfg.Currency, bmodels.AddressTypeSystem)
+		fromAccount := bmodels.GetMatchedAccount(info.MaxBalance.String(), symbol, bmodels.AddressTypeSystem)
 		if len(fromAccount.Address) == 0 {
 			return nil
 		}
@@ -99,10 +98,10 @@ func (w *Worker) cooldown(symbol string) error {
 
 	// build cold down transfer task
 	task := &models.Tx{}
-	task.Symbol = strings.ToLower(w.cfg.Currency)
+	task.Symbol = symbol
 	task.TxType = models.TxTypeCold
-	task.Address = info.coldAddress
-	task.Amount = balance.Sub(info.maxAccountRemain)
+	task.Address = info.ColdAddress
+	task.Amount = balance.Sub(info.MaxBalance)
 	task.UpdateLocalTransIDSequenceID()
 
 	// if task.Amount.LessThan(decimal.NewFromFloat(w.cfg.MinFee)) {
@@ -158,11 +157,11 @@ func (w *Worker) cooldown(symbol string) error {
 	for {
 		TxHash := models.GetTxHashBySequenceID(task.SequenceID)
 		if TxHash != "" {
-			e := alarm.NewWarnCoolWalletBalanceChange(info.maxAccountRemain, *balance, info.coldAddress, TxHash)
+			e := alarm.NewWarnCoolWalletBalanceChange(info.MaxBalance, *balance, info.ColdAddress, TxHash)
 			go alarm.SendEmail(w.cfg, task, e, e.WarnDetail)
 			break
 		}
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 1)
 	}
 
 	return nil
@@ -171,10 +170,10 @@ func (w *Worker) cooldown(symbol string) error {
 func (w *Worker) verifyColdInfo(symbol string) (*ColdWalletInfo, error) {
 
 	var (
-		minRemain   decimal.Decimal
-		maxRemain   decimal.Decimal
-		coldAddress = w.cfg.ColdAddress
-		err         = "verify Cold wallet Info fail "
+		remainBalance decimal.Decimal
+		maxBalance    decimal.Decimal
+		coldAddress   = w.cfg.ColdAddress
+		err           = "verify Cold wallet Info fail "
 	)
 
 	if coldAddress == "" {
@@ -182,22 +181,22 @@ func (w *Worker) verifyColdInfo(symbol string) (*ColdWalletInfo, error) {
 	}
 
 	if symbol == w.cfg.Currency {
-		minRemain = decimal.NewFromFloat(w.cfg.MinAccountRemain)
-		maxRemain = decimal.NewFromFloat(w.cfg.MaxAccountRemain)
+		remainBalance = decimal.NewFromFloat(w.cfg.MinAccountRemain)
+		maxBalance = decimal.NewFromFloat(w.cfg.MaxAccountRemain)
 	} else {
 		s := bmodels.GetCurrency(w.cfg.Currency, symbol)
-		minRemain, _ = decimal.NewFromString(s.MinBalance)
-		maxRemain, _ = decimal.NewFromString(s.MaxBalance)
+		remainBalance, _ = decimal.NewFromString(s.MinBalance)
+		maxBalance, _ = decimal.NewFromString(s.MaxBalance)
 	}
 
-	if minRemain.GreaterThan(maxRemain) {
+	if remainBalance.GreaterThan(maxBalance) {
 		return nil, fmt.Errorf("%s,remain-balance (%s) is greater than max-balance (%s) ",
-			err, minRemain.String(), maxRemain.String())
+			err, remainBalance.String(), maxBalance.String())
 	}
 
 	return &ColdWalletInfo{
-		coldAddress:      coldAddress,
-		maxAccountRemain: maxRemain,
-		minAccountRemain: minRemain,
+		ColdAddress:   coldAddress,
+		MaxBalance:    maxBalance,
+		RemainBalance: remainBalance,
 	}, nil
 }
