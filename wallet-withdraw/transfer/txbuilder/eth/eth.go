@@ -140,6 +140,8 @@ func (b *ETHBuilder) DoBuild(info *txbuilder.AccountModelBuildInfo) (*txbuilder.
 	} else {
 		// Token transfer.
 		contractAddr, precision, err := contractAddress(info.Task.Symbol, b.cfg.Currency)
+		// TODO: 删除
+		log.Warnf("contractAddress==  %s,%s", info.Task.Symbol, contractAddr)
 		if err != nil {
 			return nil, err
 		}
@@ -217,10 +219,11 @@ func contractAddress(symbol, mainCurrency string) (addr common.Address, precisio
 		err = fmt.Errorf("can't find currency detail of %s", symbol)
 		return
 	}
-
+	log.Warnf("CurrencyInfo==%v", currentDetail)
 	if currentDetail.IsToken() && currentDetail.ChainBelongTo(mainCurrency) {
 		addr = common.HexToAddress(currentDetail.Address)
 		precision = currentDetail.Decimal
+		panic("err")
 		return
 
 	}
