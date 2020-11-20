@@ -146,27 +146,38 @@ func updateCurrencyTable(cfg *config.Config) {
 // 	return cs, ok
 // }
 
-func CurrencyDetail(symbol string) ([]*CurrencyInfo, bool) {
+func CurrencyDetail(symbol string) *CurrencyInfo {
 
-	symbol = strings.ToUpper(symbol)
-	currencies := models.GetCurrencies()
-	if len(currencies) == 0 {
-		return nil, false
+	// symbol = strings.ToUpper(symbol)
+	// currencies := models.GetCurrencies()
+	// if len(currencies) == 0 {
+	// 	return nil, false
+	// }
+	//
+	// mainCurrency := currencies[0].Blockchain
+	// cs := []*CurrencyInfo{&CurrencyInfo{BlockchainName: mainCurrency}}
+	//
+	// for i := 0; i < len(currencies); i++ {
+	// 	c := currencies[i]
+	// 	cs = append(cs, &CurrencyInfo{
+	// 		BlockchainName: mainCurrency,
+	// 		Address:        c.Address,
+	// 		Decimal:        int(c.Decimals),
+	// 		Symbol:         c.Symbol,
+	// 	})
+	// }
+	//
+	// return cs, true
+	c := models.GetCurrencyBySymbol(symbol)
+	if symbol == "" || c == nil {
+		return nil
 	}
 
-	mainCurrency := currencies[0].Blockchain
-	cs := []*CurrencyInfo{&CurrencyInfo{BlockchainName: mainCurrency}}
-	for i := 0; i < len(currencies); i++ {
-		c := currencies[i]
-		cs = append(cs, &CurrencyInfo{
-			BlockchainName: mainCurrency,
-			Address:        c.Address,
-			Decimal:        int(c.Decimals),
-			Symbol:         c.Symbol,
-		})
+	return &CurrencyInfo{
+		BlockchainName: c.Blockchain,
+		Address:        c.Address,
+		Decimal:        int(c.Decimals),
 	}
-
-	return cs, true
 }
 
 // func CurrencyDetailByAddress(address string) (*CurrencyInfo, bool) {

@@ -96,6 +96,15 @@ func CurrencyExistedBySymbol(blockchain, symbol string) bool {
 	return c.Symbol == symbol
 }
 
+func GetCurrencyBySymbol(symbol string) *Currency {
+	var currency Currency
+	err := db.Default().Where("symbol= ?", symbol).First(&currency).Error
+	if err != nil {
+		return nil
+	}
+	return &currency
+}
+
 func BulkInsert(symbols []*Currency) {
 	valueStrings := make([]string, 0, len(symbols))
 	valueArgs := make([]interface{}, 0, len(symbols)*4)

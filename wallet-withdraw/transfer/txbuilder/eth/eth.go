@@ -131,7 +131,6 @@ func (b *ETHBuilder) DoBuild(info *txbuilder.AccountModelBuildInfo) (*txbuilder.
 				return nil, nil
 			}
 		}
-
 		cost = cost.Add(info.FeeMeta.Fee)
 		bigAmount, ok = decimalToBigInt(info.Task.Amount.Mul(decimal.New(1, geth.Precision)))
 		if !ok {
@@ -212,18 +211,18 @@ func (b *ETHBuilder) DoBuild(info *txbuilder.AccountModelBuildInfo) (*txbuilder.
 }
 
 func contractAddress(symbol, mainCurrency string) (addr common.Address, precision int, err error) {
-	details, ok := currency.CurrencyDetail(symbol)
-	if !ok {
+	currentDetail := currency.CurrencyDetail(symbol)
+
+	if currentDetail == nil {
 		err = fmt.Errorf("can't find currency detail of %s", symbol)
 		return
 	}
 
-	for _, detail := range details {
-		if detail.IsToken() && detail.ChainBelongTo(mainCurrency) {
-			addr = common.HexToAddress(detail.Address)
-			precision = detail.Decimal
-			return
-		}
+	if currentDetail.IsToken() && currentDetail.ChainBelongTo(mainCurrency) {
+		addr = common.HexToAddress(currentDetail.Address)
+		precision = currentDetail.Decimal
+		return
+
 	}
 
 	err = fmt.Errorf("can't find contract address of %s", symbol)
