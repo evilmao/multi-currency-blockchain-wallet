@@ -56,12 +56,12 @@ func (w *Worker) Work() {
 		err     = fmt.Errorf("")
 		symbols = currency.Symbols(w.cfg.Currency)
 	)
-	if now.Sub(w.lastCoolDownTxTime) > w.coolDownTaskInterval {
-		log.Infof("cool down worker process...")
-		w.lastCoolDownTxTime = now
-	} else {
+	if now.Sub(w.lastCoolDownTxTime) < w.coolDownTaskInterval {
 		return
 	}
+
+	log.Infof("cool down worker process...")
+	w.lastCoolDownTxTime = now
 
 	for _, symbol := range symbols {
 		err = w.cooldown(symbol)
