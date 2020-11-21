@@ -87,7 +87,7 @@ type ErrorAccountBalanceNotEnough struct {
 
 func NewErrorAccountBalanceNotEnough(address string, balance, needFee decimal.Decimal) *ErrorAccountBalanceNotEnough {
 	return &ErrorAccountBalanceNotEnough{
-		ErrorDetail: fmt.Sprintf("交易失败,地址金额低于当前手续费; 地址: %s ,余额 %v ,当前交易手续费: %v ", address, balance, needFee),
+		ErrorDetail: fmt.Sprintf("交易失败,地址余额低于当前手续费; 地址: %s ,余额 %v ,当前交易手续费: %v ", address, balance, needFee),
 	}
 }
 

@@ -132,8 +132,10 @@ func (b *AccountModelBuilder) BuildWithdraw(task *models.Tx) (*TxInfo, error) {
 			errMsg = err.(*alarm.NotMatchAccount).ErrorDetail
 		case *ErrFeeNotEnough:
 			fee, needFee := err.(*ErrFeeNotEnough).Fee, err.(*ErrFeeNotEnough).NeedFee
-			err = alarm.NewErrorTxFeeNotEnough(decimal.Decimal(fee), decimal.Decimal(needFee))
+			err = alarm.NewErrorTxFeeNotEnough(fee, needFee)
 			errMsg = err.(*alarm.NotMatchAccount).ErrorDetail
+		case *alarm.ErrorAccountBalanceNotEnough:
+			errMsg = err.(*alarm.ErrorAccountBalanceNotEnough).ErrorDetail
 		}
 
 		if errMsg != "" {
