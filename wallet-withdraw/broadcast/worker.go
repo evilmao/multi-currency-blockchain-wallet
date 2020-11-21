@@ -295,7 +295,7 @@ func (w *Worker) tryBroadcast(t *Task) error {
 		}
 	}
 
-	// 2. check task is broadcast
+	// 2. check task whether is broadcast
 	if !t.broadcasted {
 		txID, err := t.h.BroadcastTransaction(t.tx, t.txID)
 		if err != nil {
@@ -354,7 +354,6 @@ func (w *Worker) retry(t *Task, costRetry bool) {
 		return
 	}
 
-	//
 	time.Sleep(t.h.Ctrler().VerifyInterval())
 
 	if costRetry {

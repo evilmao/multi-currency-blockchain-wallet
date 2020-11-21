@@ -106,8 +106,8 @@ func initFeeService(txBuilder txbuilder.Builder, cfg *config.Config) (uf *utxofe
 		return nil, nil
 	}
 
-	log.Infof("suggest fee service for %s start...", cfg.Currency)
 	if txBuilder.Model() == txbuilder.UTXOModel {
+		log.Infof("suggest fee service for %s start...", cfg.Currency)
 		var (
 			sf = models.SuggestFee{
 				Symbol: strings.ToLower(cfg.Currency),

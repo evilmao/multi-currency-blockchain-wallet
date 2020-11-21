@@ -185,11 +185,13 @@ func (b *AccountModelBuilder) buildWithdraw(feeMeta FeeMeta, task *models.Tx) (*
 	if b.isFeeSymbol(task.Symbol) {
 		fromAccount = bmodels.GetMatchedAccount(task.Amount.Add(feeMeta.Fee).String(), task.Symbol, bmodels.AddressTypeSystem)
 	} else {
+		log.Warnf("fee=====%s", feeMeta.Fee.String(), b.cfg.Currency)
 		fromAccount = bmodels.GetMatchedAccount(task.Amount.String(), task.Symbol, bmodels.AddressTypeSystem)
 		// main currency
 		feeAccount = bmodels.GetMatchedAccount(feeMeta.Fee.String(), b.cfg.Currency, bmodels.AddressTypeSystem)
 	}
 
+	log.Warnf("fee=====%s", feeMeta.Fee.String(), b.cfg.Currency)
 	if len(fromAccount.Address) == 0 {
 		account := bmodels.GetMaxBalanceAccount(task.Symbol, bmodels.AddressTypeSystem)
 		return nil, alarm.NewNotMatchAccount(feeMeta.Fee, task.Amount.Add(feeMeta.Fee), *account.Balance, account.Address)

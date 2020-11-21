@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"upex-wallet/wallet-base/currency"
 	"upex-wallet/wallet-base/db"
 	"upex-wallet/wallet-base/service"
 	"upex-wallet/wallet-base/util"
@@ -143,7 +144,7 @@ func Exec(createRPCClient rpc.RPCCreator) error {
 		}
 
 		// init currency
-		deposit.CurrencyInit(cfg)
+		currency.Init(cfg)
 
 		rpcClient := createRPCClient(cfg)
 		if rpcClient == nil {

@@ -45,16 +45,17 @@ func New(cfg *config.Config, txBuilder txbuilder.Builder) *Worker {
 }
 
 func (w *Worker) Name() string {
-	return "cooldown"
+	return "coolDown"
 }
 
 func (w *Worker) Work() {
-	// per 15 minutes, scan system address balance,then do cool down task
+	// scanning system address balance interval by config setting
 	var (
 		now     = time.Now()
 		err     = fmt.Errorf("")
 		symbols = currency.Symbols(w.cfg.Currency)
 	)
+
 	if now.Sub(w.lastCoolDownTxTime) < w.coolDownTaskInterval {
 		return
 	}
@@ -63,9 +64,9 @@ func (w *Worker) Work() {
 	w.lastCoolDownTxTime = now
 
 	for _, symbol := range symbols {
-		err = w.cooldown(symbol)
+		err = w.coolDown(symbol)
 		if err != nil {
-			log.Errorf("cooldown %s start failed, %v ", err)
+			log.Errorf("coolDown %s start failed, %v ", symbol, err)
 		}
 	}
 
@@ -74,7 +75,7 @@ func (w *Worker) Work() {
 	}
 }
 
-func (w *Worker) cooldown(symbol string) error {
+func (w *Worker) coolDown(symbol string) error {
 	// verify cold info: address,balance
 	info, err := w.verifyColdInfo(symbol)
 	if err != nil {
@@ -103,10 +104,6 @@ func (w *Worker) cooldown(symbol string) error {
 	task.Address = info.ColdAddress
 	task.Amount = balance.Sub(info.MaxBalance)
 	task.UpdateLocalTransIDSequenceID()
-
-	// if task.Amount.LessThan(decimal.NewFromFloat(w.cfg.MinFee)) {
-	// 	return nil
-	// }
 
 	txInfo, err := w.txBuilder.BuildWithdraw(task)
 	if err != nil {

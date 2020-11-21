@@ -18,14 +18,11 @@ import (
 // Tx type.
 const (
 	// Base tx types.
-	TxTypeDeposit  = 0
-	TxTypeWithdraw = 2
-	TxTypeGather   = 4
-	TxTypeCold     = 8
-
-	// Ext tx types.
-	TxTypeClaim = 16
-
+	TxTypeDeposit          = 0
+	TxTypeWithdraw         = 2
+	TxTypeGather           = 4
+	TxTypeCold             = 8
+	TxTypeClaim            = 16 // Ext tx types.
 	TxTypeSupplementaryFee = 32
 )
 
@@ -89,8 +86,6 @@ type Tx struct {
 	// EncAddress     string          `gorm:"size:500" json:"en/c_address"`
 	// Extra          string          `gorm:"size:100" json:"extra"`
 	// Code           int             `gorm:"type:int;default:0" json:"code"`
-	// Channel        string          `gorm:"size:50;index"`
-
 }
 
 func (wtx Tx) TableName() string { return "wallet_tx" }
@@ -102,8 +97,6 @@ func (wtx *Tx) FirstOrCreate() error {
 	}
 	// fix same gather task repeat record
 	return db.Default().FirstOrCreate(wtx, "txid = ? ", wtx.Hash).Error
-
-	// return db.Default().FirstOrCreate(wtx, "sequence_id = ? and tx_type = ?", wtx.SequenceID, wtx.TxType).Error
 }
 
 // Update updates the tx status.
@@ -140,10 +133,8 @@ func (wtx *Tx) ClaimFormat(txHash string) map[string]string {
 	data["symbol"] = wtx.Symbol
 	data["address"] = wtx.Address
 	data["amount"] = wtx.Amount.String()
-	// data["extra"] = wtx.Extra
 	data["source"] = wtx.ClaimHash
 	data["tx_hash"] = txHash
-	// data["currency"] = strconv.Itoa(wtx.Code)
 	data["sequence_id"] = wtx.SequenceID
 	return data
 }
@@ -151,18 +142,14 @@ func (wtx *Tx) ClaimFormat(txHash string) map[string]string {
 func (wtx *Tx) CloneCore() *Tx {
 	txCopy := Tx{}
 	txCopy.SequenceID = wtx.SequenceID
-	// txCopy.Channel = wtx.Channel
 	txCopy.TransID = wtx.TransID
 	txCopy.Address = wtx.Address
-	// txCopy.EncAddress = wtx.EncAddress
 	txCopy.BlockchainName = wtx.BlockchainName
 	txCopy.Symbol = wtx.Symbol
-	// txCopy.Code = wtx.Code
 	txCopy.TxType = wtx.TxType
 	txCopy.Amount = wtx.Amount
 	txCopy.Fees = wtx.Fees
 	txCopy.Nonce = wtx.Nonce
-	// txCopy.Extra = wtx.Extra
 	return &txCopy
 }
 
@@ -188,15 +175,6 @@ func GetTxsByStatus(status uint) []*Tx {
 	var txs []*Tx
 	db.Default().Where("tx_status = ? ", status).Limit(10).Find(&txs)
 	return txs
-}
-
-// CheckTxIsFinished, return success or not
-func CheckTxIsFinished(sequenceID string) bool {
-
-	var tx Tx
-	_ = db.Default().Where("sequence_id = ?", sequenceID).First(&tx).Error
-
-	return tx.TxStatus == TxStatusSuccess && tx.Hash != ""
 }
 
 // GetTxHash, get TxHash by sequenceID

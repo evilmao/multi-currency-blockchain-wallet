@@ -94,8 +94,10 @@ func (a *FeeReadJuster) readjustFee(tx *models.Tx) error {
 		}
 	}
 
+	updateFees := tx.Fees.Sub(info.RemainFee)
 	err = tx.Update(models.M{
 		"readjusted_fee": true,
+		"fees":           updateFees,
 	}, nil)
 	if err != nil {
 		return fmt.Errorf("db update tx readjusted_fee failed, %v", err)

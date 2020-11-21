@@ -41,17 +41,20 @@ func (c *BalanceChecker) Init(cfg *config.Config) {
 }
 
 func (c *BalanceChecker) Check() error {
-	now := time.Now()
+
+	var (
+		currency   = strings.ToLower(c.cfg.Currency)
+		symbols    = bmodels.GetCurrencies()
+		now        = time.Now()
+		minBalance = decimal.NewFromFloat(c.cfg.MinAccountRemain)
+	)
 
 	if now.Sub(c.lastBalanceCheckerTime) < time.Minute*c.cfg.CoolDownTaskInterval {
 		return nil
 	}
 
-	var (
-		currency   = strings.ToLower(c.cfg.Currency)
-		minBalance = decimal.NewFromFloat(c.cfg.MinAccountRemain)
-	)
-
+	log.Infof("%s worker process...", c.Name())
+	c.lastBalanceCheckerTime = now
 	if currency == "" || minBalance.LessThan(decimal.Zero) {
 		err := fmt.Errorf("main currency or MinAccountRemain set wrong, check `currency` and `minAccountRemain` fields ")
 		log.Errorf("Balance checker fail,%v", err)
@@ -59,33 +62,31 @@ func (c *BalanceChecker) Check() error {
 	}
 
 	c1 := mainCurrencyBalanceChecker(currency, minBalance)
-	c2 := tokenCurrencyBalanceChecker()
+	c2 := tokenCurrencyBalanceChecker(symbols)
 
 	if c1 != "" || c2 != "" {
 		emailContent := headContent + c1 + c2 + tailContent
 		go alarm.SendEmailByText(c.cfg, emailContent)
 	}
 
-	c.lastBalanceCheckerTime = now
 	return nil
 }
 
-func mainCurrencyBalanceChecker(currency string, minBalance decimal.Decimal) string {
+func mainCurrencyBalanceChecker(mainCurrency string, minRemain decimal.Decimal) string {
 	var (
 		tmpContent = ""
 	)
 
-	mainCurrencyBalance := bmodels.GetBalance(currency)
-	if mainCurrencyBalance.LessThan(minBalance) {
-		tmpContent = fmt.Sprintf(content, currency, minBalance.String(), mainCurrencyBalance.String())
+	minCurrencyBalance := bmodels.GetBalance(mainCurrency)
+	if minCurrencyBalance.LessThan(minRemain) {
+		tmpContent = fmt.Sprintf(content, mainCurrency, minRemain.String(), minCurrencyBalance.String())
 	}
 
 	return tmpContent
 }
 
-func tokenCurrencyBalanceChecker() string {
+func tokenCurrencyBalanceChecker(currencies []bmodels.Currency) string {
 	var (
-		currencies = bmodels.GetCurrencies()
 		tmpContent = ""
 	)
 
