@@ -2,6 +2,7 @@ package alarm
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/shopspring/decimal"
 )
@@ -85,9 +86,9 @@ type ErrorAccountBalanceNotEnough struct {
 	ErrorDetail string
 }
 
-func NewErrorAccountBalanceNotEnough(address string, balance, needFee decimal.Decimal) *ErrorAccountBalanceNotEnough {
+func NewErrorAccountBalanceNotEnough(address string, symbol string, balance, needFee decimal.Decimal) *ErrorAccountBalanceNotEnough {
 	return &ErrorAccountBalanceNotEnough{
-		ErrorDetail: fmt.Sprintf("交易失败,地址余额低于当前手续费; 地址: %s ,余额 %v ,当前交易手续费: %v ", address, balance, needFee),
+		ErrorDetail: fmt.Sprintf("交易失败,地址余额低于当前手续费; 地址:%s; 余额:%v%s;当前所需手续费:%v%s", address, balance, strings.ToUpper(symbol), needFee, strings.ToUpper(symbol)),
 	}
 }
 
