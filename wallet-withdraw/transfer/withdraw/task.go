@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"upex-wallet/wallet-base/api"
-	"upex-wallet/wallet-base/blockchain"
+	"upex-wallet/wallet-base/currency"
+	bmodels "upex-wallet/wallet-base/models"
 	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-base/util"
 	"upex-wallet/wallet-config/withdraw/transfer/config"
@@ -71,14 +72,23 @@ func (p *taskProducer) next() (*models.Tx, bool) {
 }
 
 func (p *taskProducer) produceFromAPIs() {
+	var (
+		tokenCurrencies = bmodels.GetCurrencies()
+	)
+	if p.cfg.Currency != "" {
+		p.produceFromAPI(p.cfg.Currency)
+	}
 
-	p.produceFromAPI()
+	// token task
+	for i := 0; i < len(tokenCurrencies); i++ {
+		p.produceFromAPI(strings.ToLower(tokenCurrencies[i].Symbol))
+	}
 }
 
-func (p *taskProducer) produceFromAPI() {
+func (p *taskProducer) produceFromAPI(symbol string) {
 
 	var data = make(map[string]interface{})
-	data["symbol"] = strings.ToLower(p.cfg.Currency)
+	data["symbol"] = symbol
 	data["app_id"] = p.cfg.BrokerAccessKey
 	data["timestamp"] = time.Now().Unix()
 
@@ -112,7 +122,7 @@ func (p *taskProducer) produceFromAPI() {
 		task.TransID = fmt.Sprintf("%.f", id) // from broker
 		task.SequenceID = util.HashString32([]byte(task.TransID))
 		task.Address = addressTo
-		task.Symbol = strings.ToLower(p.cfg.Currency)
+		task.Symbol = symbol
 		task.TxType = models.TxTypeWithdraw
 		task.Amount = decimal.NewFromFloat(amount)
 		task.Fees = decimal.NewFromFloat(d["fee"].(float64))
@@ -121,21 +131,8 @@ func (p *taskProducer) produceFromAPI() {
 }
 
 func (p *taskProducer) produceFromDB() {
-	txs := models.GetUnfinishedWithdraws()
+	txs := models.GetUnfinishedWithdraws(currency.Symbols(p.cfg.Currency))
 	for _, tx := range txs {
 		p.taskCh <- tx
 	}
-}
-
-func (p *taskProducer) acceptBlockchainCurrency(blockchainName, currency string) bool {
-	name, canEmpty := blockchain.CorrectName(currency, p.cfg.Currency)
-	if blockchainName == name {
-		return true
-	}
-
-	if len(blockchainName) == 0 && canEmpty {
-		return true
-	}
-
-	return false
 }

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"upex-wallet/wallet-base/currency"
 	"upex-wallet/wallet-base/db"
 	"upex-wallet/wallet-base/service"
 	"upex-wallet/wallet-base/util"
@@ -131,16 +132,6 @@ func Exec(createRPCClient rpc.RPCCreator) error {
 
 		log.Infof("%s %s service start", serviceName, Version())
 
-		go heartbeat()
-
-		// data-dog monitor and tracer.
-		// go monitor.ListenAndServe(cfg.ListenAddress)
-		// statusReporter := monitor.NewStatsdReporter(cfg.StatusAddress, "wallet-deposit", nil)
-		// go statusReporter.Start()
-		//
-		// tracer.Start(tracer.WithServiceName(serviceName))
-		// defer tracer.Stop()
-
 		// initial db
 		dbInstance, err := db.New(cfg.DSN, serviceName)
 		if err != nil {
@@ -152,10 +143,15 @@ func Exec(createRPCClient rpc.RPCCreator) error {
 			panic(err)
 		}
 
+		// init currency
+		currency.Init(cfg)
+
 		rpcClient := createRPCClient(cfg)
 		if rpcClient == nil {
 			panic("failed to create rpc client")
 		}
+
+		go heartbeat()
 
 		depositSrv := service.NewWithInterval(deposit.New(cfg, rpcClient), time.Millisecond)
 		defer depositSrv.Stop()

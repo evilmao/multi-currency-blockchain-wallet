@@ -3,7 +3,6 @@ package gather
 import (
 	"fmt"
 	"math/rand"
-	"strings"
 
 	bmodels "upex-wallet/wallet-base/models"
 	"upex-wallet/wallet-base/newbitx/misclib/log"
@@ -46,21 +45,27 @@ func (w *Worker) Name() string {
 
 func (w *Worker) Work() {
 	// 1. use system address as to_address
-	sysAddress := bmodels.GetSystemAddress()
-
+	var (
+		sysAddress = bmodels.GetSystemAddress()
+		symbols    = bmodels.GetCurrencies()
+	)
 	if len(sysAddress) == 0 {
 		log.Errorf("%s, db get system address failed", w.Name())
 		return
 	}
 
 	sysAddr := sysAddress[rand.Intn(len(sysAddress))]
-	w.gather(sysAddr.Address)
+	for _, s := range symbols {
+		w.gather(sysAddr.Address, s.Symbol)
+	}
+
 }
 
-func (w *Worker) gather(address string) {
+func (w *Worker) gather(address, symbol string) {
 
 	task := &models.Tx{}
-	task.Symbol = strings.ToLower(w.cfg.Currency)
+	task.Symbol = symbol
+	task.BlockchainName = w.cfg.Currency
 	task.Address = address
 	task.TxType = models.TxTypeGather
 	task.UpdateLocalTransIDSequenceID()
@@ -71,7 +76,7 @@ func (w *Worker) gather(address string) {
 		switch err := err.(type) {
 		case *txbuilder.ErrBalanceForFeeNotEnough:
 			if w.supplementaryFeeBuilder != nil {
-				w.supplementaryFee(err.Address)
+				w.supplementaryFee(task.Symbol, err.Address)
 				return
 			}
 		}
@@ -114,7 +119,6 @@ func (w *Worker) storeAndBroadcast(txInfo *txbuilder.TxInfo, task *models.Tx) er
 		return fmt.Errorf("%s, db insert tx failed, %v", w.Name(), err)
 	}
 
-
 	// sign and send transaction
 	err = w.BroadcastTx(txInfo, task)
 	if err != nil {
@@ -123,7 +127,7 @@ func (w *Worker) storeAndBroadcast(txInfo *txbuilder.TxInfo, task *models.Tx) er
 
 	err = task.Update(map[string]interface{}{
 		"tx_status": models.TxStatusBroadcast,
-		"fees":  txInfo.Fee,
+		"fees":      txInfo.Fee,
 	}, nil)
 	if err != nil {
 		return fmt.Errorf("%s, db update tx failed, %v", w.Name(), err)
@@ -137,12 +141,12 @@ func (w *Worker) storeAndBroadcast(txInfo *txbuilder.TxInfo, task *models.Tx) er
 	return nil
 }
 
-func (w *Worker) supplementaryFee(toAddress string) {
+func (w *Worker) supplementaryFee(symbol, toAddress string) {
 	if w.supplementaryFeeBuilder == nil {
 		return
 	}
 
-	if exist, err := existUnconfirmedSupplementaryFeeTx(toAddress); err != nil {
+	if exist, err := existUnconfirmedSupplementaryFeeTx(symbol, toAddress); err != nil {
 		log.Errorf("%s, check unconfirmed supplementary-fee-tx failed, %v", err)
 		return
 	} else if exist {
@@ -177,8 +181,8 @@ func (w *Worker) supplementaryFee(toAddress string) {
 	log.Infof("%s, supplementary fee, %s", w.Name(), task)
 }
 
-func existUnconfirmedSupplementaryFeeTx(toAddress string) (bool, error) {
-	tx, err := models.GetLastSupplementaryFeeTxByAddress(toAddress)
+func existUnconfirmedSupplementaryFeeTx(symbol, toAddress string) (bool, error) {
+	tx, err := models.GetLastSupplementaryFeeTxByAddress(symbol, toAddress)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return false, nil

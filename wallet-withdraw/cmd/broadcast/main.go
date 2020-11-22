@@ -8,6 +8,8 @@ import (
 	"syscall"
 	"time"
 
+	gintrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/gin-gonic/gin"
+
 	"upex-wallet/wallet-base/api"
 	"upex-wallet/wallet-base/monitor"
 	"upex-wallet/wallet-base/newbitx/misclib/log"
@@ -22,7 +24,6 @@ import (
 	_ "upex-wallet/wallet-withdraw/cmd/broadcast/imports"
 
 	"github.com/gin-gonic/gin"
-	gintrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/gin-gonic/gin"
 )
 
 var (
@@ -89,23 +90,8 @@ func main() {
 		panic(err)
 	}
 
-	// tracer.Start()
-	// defer tracer.Stop()
-
-	gin.SetMode(gin.ReleaseMode)
-	gin.DefaultWriter = util.NewLogWriter(log.Info)
-	gin.DefaultErrorWriter = util.NewLogWriter(log.Error)
-
-	r := gin.Default()
-
-	r.Use(gintrace.Middleware("wallet-broadcast"))
-	r.GET("/info", gin.WrapF(monitor.Info))
-	v1 := r.Group("v1")
-	{
-		v1.POST("/tx/broadcast", BroadcastTransaction)
-		v1.GET("/tx/broadcast", BroadcastTransaction)
-	}
-	err = r.Run(bviper.GetString("listen", ":8080"))
+	// broadcast api server
+	err = BroadcastServer()
 	if err != nil {
 		panic(err)
 	}
@@ -136,4 +122,35 @@ func BroadcastTransaction(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, nil)
+}
+
+func BroadcastServer() error {
+	gin.SetMode(gin.ReleaseMode)
+	gin.DefaultWriter = util.NewLogWriter(log.Info)
+	gin.DefaultErrorWriter = util.NewLogWriter(log.Error)
+
+	r := gin.Default()
+	r.Use(gintrace.Middleware("wallet-broadcast"))
+	r.GET("/info", gin.WrapF(monitor.Info))
+	v1 := r.Group("v1")
+	{
+		v1.POST("/tx/broadcast", BroadcastTransaction)
+		v1.GET("/tx/broadcast", BroadcastTransaction)
+	}
+
+	s := &http.Server{
+		Addr:           bviper.GetString("listen", ":8080"),
+		Handler:        r,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+
+	err := s.ListenAndServe()
+	// err = r.Run(bviper.GetString("listen", ":8080"))
+	if err != nil {
+		log.Error("start broadcast api server fail, %v", err)
+	}
+
+	return err
 }

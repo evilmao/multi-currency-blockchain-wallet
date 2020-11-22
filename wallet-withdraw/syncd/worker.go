@@ -3,7 +3,6 @@ package syncd
 import (
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	"upex-wallet/wallet-base/models"
@@ -191,7 +190,6 @@ func (w *Worker) processTx(tx *models.Tx) error {
 	tx.Type = models.TxDeposit
 	tx.Amount = tx.Amount.Truncate(TxAmountPrecision)
 	tx.Extra = TruncateTxTag(tx.Extra)
-	tx.Symbol = strings.ToLower(w.cfg.Currency)
 	tx.SequenceID = GenSequenceID([]byte(tx.Symbol), []byte(tx.Hash), []byte(tx.Address), []byte(tx.Extra), []byte(strconv.Itoa(int(tx.InnerIndex))))
 
 	if models.TxExistedBySeqID(tx.SequenceID) {

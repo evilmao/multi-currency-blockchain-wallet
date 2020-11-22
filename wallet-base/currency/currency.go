@@ -3,15 +3,14 @@ package currency
 import (
 	"fmt"
 	"math"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"upex-wallet/wallet-base/api"
 	"upex-wallet/wallet-base/models"
 	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-base/util"
+	"upex-wallet/wallet-config/deposit/config"
 
 	"github.com/shopspring/decimal"
 )
@@ -26,38 +25,26 @@ func init() {
 	if decimal.DivisionPrecision < MaxDecimalDivisionPrecision {
 		decimal.DivisionPrecision = MaxDecimalDivisionPrecision
 	}
-	models.GetCode = Code
 }
 
 var (
-	brokerAPI         *api.BrokerAPI
-	rwMutex           sync.RWMutex
-	symbolIndex       = map[string]*api.CurrencyData{}
-	symbolDetailIndex = map[string][]*api.CurrencyDetail{}
-	addressIndex      = map[string]*api.CurrencyDetail{}
-
-	scheduleUpdateOn bool
+	rwMutex                 sync.RWMutex
+	symbolDetailIndex       = map[string][]*CurrencyInfo{}
+	addressIndex            = map[string]*CurrencyInfo{}
+	defaultMinDepositAmount = decimal.New(math.MaxUint32, 0)
+	scheduleUpdateOn        bool
 )
 
-func Init(brokerURL, brokerAccessKey, brokerPrivateKey string, blockchain string) error {
-	if len(brokerURL) == 0 {
-		return fmt.Errorf("broker api url is empty")
-	}
+func Init(cfg *config.Config) {
 
 	log.Infof("start init currency...")
 
-	brokerAPI = api.NewBrokerAPI(brokerURL, brokerAccessKey, brokerPrivateKey)
-	// err := Update(blockchain)
-	// if err != nil {
-	// 	return err
-	// }
+	Update(cfg)
 
-	log.Infof("finish init currency success")
-
-	return nil
+	log.Infof("finish init currency successfully")
 }
 
-func ScheduleUpdate(blockchain string, interval time.Duration) {
+func ScheduleUpdate(cfg *config.Config, interval time.Duration) {
 	rwMutex.Lock()
 	defer rwMutex.Unlock()
 
@@ -69,239 +56,137 @@ func ScheduleUpdate(blockchain string, interval time.Duration) {
 		for {
 			time.Sleep(interval)
 
-			err := Update(blockchain)
-			if err != nil {
-				log.Errorf("currency schedule update failed, %v", err)
-			}
+			Update(cfg)
 		}
 	}, nil)
 
 	scheduleUpdateOn = true
 }
 
-func Update(blockchain string) error {
-	var (
-		err error
-	)
+func Update(cfg *config.Config) {
 
-	err = updateCurrency()
+	err := updateCurrencyDetails(cfg)
 	if err != nil {
-		return err
+		log.Errorf("update currency fail,%v,", err)
 	}
 
-	err = updateCurrencyDetails()
-	if err != nil {
-		return err
-	}
-
-	err = updateCurrencyTable(blockchain)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	updateCurrencyTable(cfg)
 }
 
-func updateCurrency() error {
+func updateCurrencyDetails(cfg *config.Config) error {
 	var (
-		resp *api.CurrenciesResponse
-		err  error
+		symbols      = cfg.Symbols
+		mainCurrency = cfg.Currency
+		tmpC         = &CurrencyInfo{}
 	)
-
-	err = util.TryWithInterval(20, time.Second*3, func(int) error {
-		resp, err = brokerAPI.Currencies()
-		return err
-	})
-	if err != nil {
-		return err
-	}
 
 	rwMutex.Lock()
 	defer rwMutex.Unlock()
 
-	symbolIndex = map[string]*api.CurrencyData{}
-	for _, v := range resp.Data {
-		symbolIndex[strings.ToUpper(v.Symbol)] = v
+	if mainCurrency == "" {
+		return fmt.Errorf("currency can not be empty")
 	}
 
-	log.Infof("update currency, total: %d", len(symbolIndex))
+	symbolDetailIndex = map[string][]*CurrencyInfo{}
+	addressIndex = map[string]*CurrencyInfo{}
 
-	return nil
-}
+	// main currency detail
+	symbolDetailIndex[mainCurrency] = append(symbolDetailIndex[mainCurrency],
+		&CurrencyInfo{
+			BlockchainName:   mainCurrency,
+			Symbol:           mainCurrency,
+			Confirm:          cfg.MaxConfirm,
+			MinDepositAmount: cfg.MinAmount,
+		})
 
-func updateCurrencyDetails() error {
-	var (
-		resp *api.CurrencyDetailResponse
-		err  error
-	)
+	// token details
+	for _, s := range symbols {
+		symbol := strings.ToUpper(s.Symbol)
+		tmpC = &CurrencyInfo{
+			BlockchainName:   mainCurrency,
+			Symbol:           s.Symbol,
+			Address:          s.Address,
+			Confirm:          cfg.MaxConfirm,
+			Decimal:          int(s.Precision),
+			MinDepositAmount: s.MinDepositAmount,
+		}
 
-	err = util.TryWithInterval(20, time.Second*3, func(int) error {
-		resp, err = brokerAPI.CurrencyDetails()
-		return err
-	})
-	if err != nil {
-		return err
-	}
+		symbolDetailIndex[symbol] = append(symbolDetailIndex[symbol], tmpC)
 
-	rwMutex.Lock()
-	defer rwMutex.Unlock()
-
-	symbolDetailIndex = map[string][]*api.CurrencyDetail{}
-	addressIndex = map[string]*api.CurrencyDetail{}
-	for _, v := range resp.Data {
-		symbol := strings.ToUpper(v.Symbol)
-		symbolDetailIndex[symbol] = append(symbolDetailIndex[symbol], v)
-
-		if v.Address != "" {
-			address := strings.ToLower(v.Address)
-			addressIndex[address] = v
+		if s.Address != "" {
+			address := strings.ToLower(s.Address)
+			addressIndex[address] = tmpC
 		}
 	}
 
 	log.Infof("update token, total: %d", len(symbolDetailIndex))
-
 	return nil
 }
 
-func updateCurrencyTable(blockchain string) error {
-	var (
-		code int
-		ok   bool
-		err  error
-	)
+func updateCurrencyTable(cfg *config.Config) {
 
-	if blockchain == "" {
+	if cfg.Currency == "" {
+		return
+	}
+
+	deleteCurrencyTable(cfg)
+
+	insertOrUpdateCurrencyTable(cfg)
+}
+
+func CurrencyDetail(symbol string) *CurrencyInfo {
+
+	// symbol = strings.ToUpper(symbol)
+	// currencies := models.GetCurrencies()
+	// if len(currencies) == 0 {
+	// 	return nil, false
+	// }
+	//
+	// mainCurrency := currencies[0].Blockchain
+	// cs := []*CurrencyInfo{&CurrencyInfo{BlockchainName: mainCurrency}}
+	//
+	// for i := 0; i < len(currencies); i++ {
+	// 	c := currencies[i]
+	// 	cs = append(cs, &CurrencyInfo{
+	// 		BlockchainName: mainCurrency,
+	// 		Address:        c.Address,
+	// 		Decimal:        int(c.Decimals),
+	// 		Symbol:         c.Symbol,
+	// 	})
+	// }
+	//
+	// return cs, true
+	c := models.GetCurrencyBySymbol(symbol)
+	if symbol == "" || c == nil {
 		return nil
 	}
 
-	// Can't find currency in dw api returns data then delete from currency table
-	currencies := models.GetCurrencies()
-	for i := 0; i < len(currencies); i++ {
-		if _, isIn := CurrencyDetailByAddress(currencies[i].Address); !isIn {
-			err = deleteCurrency(blockchain, currencies[i].Symbol)
-			if err != nil {
-				log.Errorf("Cant find currency, delete currency item Error: %s(%d)",
-					strings.ToUpper(currencies[i].Symbol), currencies[i].Code)
-				continue
-			}
-		}
+	return &CurrencyInfo{
+		BlockchainName: c.Blockchain,
+		Address:        c.Address,
+		Decimal:        int(c.Decimals),
+		Symbol:         c.Symbol,
 	}
-
-	for k, vs := range symbolDetailIndex {
-		for _, v := range vs {
-			// Check token.
-			if !v.IsToken() {
-				continue
-			}
-
-			// Check token belong blockchain.
-			if !v.ChainBelongTo(blockchain) {
-				continue
-			}
-
-			// Can't find code then delete from currency table and continue
-			if code, ok = Code(k); !ok {
-				err = deleteCurrency(v.BelongChainName(), v.Symbol)
-				if err != nil {
-					log.Errorf("cant find code, delete currency item failed: %s(%d)",
-						strings.ToUpper(v.Symbol), code)
-				}
-				continue
-			}
-
-			// Deposit Disabled then delete from currency table and continue
-			if isEnable, _ := DepositEnabled(v.Symbol); !isEnable {
-				err = deleteCurrency(v.BelongChainName(), v.Symbol)
-				if err != nil {
-					log.Errorf("deposit disabled, delete currency item failed: %s(%d)",
-						strings.ToUpper(v.Symbol), code)
-				}
-				continue
-			}
-
-			cur := models.Currency{
-				Blockchain: v.BelongChainName(),
-				Decimals:   uint(v.Decimal),
-				Symbol:     strings.ToUpper(v.Symbol),
-				Address:    v.Address,
-				Code:       code,
-			}
-			if !models.CurrencyExistedBySymbol(v.BelongChainName(), strings.ToUpper(v.Symbol)) {
-				err = cur.Insert()
-				if err != nil {
-					return err
-				}
-			} else {
-				err = cur.Update()
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-
-	return nil
 }
 
-func Code(symbol string) (int, bool) {
-	rwMutex.RLock()
-	defer rwMutex.RUnlock()
-
-	symbol = strings.ToUpper(symbol)
-	c, ok := symbolIndex[symbol]
-	if !ok {
-		return 0, false
-	}
-
-	code, err := strconv.Atoi(c.Code)
-	if err != nil {
-		return 0, false
-	}
-
-	return code, true
-}
-
-func CurrencyDetail(symbol string) ([]*api.CurrencyDetail, bool) {
-	rwMutex.RLock()
-	defer rwMutex.RUnlock()
-
-	symbol = strings.ToUpper(symbol)
-	cs, ok := symbolDetailIndex[symbol]
-	if !ok {
-		return nil, false
-	}
-	return cs, ok
-}
-
-func CurrencyDetailByAddress(address string) (*api.CurrencyDetail, bool) {
-	rwMutex.RLock()
-	defer rwMutex.RUnlock()
+func CurrencyDetailByAddress(address string) (*CurrencyInfo, bool) {
 
 	address = strings.ToLower(address)
-	c, ok := addressIndex[address]
-	if !ok {
+	c := models.GetCurrencyByContractAddress(address)
+	if c == nil {
 		return nil, false
 	}
-	return c, ok
+
+	return &CurrencyInfo{
+		BlockchainName: c.Blockchain,
+		Symbol:         c.Symbol,
+		Address:        c.Address,
+		Decimal:        int(c.Decimals),
+	}, true
+
 }
 
-func ForeachCurrencyDetail(h func(*api.CurrencyDetail) (bool, error)) error {
-	for _, details := range symbolDetailIndex {
-		for _, detail := range details {
-			ok, err := h(detail)
-			if err != nil {
-				return err
-			}
-
-			if !ok {
-				return nil
-			}
-		}
-	}
-	return nil
-}
-
-func firstDetailWithBlockchainName(symbol string) (*api.CurrencyDetail, bool) {
+func firstDetailWithBlockchainName(symbol string) (*CurrencyInfo, bool) {
 	symbol = strings.ToUpper(symbol)
 	cs, ok := symbolDetailIndex[symbol]
 	if !ok || len(cs) == 0 {
@@ -319,8 +204,6 @@ func firstDetailWithBlockchainName(symbol string) (*api.CurrencyDetail, bool) {
 	return cs[idx], true
 }
 
-var defaultMinDepositAmount = decimal.New(math.MaxUint32, 0)
-
 func MinAmount(symbol string) (decimal.Decimal, bool) {
 	rwMutex.RLock()
 	defer rwMutex.RUnlock()
@@ -330,57 +213,92 @@ func MinAmount(symbol string) (decimal.Decimal, bool) {
 		return defaultMinDepositAmount, false
 	}
 
-	amount, err := decimal.NewFromString(detail.MinDepositAmount)
-	return amount, err == nil
+	amount := decimal.NewFromFloat(detail.MinDepositAmount)
+	return amount, true
 }
 
-func DepositEnabled(symbol string) (bool, bool) {
-	rwMutex.RLock()
-	defer rwMutex.RUnlock()
+func deleteCurrencyTable(cfg *config.Config) {
+	var (
+		dbCurrencies = models.GetCurrencies()
+		symbols      = cfg.Symbols
+	)
 
-	symbol = strings.ToUpper(symbol)
-	c, ok := symbolIndex[symbol]
-	if !ok {
-		return false, false
-	}
-	return c.DepositEnabled, ok
-}
-
-func WithdrawEnabled(symbol string) (bool, bool) {
-	rwMutex.RLock()
-	defer rwMutex.RUnlock()
-
-	symbol = strings.ToUpper(symbol)
-	c, ok := symbolIndex[symbol]
-	if !ok {
-		return false, false
-	}
-	return c.WithdrawEnabled, ok
-}
-
-func MaxWithdrawAmount(symbol string) (decimal.Decimal, bool) {
-	rwMutex.RLock()
-	defer rwMutex.RUnlock()
-
-	detail, ok := firstDetailWithBlockchainName(symbol)
-	if !ok {
-		return decimal.Zero, false
-	}
-
-	amount, err := decimal.NewFromString(detail.MaxWithdrawAmount)
-	return amount, err == nil
-}
-
-func deleteCurrency(blockchain, symbol string) error {
-	if models.CurrencyExistedBySymbol(blockchain, symbol) {
-		cur := models.Currency{
-			Blockchain: blockchain,
-			Symbol:     strings.ToUpper(symbol),
+	Delete := func(c *models.Currency) {
+		err := c.Delete()
+		if err != nil {
+			log.Errorf("delete currency item, blockchain: %s, symbol: %s fail,%v", c.Blockchain, c.Symbol, err)
 		}
-		err := cur.Delete()
-		log.Warnf("delete currency item, blockchain: %s, symbol: %s, error: %v",
-			blockchain, strings.ToUpper(symbol), err)
-		return err
+		log.Warnf("delete currency item, blockchain: %s, symbol: %s",
+			cfg.Currency, strings.ToUpper(c.Symbol))
 	}
-	return nil
+
+	// Can't find currency in config then delete from currency table
+	for i := 0; i < len(dbCurrencies); i++ {
+		var (
+			c         = dbCurrencies[i]
+			canDelete = true
+		)
+
+		if len(symbols) == 0 {
+			Delete(&c)
+			continue
+		}
+
+		for _, s := range symbols {
+			if c.Symbol == s.Symbol && c.Blockchain == s.Blockchain {
+				canDelete = false
+				break
+			}
+		}
+
+		if canDelete {
+			Delete(&c)
+			continue
+		}
+	}
+}
+
+func insertOrUpdateCurrencyTable(cfg *config.Config) {
+	symbols := cfg.Symbols
+
+	for i := 0; i < len(symbols); i++ {
+		symbolDetail := symbols[i]
+		c := &models.Currency{
+			Blockchain: symbolDetail.Blockchain,
+			Symbol:     symbolDetail.Symbol,
+		}
+		// insert a new symbol for currency
+		err := c.Insert()
+		if err != nil {
+			log.Errorf("Init symbol %s fail, %v", symbolDetail.Symbol, err)
+		}
+
+		// update existed symbol
+
+		c.Address = symbolDetail.Address
+		c.Decimals = symbolDetail.Precision
+		c.MinBalance = fmt.Sprintf("%"+fmt.Sprintf(".%d", symbolDetail.Precision)+"f", symbolDetail.MinBalanceRemain)
+		c.MaxBalance = fmt.Sprintf("%"+fmt.Sprintf(".%d", symbolDetail.Precision)+"f", symbolDetail.MaxBalanceRemain)
+
+		err = c.Update()
+		if err != nil {
+			log.Errorf("update symbol %s fail, %v", symbols[i].Symbol, err)
+		} else {
+			log.Warnf("init symbol [%s] successfully", symbols[i].Symbol)
+		}
+	}
+}
+
+func Symbols(mainCurrency string) []string {
+
+	var (
+		currencies = models.GetCurrencies()
+		symbols    = []string{mainCurrency}
+	)
+
+	for i := 0; i < len(currencies); i++ {
+		symbols = append(symbols, strings.ToLower(currencies[i].Symbol))
+	}
+
+	return symbols
 }

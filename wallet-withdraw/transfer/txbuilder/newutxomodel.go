@@ -3,7 +3,6 @@ package txbuilder
 import (
 	"fmt"
 
-	"upex-wallet/wallet-base/currency"
 	bmodels "upex-wallet/wallet-base/models"
 	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-withdraw/base/models"
@@ -233,17 +232,14 @@ func (b *UTXOModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 		txType = models.TxTypeName(task.TxType)
 	)
 
-	// if !b.builder.Support(task.Symbol) {
-	// 	return nil, NewErrUnsupportedCurrency(task.Symbol)
+	// maxWithdrawAmount, ok := currency.MaxWithdrawAmount(task.Symbol)
+
+	// if !ok {
+	// 	return nil, fmt.Errorf("can't find max withdraw amount of %s", task.Symbol)
 	// }
-	maxWithdrawAmount, ok := currency.MaxWithdrawAmount(task.Symbol)
-
-	if !ok {
-		return nil, fmt.Errorf("can't find max withdraw amount of %s", task.Symbol)
-	}
-
+	// TODO: maxOutAmount 不用设置
 	// Set maxOutAmount = KYC单次最大提现值 * 5%.
-	maxOutAmount := maxWithdrawAmount.Mul(decimal.NewFromFloat(0.05))
+	maxOutAmount := decimal.NewFromFloat(1).Mul(decimal.NewFromFloat(0.05))
 	buildExt := func(metaData *MetaData) (*BuildExtInfo, error) {
 		// Build from normal address.
 		filterFee := b.OneInOutPutFee(txType)
@@ -299,7 +295,7 @@ func (b *UTXOModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 			if err != nil {
 				return nil, fmt.Errorf("build by MetaData for %s fail, %v", txType, err)
 			}
-			log.Infof("-----------------%s metaData.Fee ------------- %s", txType, metaData.Fee.String())
+
 			task.Amount = extInfo.TotalInput.Sub(metaData.Fee)
 
 			if task.Amount.LessThan(decimal.Zero) {

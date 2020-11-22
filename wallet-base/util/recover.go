@@ -26,7 +26,7 @@ func WithRecover(tag string, f func(), handlePanic func(error)) {
 	f()
 }
 
-// Go is a wrapper of goruntine with recover.
+// Go is a wrapper of goroutine with recover.
 func Go(name string, f func(), handlePanic func(error)) {
 	go WithRecover(fmt.Sprintf("goroutine %s", name), f, handlePanic)
 }

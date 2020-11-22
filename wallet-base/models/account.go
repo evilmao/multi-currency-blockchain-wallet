@@ -38,7 +38,7 @@ func (act *Account) ForUpdate(data M) error {
 	}
 
 	delete(data, "op")
-	err := db.Default().Model(act).Where("address = ?", act.Address).Updates(data).Error
+	err := db.Default().Model(act).Where("symbol = ? and address = ?", act.Symbol, act.Address).Updates(data).Error
 	if err != nil {
 		return err
 	}
@@ -89,23 +89,23 @@ func GetBalance(symbol string) *decimal.Decimal {
 	var data struct {
 		Balance decimal.Decimal
 	}
-	db.Default().Model(&Account{}).Select("sum(balance) as balance").Where("symbol = ?", symbol).Scan(&data)
+	db.Default().Model(&Account{}).Select("sum(balance) as balance").Where("symbol = ? and account_type= ? ", symbol, AddressTypeSystem).Scan(&data)
 	return &data.Balance
 }
 
 // GetSystemBalance returns the balance of system accounts.
-func GetSystemBalance() *decimal.Decimal {
+func GetSystemBalance(symbol string) *decimal.Decimal {
 	var data struct {
 		Balance decimal.Decimal
 	}
-	db.Default().Model(&Account{}).Select("sum(balance) as balance").Where("`account_type` = ?", AddressTypeSystem).Scan(&data)
+	db.Default().Model(&Account{}).Select("sum(balance) as balance").Where("symbol = ? and `account_type` = ?", symbol, AddressTypeSystem).Scan(&data)
 	return &data.Balance
 }
 
 // GetMatchedAccount gets matched account for withdraw.
-func GetMatchedAccount(amount string, addressType uint) *Account {
+func GetMatchedAccount(amount, symbol string, addressType uint) *Account {
 	account := Account{Balance: &decimal.Zero}
-	db.Default().Where("balance > ? and `account_type` = ?", amount, addressType).First(&account)
+	db.Default().Where("balance > ? and symbol = ? and `account_type` = ?", amount, symbol, addressType).First(&account)
 	return &account
 }
 
@@ -117,13 +117,13 @@ func GetAllMatchedAccounts(amount string, addressType uint) []*Account {
 }
 
 // GetAccounts return accounts info.
-func GetAccounts(symbolID uint, index, pageSize int64) (*[]Account, int64) {
+func GetAccounts(symbol string, index, pageSize int64) (*[]Account, int64) {
 	var (
 		count    int64
 		accounts []Account
 	)
 
-	db.Default().Table("tx").Select("address, sum(amount) as balance").Where("symbol_id = ?", symbolID).
+	db.Default().Table("tx").Select("address, sum(amount) as balance").Where("symbol = ?", symbol).
 		Group("address").Count(&count).Offset(pageSize * (index - 1)).Limit(pageSize).Find(&accounts)
 
 	return &accounts, count
@@ -167,8 +167,8 @@ func (act *Account) ForUpdateWithDB(db *gorm.DB, data map[string]interface{}) er
 }
 
 // GetMaxBalanceAccount gets max balance account
-func GetMaxBalanceAccount(addressType uint) *Account {
+func GetMaxBalanceAccount(symbol string, addressType uint) *Account {
 	account := Account{Balance: &decimal.Zero}
-	db.Default().Where("`account_type` = ?", addressType).Order("balance DESC").Limit(1).Find(&account)
+	db.Default().Where("symbol = ? and `account_type` = ?", symbol, addressType).Order("balance DESC").Limit(1).Find(&account)
 	return &account
 }

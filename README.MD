@@ -227,6 +227,19 @@ make
     ./deposit-eth -c app.yml
     ```
 
+5. 注意事项
+添加代币功能需要在 配置中手动加入配置后, 重启 deposit服务和 syncd服务
+```shell script
+  ...
+    # erc20 或 trc20 配置相关代币信息
+    symbols:
+     usdt:                                                       # token symbol 
+        precision: 6                                             # token amount decimals
+        address: "0xdac17f958d2ee523a2206206994597c13d831ec7"    # token of contract address, check from Official web
+        minDepositAmount: 0.2                                    # less than value, will not notify to the broker
+        minBalanceRemain: 2                                      # System address balance less than this value, will send mail
+        maxBalanceRemain: 4                                      # System address balance grater than this value, will do cold-down tx
+```
 ### 四. wallet-transfer (交易)
 
 - syncd 区块同步
@@ -325,8 +338,8 @@ make
    ```shell
    
    eth:
-     	maxConfirm: 30       # 链上交易网络节点确认数
-       verifyInterval: 10   # 链上交易 网络请求间隔, 单位秒
+        maxConfirm: 30       # 链上交易网络节点确认数
+        verifyInterval: 10   # 链上交易 网络请求间隔, 单位秒
    	rsaKey:---			 # broadcast的私钥文件, 使用wallet-tools生成
    ```
 3. 运行
@@ -334,7 +347,6 @@ make
    ```shell
    ./broadcast -c path/to/app.yml
    ```
-
 ##### 3. signer (交易签名服务)
 
 1. 构建

@@ -14,7 +14,7 @@ func InitDB() error {
 	err := db.Default().AutoMigrate(
 		&models.Account{},
 		&models.Tx{},
-		// &models.Currency{},
+		&models.Currency{},
 		&models.BlockInfo{},
 		&models.Address{},
 	).Error

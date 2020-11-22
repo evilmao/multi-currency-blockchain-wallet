@@ -1,11 +1,22 @@
 package config
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
 	bviper "upex-wallet/wallet-base/viper"
 )
+
+type SymbolDetail struct {
+	Symbol           string
+	Address          string
+	Blockchain       string
+	Precision        uint
+	MinDepositAmount float64
+	MinBalanceRemain float64
+	MaxBalanceRemain float64
+}
 
 // Config defines configurations of the sync.
 type Config struct {
@@ -36,6 +47,9 @@ type Config struct {
 
 	// Inner config.
 	ForceTxs []string
+
+	// erc20 or trc20
+	Symbols []*SymbolDetail
 }
 
 // DefaultConfig returns a default Wallet Config.
@@ -68,7 +82,7 @@ func New() *Config {
 	cfg.BrokerURL = bviper.GetString("brokerUrl", cfg.BrokerURL)
 	cfg.BrokerAccessKey = bviper.GetString("brokerAccessKey", cfg.BrokerAccessKey)
 	cfg.BrokerPrivateKey = bviper.GetString("brokerPrivateKey", cfg.BrokerPrivateKey)
-	cfg.Currency = strings.ToUpper(bviper.GetString("currency", cfg.Currency))
+	cfg.Currency = strings.ToLower(bviper.GetString("currency", cfg.Currency))
 	cfg.MaxConfirm = int(bviper.GetInt64("maxConfirmations", int64(cfg.MaxConfirm)))
 	cfg.SecConfirm = int(bviper.GetInt64("securityConfirmations", int64(cfg.SecConfirm)))
 	cfg.StartHeight = bviper.GetInt64("startHeight", cfg.StartHeight)
@@ -86,6 +100,24 @@ func New() *Config {
 	startDate := bviper.GetInt64("startDate", 0)
 	if startDate > 0 {
 		cfg.StartDate = time.Unix(startDate, 0)
+	}
+	// trc20 or erc20
+	symbols := bviper.GetStringMap("symbols", nil)
+	if symbols != nil {
+		cfg.Symbols = make([]*SymbolDetail, 0)
+		for symbol := range symbols {
+			cfg.Symbols = append(cfg.Symbols,
+				&SymbolDetail{
+					Symbol:           strings.ToLower(symbol),
+					Precision:        uint(bviper.GetInt64(fmt.Sprintf("symbols.%s.precision", symbol), 0)),
+					Address:          bviper.GetString(fmt.Sprintf("symbols.%s.address", symbol), ""),
+					MinDepositAmount: bviper.GetFloat64(fmt.Sprintf("symbols.%s.minDepositAmount", symbol), 0),
+					MinBalanceRemain: bviper.GetFloat64(fmt.Sprintf("symbols.%s.minBalanceRemain", symbol), 0),
+					MaxBalanceRemain: bviper.GetFloat64(fmt.Sprintf("symbols.%s.maxBalanceRemain", symbol), 0),
+					Blockchain:       strings.ToLower(cfg.Currency),
+				},
+			)
+		}
 	}
 
 	return cfg
