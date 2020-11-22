@@ -220,7 +220,6 @@ func contractAddress(symbol, mainCurrency string) (addr common.Address, precisio
 	}
 
 	if currentDetail.IsToken() && currentDetail.ChainBelongTo(mainCurrency) {
-		log.Warnf("contractAddress==%s,%s", symbol, currentDetail.Address)
 		addr = common.HexToAddress(currentDetail.Address)
 		precision = currentDetail.Decimal
 		return
