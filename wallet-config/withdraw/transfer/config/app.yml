@@ -9,7 +9,6 @@ withdraw: True
 cooldown: False
 gather: False
 autoRollback: False
-claim: False
 updateCurrency: False
 scheduleChecker:
   - "all"

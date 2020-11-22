@@ -232,9 +232,6 @@ func (b *UTXOModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 		txType = models.TxTypeName(task.TxType)
 	)
 
-	// if !b.builder.Support(task.Symbol) {
-	// 	return nil, NewErrUnsupportedCurrency(task.Symbol)
-	// }
 	// maxWithdrawAmount, ok := currency.MaxWithdrawAmount(task.Symbol)
 
 	// if !ok {

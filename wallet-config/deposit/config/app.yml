@@ -2,8 +2,8 @@
 # *** DO NOT EDIT ME ***
 
 currency: eth
-dsn: "root:Xxzx@789@tcp(43.254.54.79:3306)/wallet_eth?charset=utf8&parseTime=True&loc=Local"
-rpcUrl: "http://54.95.191.140:5003"
+dsn: "root:Xxzx@789@tcp(43.254.54.79:3306)/wallet_eth?charset=utf8&parseTime=True&loc=Local"  # db
+rpcUrl: "http://54.95.191.140:5003"                                                           # RPC  URL
 
 # broker
 brokerUrl: "http://test-api.exup.io/finance/"           # broker api

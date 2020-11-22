@@ -1,7 +1,7 @@
 # This is a sample.
 # *** DO NOT EDIT ME ***
 
-listen: ":9997"
+listen: ":9997"                                             # broadcast api server port
 
 broker:
   url: "http://test-api.exup.io/finance/"
