@@ -25,9 +25,9 @@ type BalanceChecker struct {
 }
 
 // NewBalanceChecker, check symbol balance
-func NewBalanceChecker(cfg *config.Config, t time.Time) *BalanceChecker {
+func NewBalanceChecker(cfg *config.Config) *BalanceChecker {
 	return &BalanceChecker{
-		lastBalanceCheckerTime: t,
+		lastBalanceCheckerTime: time.Now(),
 		cfg:                    cfg,
 	}
 }
@@ -41,9 +41,9 @@ func (c *BalanceChecker) Init(cfg *config.Config) {
 }
 
 func (c *BalanceChecker) Check() error {
-
+	log.Warnf("BalanceChecker start time:%s", c.lastBalanceCheckerTime.String())
 	var (
-		currency   = strings.ToLower(c.cfg.Currency)
+		currency   = c.cfg.Currency
 		symbols    = bmodels.GetCurrencies()
 		minBalance = decimal.NewFromFloat(c.cfg.MinAccountRemain)
 	)
