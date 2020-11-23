@@ -225,7 +225,9 @@ func New() *Config {
 	cfg.MaxAccountRemain = bviper.GetFloat64("wallet.maxAccountRemain", cfg.MaxAccountRemain)
 	cfg.MinAccountRemain = bviper.GetFloat64("wallet.minAccountRemain", cfg.MinAccountRemain)
 	cfg.ColdAddress = bviper.GetString("wallet.coldAddress", cfg.ColdAddress)
-	cfg.BalanceCheckerTaskInterval = bviper.GetDuration("wallet.balanceCheckerTaskInterval", cfg.BalanceCheckerTaskInterval)
+
+	t := bviper.GetInt64("wallet.balanceCheckerTaskInterval", balanceCheckerTaskInterval)
+	cfg.BalanceCheckerTaskInterval = time.Minute * time.Duration(t)
 
 	cfg.BroadcastURL = bviper.GetString("wallet.broadcastUrl", cfg.BroadcastURL)
 	cfg.BrokerURL = bviper.GetString("broker.url", cfg.BrokerURL)
