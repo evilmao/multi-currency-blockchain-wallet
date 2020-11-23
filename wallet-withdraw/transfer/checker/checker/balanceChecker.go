@@ -17,7 +17,7 @@ var (
 	headContent                     = "【Balance Not Enough】 "
 	content                         = "%s balance(%s) less than minimum remain balance(%s),\n\t\t\t\t"
 	tailContent                     = "pls deposit ASAP."
-	checkTaskInterval time.Duration = 2
+	checkTaskInterval time.Duration = 5
 )
 
 type BalanceChecker struct {
@@ -79,7 +79,7 @@ func mainCurrencyBalanceChecker(mainCurrency string, minRemain decimal.Decimal) 
 
 	minCurrencyBalance := bmodels.GetBalance(mainCurrency)
 	if minCurrencyBalance.LessThan(minRemain) {
-		tmpContent = fmt.Sprintf(content, mainCurrency, minRemain.String(), minCurrencyBalance.String())
+		tmpContent = fmt.Sprintf(content, mainCurrency, minCurrencyBalance.String(), minRemain.String())
 	}
 
 	return tmpContent
