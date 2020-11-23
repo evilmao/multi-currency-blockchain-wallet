@@ -176,7 +176,7 @@ func (b *ETHBuilder) DoBuild(info *txbuilder.AccountModelBuildInfo) (*txbuilder.
 	}
 
 	// fix: needFee less than fee, account of balance exchange is incorrect
-	if needFee.LessThan(info.FeeMeta.Fee) {
+	if needFee.LessThan(info.FeeMeta.Fee) && info.Task.Symbol == b.cfg.Currency {
 		costExchange := info.FeeMeta.Fee.Sub(needFee)
 		bigAmountExchange, _ := decimalToBigInt(costExchange.Mul(decimal.New(1, geth.Precision)))
 
