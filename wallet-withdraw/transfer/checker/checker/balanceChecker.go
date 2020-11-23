@@ -25,9 +25,10 @@ type BalanceChecker struct {
 }
 
 // NewBalanceChecker, check symbol balance
-func NewBalanceChecker(t time.Time) *BalanceChecker {
+func NewBalanceChecker(cfg *config.Config, t time.Time) *BalanceChecker {
 	return &BalanceChecker{
 		lastBalanceCheckerTime: t,
+		cfg:                    cfg,
 	}
 }
 
