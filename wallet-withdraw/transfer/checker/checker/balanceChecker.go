@@ -25,10 +25,9 @@ type BalanceChecker struct {
 }
 
 // NewBalanceChecker, check symbol balance
-func NewBalanceChecker(cfg *config.Config, t time.Time) *BalanceChecker {
+func NewBalanceChecker(t time.Time) *BalanceChecker {
 	return &BalanceChecker{
 		lastBalanceCheckerTime: t,
-		cfg:                    cfg,
 	}
 }
 
@@ -37,7 +36,7 @@ func (c *BalanceChecker) Name() string {
 }
 
 func (c *BalanceChecker) Init(cfg *config.Config) {
-	return
+	c.cfg = cfg
 }
 
 func (c *BalanceChecker) Check() error {
@@ -45,16 +44,15 @@ func (c *BalanceChecker) Check() error {
 	var (
 		currency   = strings.ToLower(c.cfg.Currency)
 		symbols    = bmodels.GetCurrencies()
-		now        = time.Now()
 		minBalance = decimal.NewFromFloat(c.cfg.MinAccountRemain)
 	)
 
-	if now.Sub(c.lastBalanceCheckerTime) < time.Minute*c.cfg.CoolDownTaskInterval {
+	if time.Now().Sub(c.lastBalanceCheckerTime) < time.Minute*c.cfg.CoolDownTaskInterval {
 		return nil
 	}
 
 	log.Infof("%s worker process...", c.Name())
-	c.lastBalanceCheckerTime = now
+	c.lastBalanceCheckerTime = time.Now()
 	if currency == "" || minBalance.LessThan(decimal.Zero) {
 		err := fmt.Errorf("main currency or MinAccountRemain set wrong, check `currency` and `minAccountRemain` fields ")
 		log.Errorf("Balance checker fail,%v", err)

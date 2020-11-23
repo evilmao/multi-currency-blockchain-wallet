@@ -77,8 +77,8 @@ func initConfig() {
 }
 
 func initBalanceChecker(cfg *config.Config) {
-	now := time.Now()
-	bchecker.Add(strings.ToLower(cfg.Currency), bchecker.NewBalanceChecker(cfg, now))
+	t := time.Now()
+	bchecker.Add(cfg.Currency, bchecker.NewBalanceChecker(t))
 	log.Infof("hot wallet balance checker init...")
 }
 
