@@ -14,9 +14,10 @@ import (
 )
 
 var (
-	headContent = "【Balance Not Enough】 "
-	content     = "%s balance(%s) less than minimum remain balance(%s),\n"
-	tailContent = "pls deposit ASAP."
+	headContent                     = "【Balance Not Enough】 "
+	content                         = "%s balance(%s) less than minimum remain balance(%s),\n"
+	tailContent                     = "pls deposit ASAP."
+	checkTaskInterval time.Duration = 5
 )
 
 type BalanceChecker struct {
@@ -42,17 +43,19 @@ func (c *BalanceChecker) Init(cfg *config.Config) {
 
 func (c *BalanceChecker) Check() error {
 	log.Warnf("BalanceChecker start time:%s", c.lastBalanceCheckerTime.String())
+	log.Warnf("BalanceChecker timeNow:%s", time.Now().String())
+
+	if time.Now().Sub(c.lastBalanceCheckerTime) < time.Minute*checkTaskInterval {
+		return nil
+	}
+
 	var (
 		currency   = c.cfg.Currency
 		symbols    = bmodels.GetCurrencies()
 		minBalance = decimal.NewFromFloat(c.cfg.MinAccountRemain)
 	)
 
-	if time.Now().Sub(c.lastBalanceCheckerTime) < time.Minute*c.cfg.CoolDownTaskInterval {
-		return nil
-	}
-
-	log.Infof("%s worker process...", c.Name())
+	log.Infof("%s process...", c.Name())
 	c.lastBalanceCheckerTime = time.Now()
 	if currency == "" || minBalance.LessThan(decimal.Zero) {
 		err := fmt.Errorf("main currency or MinAccountRemain set wrong, check `currency` and `minAccountRemain` fields ")

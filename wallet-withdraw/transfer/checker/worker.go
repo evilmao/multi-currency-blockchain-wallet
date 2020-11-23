@@ -63,7 +63,6 @@ func (w *Worker) Init() error {
 
 func (w *Worker) Work() {
 	for _, c := range w.checkers {
-		log.Warnf("check of %s start", c.Name())
 		err := c.Check()
 		if err != nil {
 			log.Errorf("%s, %s, %v", w.Name(), c.Name(), err)
