@@ -213,6 +213,7 @@ func (w *Worker) processTx(tx *models.Tx) error {
 	// ignore deposit if less than min amount.
 
 	if min, _ := currency.MinAmount(tx.Symbol); tx.Amount.LessThan(min) {
+		log.Warnf("min=====%s", min)
 		accept = false
 		log.Infof("%s, ignore min-amount deposit tx, %s", workerTag, TxString(tx))
 	}
