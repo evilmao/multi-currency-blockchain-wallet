@@ -14,10 +14,9 @@ import (
 )
 
 var (
-	headContent                     = "【Balance Not Enough】 "
-	content                         = "%s balance(%s) less than minimum remain balance(%s),\n\t\t\t\t"
-	tailContent                     = "pls deposit ASAP."
-	checkTaskInterval time.Duration = 5
+	headContent = "【Balance Not Enough】 "
+	content     = "%s balance(%s) less than minimum remain balance(%s),\n\t\t\t\t"
+	tailContent = "pls deposit ASAP."
 )
 
 type BalanceChecker struct {
@@ -43,7 +42,7 @@ func (c *BalanceChecker) Init(cfg *config.Config) {
 
 func (c *BalanceChecker) Check() error {
 
-	if time.Now().Sub(c.lastBalanceCheckerTime) < time.Minute*checkTaskInterval {
+	if time.Now().Sub(c.lastBalanceCheckerTime) < time.Minute*c.cfg.BalanceCheckerTaskInterval {
 		return nil
 	}
 
