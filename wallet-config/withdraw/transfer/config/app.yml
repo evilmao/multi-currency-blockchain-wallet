@@ -22,16 +22,20 @@ sign:
 
 wallet:
   broadcastUrl: "http://127.0.0.1:9997/v1/tx/broadcast"
-  maxAccountRemain: 0.02         # 0.05 eth, grater than value, will do cool-down tx
-  minAccountRemain: 0.01         # 0.03 eth , less than value, will alarm
+  minFee: 0.0003                 # 0.003 eth, min transaction fees
+  maxFee: 0.0144                 # 0.0144 eth, max transaction fees
+  # gather tx config
+  maxAccountRemain: 0.02         # 0.05 eth, gather tx, mainCurrency of balance will remain value
+  # cold-down tx config
   coldAddress: ""                # cold wallet address
-  coolDownTaskInterval: 15       # cold down transfer trigger interval, unit minute
+  coolDownTaskInterval: 15       # 15 minutes, cold down transfer trigger interval, unit minute
+  maxBalance: 2                  # system address balance grater than value, will process cold-down access
+  # balanceChecker config
+  minBalance: 1                  # 1 eth,the balance of system address less than value, will do process balance checker task
   balanceCheckerTaskInterval: 5  # hot-wallet balance checker task trigger interval, unit minute
-  minFee: 0.0003                 # 0.003 eth
-  maxFee: 0.0144                 # 0.0144 eth
-  # alarmTimeout: 30
-  # maxGasPrice: 0.0000002
-  # maxGasLimit: 72000            # 72000 G-WEI
+
+  # maxGasPrice: 0.0000002        # 0.0000072 ETH = 200 GWei
+  # maxGasLimit: 100000            # 100000
 
 broker:
   url: "http://test-api.exup.io/finance/"

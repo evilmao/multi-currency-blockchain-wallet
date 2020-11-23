@@ -49,13 +49,13 @@ func (c *BalanceChecker) Check() error {
 	var (
 		currency   = c.cfg.Currency
 		symbols    = bmodels.GetCurrencies()
-		minBalance = decimal.NewFromFloat(c.cfg.MinAccountRemain)
+		minBalance = decimal.NewFromFloat(c.cfg.MinBalance)
 	)
 
 	log.Infof("%s task process...", c.Name())
 	c.lastBalanceCheckerTime = time.Now()
 	if currency == "" || minBalance.LessThan(decimal.Zero) {
-		err := fmt.Errorf("main currency or MinAccountRemain set wrong, check `currency` and `minAccountRemain` fields ")
+		err := fmt.Errorf("main currency or minBalance set wrong, check `currency` and `minAccountRemain` fields ")
 		log.Errorf("Balance checker fail,%v", err)
 		return err
 	}
