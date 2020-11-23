@@ -15,7 +15,7 @@ import (
 
 var (
 	headContent = "【Balance Not Enough】 "
-	content     = "%s balance(%s) less than minimum remain balance(%s),\n"
+	content     = "%s balance(%s) less than minimum remain balance(%s),\n\t\t\t\t"
 	tailContent = "pls deposit ASAP."
 )
 
@@ -25,9 +25,9 @@ type BalanceChecker struct {
 }
 
 // NewBalanceChecker, check symbol balance
-func NewBalanceChecker(cfg *config.Config, t time.Time) *BalanceChecker {
+func NewBalanceChecker(cfg *config.Config) *BalanceChecker {
 	return &BalanceChecker{
-		lastBalanceCheckerTime: t,
+		lastBalanceCheckerTime: time.Now(),
 		cfg:                    cfg,
 	}
 }
@@ -37,24 +37,23 @@ func (c *BalanceChecker) Name() string {
 }
 
 func (c *BalanceChecker) Init(cfg *config.Config) {
-	return
+	c.cfg = cfg
 }
 
 func (c *BalanceChecker) Check() error {
 
-	var (
-		currency   = strings.ToLower(c.cfg.Currency)
-		symbols    = bmodels.GetCurrencies()
-		now        = time.Now()
-		minBalance = decimal.NewFromFloat(c.cfg.MinAccountRemain)
-	)
-
-	if now.Sub(c.lastBalanceCheckerTime) < time.Minute*c.cfg.CoolDownTaskInterval {
+	if time.Now().Sub(c.lastBalanceCheckerTime) < time.Minute*c.cfg.BalanceCheckerTaskInterval {
 		return nil
 	}
 
-	log.Infof("%s worker process...", c.Name())
-	c.lastBalanceCheckerTime = now
+	var (
+		currency   = c.cfg.Currency
+		symbols    = bmodels.GetCurrencies()
+		minBalance = decimal.NewFromFloat(c.cfg.MinAccountRemain)
+	)
+
+	log.Infof("%s task process...", c.Name())
+	c.lastBalanceCheckerTime = time.Now()
 	if currency == "" || minBalance.LessThan(decimal.Zero) {
 		err := fmt.Errorf("main currency or MinAccountRemain set wrong, check `currency` and `minAccountRemain` fields ")
 		log.Errorf("Balance checker fail,%v", err)
@@ -79,7 +78,7 @@ func mainCurrencyBalanceChecker(mainCurrency string, minRemain decimal.Decimal) 
 
 	minCurrencyBalance := bmodels.GetBalance(mainCurrency)
 	if minCurrencyBalance.LessThan(minRemain) {
-		tmpContent = fmt.Sprintf(content, mainCurrency, minRemain.String(), minCurrencyBalance.String())
+		tmpContent = fmt.Sprintf(content, mainCurrency, minCurrencyBalance.String(), minRemain.String())
 	}
 
 	return tmpContent

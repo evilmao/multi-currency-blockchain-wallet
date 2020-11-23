@@ -6,7 +6,6 @@ import (
 	"runtime"
 	"strings"
 	"syscall"
-	"time"
 
 	_ "upex-wallet/wallet-withdraw/cmd/transfer/imports"
 
@@ -77,8 +76,7 @@ func initConfig() {
 }
 
 func initBalanceChecker(cfg *config.Config) {
-	now := time.Now()
-	bchecker.Add(strings.ToLower(cfg.Currency), bchecker.NewBalanceChecker(cfg, now))
+	bchecker.Add(cfg.Currency, bchecker.NewBalanceChecker(cfg))
 	log.Infof("hot wallet balance checker init...")
 }
 
