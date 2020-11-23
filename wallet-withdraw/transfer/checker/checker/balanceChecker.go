@@ -42,7 +42,7 @@ func (c *BalanceChecker) Init(cfg *config.Config) {
 
 func (c *BalanceChecker) Check() error {
 
-	if time.Now().Sub(c.lastBalanceCheckerTime) < time.Minute*c.cfg.BalanceCheckerTaskInterval {
+	if time.Now().Sub(c.lastBalanceCheckerTime) < c.cfg.BalanceCheckerTaskInterval {
 		return nil
 	}
 
