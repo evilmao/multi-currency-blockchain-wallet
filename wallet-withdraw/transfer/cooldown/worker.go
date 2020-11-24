@@ -178,8 +178,8 @@ func (w *Worker) verifyColdInfo(symbol string) (*ColdWalletInfo, error) {
 	}
 
 	if symbol == w.cfg.Currency {
-		remainBalance = decimal.NewFromFloat(w.cfg.MinAccountRemain)
-		maxBalance = decimal.NewFromFloat(w.cfg.MaxAccountRemain)
+		remainBalance = decimal.NewFromFloat(w.cfg.MinBalance)
+		maxBalance = decimal.NewFromFloat(w.cfg.MaxBalance)
 	} else {
 		s := bmodels.GetCurrency(w.cfg.Currency, symbol)
 		remainBalance, _ = decimal.NewFromString(s.MinBalance)

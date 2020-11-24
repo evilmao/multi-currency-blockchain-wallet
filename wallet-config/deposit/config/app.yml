@@ -13,7 +13,7 @@ brokerPrivateKey: "1f5ddxyyy1f2c0b58bbd8cxx7x79xxxx"    # appSecretKey
 # main currency setting
 minAmount: 0.001                                        # Main currency , less than value, will not notify to the broker
 maxConfirmations: 30                                    # Block broadcast confirmation node number
-startHeight: 11295200                                   # scan block starting height
+startHeight: 11313537                                   # scan block starting height
 # ignoreNotifyAudit: true                               # in withdraw program,just need store deposit record, but not request broker notify
 
 # erc20 or trc20 settings
@@ -23,7 +23,7 @@ symbols:
     address: "0xdac17f958d2ee523a2206206994597c13d831ec7"    # token of contract address, check from Official web
     minDepositAmount: 0.2                                    # less than value, will not notify to the broker
     minBalanceRemain: 2                                      # System address balance less than this value, will send mail
-    maxBalanceRemain: 4                                      # System address balance grater than this value, will do cold-down tx
+    maxBalanceRemain: 10                                      # System address balance grater than this value, will do cold-down tx
   qos:
     precision: 10
     address: "0x7b188A8b3A2113621895Fb35fC67a779CAFFA92D"

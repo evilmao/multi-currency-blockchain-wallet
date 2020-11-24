@@ -187,7 +187,7 @@ func CurrencyDetailByAddress(address string) (*CurrencyInfo, bool) {
 }
 
 func firstDetailWithBlockchainName(symbol string) (*CurrencyInfo, bool) {
-	symbol = strings.ToUpper(symbol)
+
 	cs, ok := symbolDetailIndex[symbol]
 	if !ok || len(cs) == 0 {
 		return nil, false
