@@ -4,18 +4,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/shopspring/decimal"
-
 	"upex-wallet/wallet-base/api"
 	"upex-wallet/wallet-base/models"
 	"upex-wallet/wallet-base/monitor"
+	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-base/util"
 	"upex-wallet/wallet-config/deposit/config"
 	"upex-wallet/wallet-deposit/deposit"
 
-	"upex-wallet/wallet-base/newbitx/misclib/log"
-
 	"github.com/jinzhu/gorm"
+	"github.com/shopspring/decimal"
 )
 
 // BaseFetcher parses blockchain data and notifies exchange.
@@ -186,7 +184,7 @@ L:
 			// for request broker
 			txInfo := tx.DepositNotifyFormat()
 			txInfo["app_id"] = f.Cfg.BrokerAccessKey
-			txInfo["symbol"] = strings.ToLower(f.Cfg.Currency)
+			txInfo["symbol"] = f.Cfg.Currency
 
 			// for update db
 			data := make(map[string]interface{})
