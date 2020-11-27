@@ -7,6 +7,7 @@ import (
 
 	"upex-wallet/wallet-config/deposit/config"
 	"upex-wallet/wallet-deposit/cmd"
+	_ "upex-wallet/wallet-deposit/cmd/imports"
 	"upex-wallet/wallet-deposit/rpc"
 )
 
