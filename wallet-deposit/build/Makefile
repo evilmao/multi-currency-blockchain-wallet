@@ -14,7 +14,7 @@ version:
 	$(MK_GIT_VERSION) ../cmd cmd
 
 deposit: version
-	$(MK_IMPORT) ../rpc upex-wallet/wallet-deposit/rpc ../cmd/deposit main
+	$(MK_IMPORT) ../rpc upex-wallet/wallet-deposit/rpc ../cmd imports
 	@go install ../cmd/deposit
 	go build -o ./bin/deposit ../cmd/deposit
 	@echo
@@ -22,7 +22,7 @@ deposit: version
 prebuild: deposit
 	@echo "declare -a all_services=(" > ${ServicesFile}
 
-build: eth
+build: eth btc
 
 postbuild:
 	@echo ")" >> ${ServicesFile}

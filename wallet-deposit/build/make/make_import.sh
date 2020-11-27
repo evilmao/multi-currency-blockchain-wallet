@@ -2,7 +2,7 @@
 
 source_path=${1}
 source_package=${2}
-target_file=${3}/import.go
+target_file=${3}/imports/import.go
 package_name=${4}
 
 # 导入package依赖包
