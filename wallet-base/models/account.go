@@ -70,7 +70,7 @@ func GetAccountByAddress(addr string, symbol string) *Account {
 	return &account
 }
 
-// IsContractAddress returns true if matchs contract configuration.
+// IsContractAddress returns true if match contract configuration.
 func IsContractAddress(addr string) (*Currency, error) {
 	var (
 		token Currency

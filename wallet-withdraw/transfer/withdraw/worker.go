@@ -5,17 +5,15 @@ import (
 
 	bapi "upex-wallet/wallet-base/api"
 	bmodels "upex-wallet/wallet-base/models"
-	"upex-wallet/wallet-base/service"
-
 	"upex-wallet/wallet-base/newbitx/misclib/log"
-
-	"github.com/shopspring/decimal"
-
+	"upex-wallet/wallet-base/service"
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/base/models"
 	"upex-wallet/wallet-withdraw/transfer"
 	"upex-wallet/wallet-withdraw/transfer/alarm"
 	"upex-wallet/wallet-withdraw/transfer/txbuilder"
+
+	"github.com/shopspring/decimal"
 )
 
 type Worker struct {

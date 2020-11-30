@@ -4,13 +4,11 @@ import (
 	"strings"
 
 	bmodels "upex-wallet/wallet-base/models"
-
 	"upex-wallet/wallet-base/newbitx/misclib/log"
-
-	"github.com/shopspring/decimal"
-
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/base/models"
+
+	"github.com/shopspring/decimal"
 )
 
 type TxIn struct {

@@ -5,14 +5,13 @@ import (
 	"time"
 
 	bmodels "upex-wallet/wallet-base/models"
+	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-base/util"
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/base/models"
 	"upex-wallet/wallet-withdraw/broadcast/types"
 	"upex-wallet/wallet-withdraw/signer"
 	"upex-wallet/wallet-withdraw/transfer/txbuilder"
-
-	"upex-wallet/wallet-base/newbitx/misclib/log"
 )
 
 type Broadcaster struct {

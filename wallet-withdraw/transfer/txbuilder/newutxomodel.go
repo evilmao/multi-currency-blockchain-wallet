@@ -5,6 +5,7 @@ import (
 
 	bmodels "upex-wallet/wallet-base/models"
 	"upex-wallet/wallet-base/newbitx/misclib/log"
+	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/base/models"
 	"upex-wallet/wallet-withdraw/transfer/alarm"
 
@@ -12,8 +13,109 @@ import (
 )
 
 var (
-	feeFloatUp = 0.10 // 交易费浮动百分比
+	feeFloatUp     = 0.10 // 交易费浮动百分比
+	errEmptyInputs = fmt.Errorf("build extinfo failed, inputs is empty")
 )
+
+// BuildExtInfo def.
+type BuildExtInfo struct {
+	Inputs       []*TxIn
+	TotalInput   decimal.Decimal
+	MaxOutAmount decimal.Decimal
+}
+
+type utxoSelector func(acc *bmodels.Account, limitLen int) ([]*bmodels.UTXO, decimal.Decimal, bool, error)
+
+func createBuildExtInfo(fromAccounts []*bmodels.Account, selectUTXO utxoSelector, maxTxInLen int, maxOutAmount decimal.Decimal) (*BuildExtInfo, error) {
+	var (
+		extInfo = &BuildExtInfo{
+			MaxOutAmount: maxOutAmount, // 0
+		}
+		utxoLen int // 0
+	)
+	for _, acc := range fromAccounts {
+		utxos, totalIn, ok, err := selectUTXO(acc, maxTxInLen-utxoLen)
+		if err != nil {
+			return nil, err
+		}
+
+		if !ok {
+			continue
+		}
+
+		if acc.Balance.LessThan(totalIn) {
+			return nil, fmt.Errorf("balance of %s mismatch to utxo, less", acc.Address)
+		}
+		extInfo.Inputs = append(extInfo.Inputs, &TxIn{
+			Account:   acc,
+			Cost:      totalIn,
+			CostUTXOs: utxos,
+		})
+		extInfo.TotalInput = extInfo.TotalInput.Add(totalIn)
+		utxoLen += len(utxos)
+		if utxoLen >= maxTxInLen {
+			break
+		}
+	}
+
+	if len(extInfo.Inputs) == 0 {
+		return nil, errEmptyInputs
+	}
+
+	return extInfo, nil
+}
+
+// UTXOModelTxBuilder def.
+type UTXOModelTxBuilder interface {
+	Support(string) bool
+	DoBuild(*MetaData, *models.Tx, *BuildExtInfo) (*TxInfo, error)
+}
+
+type UTXOModelBuilder struct {
+	cfg      *config.Config
+	metaData *MetaData
+	builder  UTXOModelTxBuilder
+}
+
+// NewUTXOModelBuilder factory func to instance a UTXO Builder
+func NewUTXOModelBuilder(cfg *config.Config, builder UTXOModelTxBuilder) Builder {
+	metaData, ok := FindMetaData(cfg.Currency)
+	if !ok {
+		panic(fmt.Errorf("can't get meta data of currency %s", cfg.Currency))
+	}
+
+	// maxFee := decimal.NewFromFloat(cfg.MaxFee)
+	// don't need to maxFee 同builder
+	// if maxFee.GreaterThan(metaData.Fee) {
+	// 	metaData.Fee = maxFee
+	// }
+
+	return &UTXOModelBuilder{
+		cfg:      cfg,
+		metaData: metaData,
+		builder:  builder,
+	}
+}
+
+// BuildByMetaData build TxInfo by metaData, handle ErrFeeNotEnough.
+func (b *UTXOModelBuilder) BuildByMetaData(doBuild func(*MetaData) (*TxInfo, error)) (*TxInfo, error) {
+	txInfo, err := doBuild(b.metaData)
+
+	if err != nil {
+		if err, ok := err.(*ErrFeeNotEnough); ok {
+			log.Warnf("%v, try to rebuild by new fee", err)
+			feeFloatUp = b.cfg.FeeFloatUp
+			return doBuild(b.metaData)
+		}
+		return nil, err
+	}
+	return txInfo, nil
+}
+
+// Model to instance a UTXO model
+func (b *UTXOModelBuilder) Model() Model {
+	return UTXOModel
+}
 
 // newCreateBuildExtInfo  build a BuildExtInfo instance, confirm tx inputs and outputs
 func (b *UTXOModelBuilder) newCreateBuildExtInfo(fromAccounts []*bmodels.Account, task *models.Tx, metaData *MetaData, maxOutAmount decimal.Decimal) (*BuildExtInfo, error) {
@@ -184,7 +286,6 @@ func (b *UTXOModelBuilder) buildBySuggestTransactionFee(metaData *MetaData, task
 		return nil, fmt.Errorf("create builder extInfo failed,%v", err)
 	}
 
-	// src/upex-wallet/wallet-withdraw/transfer/txbuilder/btc/btc.go
 	return b.builder.DoBuild(metaData, task, extInfo)
 }
 
@@ -194,10 +295,6 @@ func (b *UTXOModelBuilder) BuildWithdraw(task *models.Tx) (*TxInfo, error) {
 	var (
 		MaxOutAmount = decimal.Zero
 	)
-
-	// if !b.builder.Support(task.Symbol) {
-	// 	return nil, NewErrUnsupportedCurrency(task.Symbol)
-	// }
 
 	txInfo, err := b.buildBySuggestTransactionFee(b.metaData, task, MaxOutAmount)
 	if err != nil {
@@ -229,17 +326,12 @@ func (b *UTXOModelBuilder) BuildWithdraw(task *models.Tx) (*TxInfo, error) {
 func (b *UTXOModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 
 	var (
-		txType = models.TxTypeName(task.TxType)
+		txType            = models.TxTypeName(task.TxType)
+		maxWithdrawAmount = decimal.NewFromFloat(b.cfg.MaxWithdrawAmount)
 	)
 
-	// maxWithdrawAmount, ok := currency.MaxWithdrawAmount(task.Symbol)
+	maxOutAmount := maxWithdrawAmount.Mul(decimal.NewFromFloat(0.05))
 
-	// if !ok {
-	// 	return nil, fmt.Errorf("can't find max withdraw amount of %s", task.Symbol)
-	// }
-	// TODO: maxOutAmount 不用设置
-	// Set maxOutAmount = KYC单次最大提现值 * 5%.
-	maxOutAmount := decimal.NewFromFloat(1).Mul(decimal.NewFromFloat(0.05))
 	buildExt := func(metaData *MetaData) (*BuildExtInfo, error) {
 		// Build from normal address.
 		filterFee := b.OneInOutPutFee(txType)
@@ -261,7 +353,6 @@ func (b *UTXOModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 			return createBuildExtInfo(
 				fromAccounts,
 				func(acc *bmodels.Account, limitLen int) ([]*bmodels.UTXO, decimal.Decimal, bool, error) {
-					// Set maxSmallUTXOAmount = maxOutAmount * 70%.
 					maxSmallUTXOAmount := maxOutAmount.Mul(decimal.NewFromFloat(0.7))
 					utxos, totalIn, ok := models.SelectSmallUTXO(acc.Address, maxSmallUTXOAmount, limitLen)
 					return utxos, totalIn, ok, nil
@@ -313,4 +404,39 @@ func (b *UTXOModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 	}
 
 	return txInfo, err
+}
+
+// OutputsAdder def.
+type OutputsAdder func(string, uint64)
+
+// MakeOutputs totalIn = extInfo.TotalInput
+func MakeOutputs(
+	totalIn, mainOut, maxOutAmount decimal.Decimal,
+	outAddress, changeAddress string,
+	metaData *MetaData,
+	addOutput OutputsAdder) {
+
+	if mainOut.GreaterThan(decimal.Zero) {
+		if maxOutAmount.GreaterThan(decimal.Zero) {
+			amount := mainOut
+			v := maxOutAmount.Mul(decimal.New(1, int32(metaData.Precision))).IntPart()
+			for amount.GreaterThan(maxOutAmount) {
+				addOutput(outAddress, uint64(v))
+				amount = amount.Sub(maxOutAmount)
+			}
+			if amount.GreaterThan(decimal.Zero) {
+				v := amount.Mul(decimal.New(1, int32(metaData.Precision))).IntPart()
+				addOutput(outAddress, uint64(v))
+			}
+		} else {
+			v := mainOut.Mul(decimal.New(1, int32(metaData.Precision))).IntPart()
+			addOutput(outAddress, uint64(v))
+		}
+	}
+
+	cost := mainOut.Add(metaData.Fee)
+	if totalIn.GreaterThan(cost) {
+		changeValue := totalIn.Sub(cost).Mul(decimal.New(1, int32(metaData.Precision))).IntPart()
+		addOutput(changeAddress, uint64(changeValue))
+	}
 }

@@ -33,6 +33,8 @@ wallet:
   # balanceChecker config
   minBalance: 1                  # 1 eth,the balance of system address less than value, will do process balance checker task
   balanceCheckerTaskInterval: 5  # hot-wallet balance checker task trigger interval, unit minute
+  # withdraw config
+  maxWithdrawAmount: 10          # The maximum allowable amount for a single transaction
 
   # maxGasPrice: 0.0000002        # 0.0000072 ETH = 200 GWei
   # maxGasLimit: 100000            # 100000
