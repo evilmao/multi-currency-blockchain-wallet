@@ -1,9 +1,6 @@
-package main
+package bsyncd
 
 import (
-	"fmt"
-	"os"
-
 	"upex-wallet/wallet-base/api"
 	"upex-wallet/wallet-base/models"
 	"upex-wallet/wallet-config/deposit/config"
@@ -12,12 +9,16 @@ import (
 	"upex-wallet/wallet-deposit/syncer/bitcoin/gbtc"
 )
 
-func main() {
-	if err := cmd.Execute(run); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+func init() {
+	cmd.Register("btc", cmd.NewRunType(0, run))
 }
+
+// func main() {
+// 	if err := cmd.Execute(run); err != nil {
+// 		fmt.Println(err)
+// 		os.Exit(1)
+// 	}
+// }
 
 func run(cfg *config.Config, restartTimes int) {
 

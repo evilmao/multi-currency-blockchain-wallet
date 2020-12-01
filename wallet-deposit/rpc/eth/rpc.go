@@ -8,15 +8,14 @@ import (
 
 	"upex-wallet/wallet-base/currency"
 	"upex-wallet/wallet-base/models"
+	"upex-wallet/wallet-base/newbitx/misclib/crypto"
+	"upex-wallet/wallet-base/newbitx/misclib/ethereum/token"
 	"upex-wallet/wallet-base/util"
 	"upex-wallet/wallet-config/deposit/config"
 	"upex-wallet/wallet-deposit/deposit"
 	"upex-wallet/wallet-deposit/rpc"
 	"upex-wallet/wallet-deposit/rpc/eth/contracts"
 	"upex-wallet/wallet-deposit/rpc/eth/geth"
-
-	"upex-wallet/wallet-base/newbitx/misclib/crypto"
-	"upex-wallet/wallet-base/newbitx/misclib/ethereum/token"
 
 	"github.com/buger/jsonparser"
 	"github.com/ethereum/go-ethereum/common/hexutil"
