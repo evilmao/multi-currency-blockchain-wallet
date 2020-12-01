@@ -82,7 +82,7 @@ func Execute(run Runnable) error {
 
 		log.Infof("%s %s service start", serviceName, Version())
 
-		go heartbeat()
+		// go heartbeat()
 
 		// data-dog monitor and tracer.
 		// go monitor.ListenAndServe(cfg.ListenAddress)

@@ -16,14 +16,14 @@ func NewClient(url string) *Client {
 	return &Client{url}
 }
 
-func (rpc *Client) Request(method string, params Params) ([]byte, error) {
+func (c *Client) Request(method string, params Params) ([]byte, error) {
 	reqData := NewRequest(method, params)
 	rawData, err := json.Marshal(reqData)
 	if err != nil {
 		return nil, fmt.Errorf("json marshal request data failed, %v", err)
 	}
 
-	req, err := http.NewRequest("POST", rpc.url, bytes.NewBuffer(rawData))
+	req, err := http.NewRequest("POST", c.url, bytes.NewBuffer(rawData))
 	if err != nil {
 		return nil, fmt.Errorf("create http request failed, %v", err)
 	}
@@ -39,7 +39,6 @@ func (rpc *Client) Request(method string, params Params) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read response body failed, %v", err)
 	}
-
 	return body, nil
 }
 
@@ -90,6 +89,7 @@ func (rpc *Client) GetFullBlockByHash(h string) ([]byte, error) {
 		err       error
 	)
 	err = rpc.Call("getblock", []interface{}{h, 2}, &blockData)
+
 	return blockData, err
 }
 
@@ -120,6 +120,7 @@ func (rpc *Client) GetFullBlockByHeight(h uint64) ([]byte, error) {
 		return blockData, err
 	}
 	blockData, err = rpc.GetFullBlockByHash(blockHash)
+
 	return blockData, err
 }
 
@@ -131,6 +132,7 @@ func (rpc *Client) GetBlockHash(height uint64) (string, error) {
 	)
 
 	err = rpc.Call("getblockhash", Params{height}, &blockHash)
+
 	return blockHash, err
 }
 

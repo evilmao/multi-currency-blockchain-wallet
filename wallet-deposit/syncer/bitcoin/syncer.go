@@ -83,7 +83,6 @@ func (s *Syncer) FetchBlocks() {
 				err = fmt.Errorf("get block at height %d failed", s.CurrentBlock.Height+1)
 				break
 			}
-
 			if previousBlockHash == s.CurrentBlock.Hash {
 				err = s.importBlock(blockData)
 			} else {
@@ -156,9 +155,9 @@ func (s *Syncer) processOrphanBlock(h string) error {
 		err = s.ProcessOrphanBlock(block)
 	}
 
-	previousblockhash, _ := jsonparser.GetString(data, "previousblockhash")
+	previousBlockHash, _ := jsonparser.GetString(data, "previousblockhash")
 	s.CurrentBlock.Height = block.Height - 1
-	s.CurrentBlock.Hash = previousblockhash
+	s.CurrentBlock.Hash = previousBlockHash
 
 	return err
 }
