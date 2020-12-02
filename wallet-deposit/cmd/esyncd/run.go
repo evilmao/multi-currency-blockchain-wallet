@@ -1,4 +1,4 @@
-package esyncd
+package cmd
 
 import (
 	"strings"
