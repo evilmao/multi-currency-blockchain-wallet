@@ -7,7 +7,7 @@ ServicesFile := ../.circleci/all_services.sh
 
 all:
 	@$(MAKE) prebuild
-	@$(MAKE) build
+	#@$(MAKE) build
 	@$(MAKE) postbuild
 
 version:
@@ -16,17 +16,13 @@ version:
 deposit: version
 	$(MK_IMPORT) ../rpc upex-wallet/wallet-deposit/rpc ../cmd imports
 	@go install ../cmd/deposit
-	go build -o ./bin/deposit ../cmd/deposit
+	go build -o ./bin/deposit/deposit ../cmd/deposit
 	@echo
 
-prebuild: deposit
+build: deposit
 	@echo "declare -a all_services=(" > ${ServicesFile}
-
-build: eth btc
 
 postbuild:
 	@echo ")" >> ${ServicesFile}
 
-include ./make/*.mk
-
-.PHONY: all version deposit prebuild build postbuild
+.PHONY: all version deposit build postbuild

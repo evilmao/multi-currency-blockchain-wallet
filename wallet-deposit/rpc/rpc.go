@@ -36,7 +36,7 @@ func Register(currencyType string, creator RPCCreator) {
 		log.Errorf("rpc.Register, duplicate of %s\n", currencyType)
 		return
 	}
-	log.Infof("Register success:[%s]", currencyType)
+	log.Infof("rpc.Register success:[%s]", currencyType)
 	rpcCreators[currencyType] = creator
 }
 
