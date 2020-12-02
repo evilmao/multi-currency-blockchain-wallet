@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"upex-wallet/wallet-base/newbitx/misclib/log"
+	"upex-wallet/wallet-base/util"
 	bviper "upex-wallet/wallet-base/viper"
 	"upex-wallet/wallet-withdraw/broadcast/handler"
 	"upex-wallet/wallet-withdraw/transfer/txbuilder/btc/gbtc"
@@ -132,7 +133,7 @@ func (h *btcHandler) BroadcastTransaction(tx handler.Tx, txHash string) (string,
 	txHash, err := h.rpcClient.SendRawTransaction(btcTx)
 	if err != nil {
 		txHash = btcTx.Hash
-		if !h.VerifyTxBroadcasted(txHash) {
+		if !h.VerifyTxBroadCasted(txHash) {
 			return "", fmt.Errorf("%s, txid: %s, %v", handler.ErrBroadcastFail, btcTx.Hash, err)
 		}
 	}
@@ -149,7 +150,7 @@ func (h *btcHandler) BroadcastTransaction(tx handler.Tx, txHash string) (string,
 	return txHash, nil
 }
 
-func (h *btcHandler) VerifyTxBroadcasted(txHash string) bool {
+func (h *btcHandler) VerifyTxBroadCasted(txHash string) bool {
 	tx, err := h.rpcClient.GetTransactionDetail(txHash)
 	if err != nil {
 		return false
