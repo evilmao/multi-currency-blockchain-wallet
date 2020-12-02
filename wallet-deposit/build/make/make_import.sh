@@ -28,7 +28,7 @@ for folder in $(ls -d "${main_path%%/}"/*/ |egrep -v "(deposit|imports)")
 do
     folder=${folder%%/}
     folder=${folder##*/}
-    echo "    _ \"upex-wallet/upex-deposit/cmd/${folder}\"" >> "${target_file}"
+    echo "    _ \"upex-wallet/wallet-deposit/cmd/${folder}\"" >> "${target_file}"
 done
 
 

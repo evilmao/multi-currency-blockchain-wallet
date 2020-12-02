@@ -1,7 +1,7 @@
 package cmd
 
 const (
-    VersionHash = "f8aaaa5"
+    VersionHash = "9430040"
     VersionTag  = ""
 )
 

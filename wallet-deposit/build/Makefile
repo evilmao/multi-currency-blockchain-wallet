@@ -6,23 +6,18 @@ MK_IMPORT := ./make/make_import.sh
 ServicesFile := ../.circleci/all_services.sh
 
 all:
-	#@$(MAKE) prebuild
 	@$(MAKE) build
-	@$(MAKE) postbuild
 
 version:
 	$(MK_GIT_VERSION) ../cmd cmd
 
-deposit: version
+prebuild: version
 	$(MK_IMPORT) ../rpc upex-wallet/wallet-deposit/rpc ../cmd imports
+
+build: prebuild
 	@go install ../cmd/deposit
 	go build -o ./bin/deposit ../cmd/deposit
 	@echo
 
-build: deposit
-	@echo "declare -a all_services=(" > ${ServicesFile}
 
-postbuild:
-	@echo ")" >> ${ServicesFile}
-
-.PHONY: all version deposit build postbuild
+.PHONY: all version prebuild build
