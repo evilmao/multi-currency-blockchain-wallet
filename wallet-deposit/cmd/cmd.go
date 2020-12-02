@@ -94,12 +94,44 @@ func Execute() error {
 		currency.Init(cfg)
 
 		// chose runnable
-		err = ChoseRunnable(cfg)
+		err = choseRunnable(cfg)
 		if err != nil {
 			panic(err)
 		}
 	}
 	return rootCmd.Execute()
+}
+
+func choseRunnable(cfg *config.Config) error {
+
+	runType, ok := Find(cfg.Currency)
+	if !ok {
+		return fmt.Errorf("chose runnable fail, currency %s is not exits", cfg.Currency)
+	}
+
+	runType0 := func(run Runnable) {
+		restartTimes := 0
+		for {
+			util.WithRecover("deposit-run", func() {
+				run(cfg, restartTimes)
+			}, nil)
+
+			time.Sleep(2 * time.Second)
+			restartTimes++
+			log.Errorf("%s deposit Service Restart %d Times", strings.ToUpper(cfg.Currency), restartTimes)
+		}
+	}
+
+	switch runType.Type {
+	case 0:
+		runType0(runType.Runnable)
+	case 1:
+		runType.Runnable(cfg, 1)
+	default:
+		return fmt.Errorf("runnable type is wrong,should 1 or 0")
+	}
+
+	return nil
 }
 
 func heartbeat() {
