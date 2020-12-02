@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"upex-wallet/wallet-deposit/cmd"
+	_ "upex-wallet/wallet-deposit/cmd/imports"
 )
 
 func main() {

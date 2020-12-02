@@ -16,7 +16,6 @@ import (
 	"upex-wallet/wallet-base/util"
 	"upex-wallet/wallet-config/deposit/config"
 	"upex-wallet/wallet-deposit/base/models"
-	_ "upex-wallet/wallet-deposit/cmd/imports"
 )
 
 var (
