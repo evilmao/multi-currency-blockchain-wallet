@@ -5,20 +5,13 @@ import (
 	"upex-wallet/wallet-base/models"
 	"upex-wallet/wallet-config/deposit/config"
 	"upex-wallet/wallet-deposit/cmd"
-	syncer "upex-wallet/wallet-deposit/syncer/bitcoin"
+	bsync "upex-wallet/wallet-deposit/syncer/bitcoin"
 	"upex-wallet/wallet-deposit/syncer/bitcoin/gbtc"
 )
 
 func init() {
 	cmd.Register("btc", cmd.NewRunType(0, run))
 }
-
-// func main() {
-// 	if err := cmd.Execute(run); err != nil {
-// 		fmt.Println(err)
-// 		os.Exit(1)
-// 	}
-// }
 
 func run(cfg *config.Config, restartTimes int) {
 
@@ -30,8 +23,8 @@ func run(cfg *config.Config, restartTimes int) {
 		lastBlock.Hash = ""
 	}
 
-	depositSync := syncer.New(cfg, bitcoinRPC, lastBlock)
-	fetcher := syncer.NewFetcher(
+	depositSync := bsync.New(cfg, bitcoinRPC, lastBlock)
+	fetcher := bsync.NewFetcher(
 		api.NewExAPI(cfg.BrokerURL, cfg.BrokerAccessKey, cfg.BrokerPrivateKey),
 		cfg,
 		bitcoinRPC,
