@@ -61,11 +61,11 @@ func initLogger() error {
 
 // Execute executes run.
 // func Execute(run Runnable) error {
-func Execute() error {
+func Execute(serviceType string) error {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	rootCmd.Run = func(cmd *cobra.Command, args []string) {
-		serviceName := fmt.Sprintf("wallet-deposit-%s", strings.ToLower(cfg.Currency))
+		serviceName := fmt.Sprintf("wallet-%s-%s", serviceType, strings.ToLower(cfg.Currency))
 
 		defer util.DeferRecover(serviceName, nil)()
 

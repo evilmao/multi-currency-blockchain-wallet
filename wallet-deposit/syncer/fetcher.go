@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"upex-wallet/wallet-base/api"
+	"upex-wallet/wallet-base/currency"
 	"upex-wallet/wallet-base/models"
 	"upex-wallet/wallet-base/monitor"
 	"upex-wallet/wallet-base/newbitx/misclib/log"
@@ -13,7 +14,6 @@ import (
 	"upex-wallet/wallet-deposit/deposit"
 
 	"github.com/jinzhu/gorm"
-	"github.com/shopspring/decimal"
 )
 
 // BaseFetcher parses blockchain data and notifies exchange.
@@ -25,23 +25,16 @@ type BaseFetcher struct {
 	GetTxConfirmations func(h string) (uint64, error)
 	needNotify         util.AtomicBool
 	Run                bool
-	minAmount          decimal.Decimal
 }
 
 // NewFetcher returns fetcher instance.
 func NewFetcher(api *api.ExAPI, cfg *config.Config) *BaseFetcher {
-	var minAmount = decimal.Zero
-
-	if cfg.MinAmount > 0 {
-		minAmount = decimal.NewFromFloat(cfg.MinAmount)
-	}
 
 	return &BaseFetcher{
-		ExAPI:     api,
-		Cfg:       cfg,
-		Run:       true,
-		minAmount: minAmount,
-		TxCh:      make(chan *models.Tx, 2000),
+		ExAPI: api,
+		Cfg:   cfg,
+		Run:   true,
+		TxCh:  make(chan *models.Tx, 2000),
 	}
 }
 
@@ -68,17 +61,6 @@ func (f *BaseFetcher) ProcessOrphanBlock(block models.BlockInfo) error {
 	block.Symbol = f.Cfg.Currency
 	return block.Delete()
 }
-
-// EncryptAddress encrypts deposit address using rsa public key.
-// func (f *BaseFetcher) EncryptAddress(act *models.Address) string {
-// 	ver := act.Version
-// 	addr := act.Address
-// 	cipherText, err := rsa.B64Encrypt(addr, f.Cfg.PublicKeys[f.Cfg.Currency][ver])
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return ver + "," + cipherText
-// }
 
 // Close release resource.C
 func (f *BaseFetcher) Close() {
@@ -160,8 +142,7 @@ L:
 			continue
 		}
 
-		tx.Amount = tx.Amount.Truncate(deposit.TxAmountPrecision)
-		if tx.Amount.LessThan(f.minAmount) {
+		if min, _ := currency.MinAmount(tx.Symbol); tx.Amount.LessThan(min) {
 			log.Infof("ignore min-amount deposit tx, %s", deposit.TxString(tx))
 
 			_ = tx.Update(models.M{

@@ -57,7 +57,7 @@ func New(cfg *config.Config, rpcClient rpc.RPC) *Worker {
 
 	if !cfg.IgnoreBlockStuckCheck {
 		w.updateMonitor = util.NewUpdateMonitor(time.Minute*20, func(v int64, d time.Duration) {
-			log.Errorf("%s, block stucks at height %d for %v", workerTag, v, d)
+			log.Errorf("%s, block stuck at height %d for %v", workerTag, v, d)
 		})
 	}
 
