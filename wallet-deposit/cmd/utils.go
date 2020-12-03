@@ -32,7 +32,6 @@ func Register(currencyType string, runType *RunType) {
 		log.Errorf("runnable.Register, duplicate of %s\n", currencyType)
 		return
 	}
-	log.Infof("Register runnable success:[%s]", currencyType)
 	RunTypeMap[currencyType] = runType
 }
 

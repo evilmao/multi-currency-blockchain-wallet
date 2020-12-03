@@ -133,6 +133,7 @@ func (w *Worker) Work() {
 		"hash":   w.currentBlock.Hash,
 		"txNum":  len(w.currentBlock.Txs),
 	})
+
 	defer monitor.DeferFinishDDSpan(span, func() (monitor.SpanTags, error) {
 		return nil, err
 	})()

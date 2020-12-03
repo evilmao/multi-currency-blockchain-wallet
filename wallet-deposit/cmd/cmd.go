@@ -53,14 +53,13 @@ func initConfig() {
 	}
 }
 
-func initLogger() error {
+func initLogger(name string) error {
 	filePath := "./log/"
 	symbol := strings.ToLower(cfg.Currency)
-	return util.InitDefaultRotationLogger(filePath, fmt.Sprintf("wallet-deposit-%s.log", symbol))
+	return util.InitDefaultRotationLogger(filePath, fmt.Sprintf("wallet-%s-%s.log", name, symbol))
 }
 
 // Execute executes run.
-// func Execute(run Runnable) error {
 func Execute(serviceType string) error {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
@@ -69,7 +68,7 @@ func Execute(serviceType string) error {
 
 		defer util.DeferRecover(serviceName, nil)()
 
-		err := initLogger()
+		err := initLogger(serviceType)
 		if err != nil {
 			panic(fmt.Errorf("init logger failed, %v", err))
 		}

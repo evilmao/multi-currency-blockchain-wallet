@@ -10,6 +10,7 @@ import (
 	"upex-wallet/wallet-base/models"
 	"upex-wallet/wallet-base/newbitx/misclib/crypto"
 	"upex-wallet/wallet-base/newbitx/misclib/ethereum/token"
+	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-base/util"
 	"upex-wallet/wallet-config/deposit/config"
 	"upex-wallet/wallet-deposit/deposit"
@@ -27,6 +28,8 @@ func init() {
 	rpc.Register("ETC", New)
 	rpc.Register("SMT", New)
 	rpc.Register("IONC", New)
+
+	log.Info("rpc register for ETHLike success...")
 }
 
 type RPC struct {
