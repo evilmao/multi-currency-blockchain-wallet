@@ -117,7 +117,7 @@ func (r *RPC) GetTxConfirmations(hash string) (uint64, error) {
 	return uint64(confirm), nil
 }
 
-func (r *RPC) ParseTx(tx interface{}) ([]*models.Tx, error) {
+func (r *RPC) ParseTx(tx interface{}) ([]*models.Tx, []*models.UTXO, error) {
 	var (
 		txs     []*models.Tx
 		address string
@@ -125,35 +125,34 @@ func (r *RPC) ParseTx(tx interface{}) ([]*models.Tx, error) {
 	txData := tx.([]byte)
 	hash, err := jsonparser.GetString(txData, "hash")
 	if err != nil {
-		return nil, fmt.Errorf("parse tx hash failed, %v", err)
+		return nil, nil, fmt.Errorf("parse tx hash failed, %v", err)
 	}
 
 	address, _ = jsonparser.GetString(txData, "to")
 	// The 'to' field is null in deploy contract transactions.
 	if len(address) == 0 {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	input, err := jsonparser.GetString(txData, "input")
 	if err != nil {
-		return nil, fmt.Errorf("parse tx input failed, %v", err)
+		return nil, nil, fmt.Errorf("parse tx input failed, %v", err)
 	}
 
 	if len(input) != 0 && input != geth.HEX_PREFIX &&
 		bytes.Equal(crypto.Hash160([]byte(address + "FCoin Wallet"))[:8], hexutil.MustDecode(input)) {
 
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	ok, err := models.HasAddress(address)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-
 	if ok {
 		amount, err := jsonparser.GetString(txData, "value")
 		if err != nil {
-			return nil, fmt.Errorf("parse tx value failed, %v", err)
+			return nil, nil, fmt.Errorf("parse tx value failed, %v", err)
 		}
 
 		a := hexutil.MustDecodeBig(amount)
@@ -165,27 +164,27 @@ func (r *RPC) ParseTx(tx interface{}) ([]*models.Tx, error) {
 			Confirm: 1,
 			Symbol:  r.cfg.Currency,
 		})
-		return txs, nil
+		return txs, nil, nil
 	}
 
 	if len(input) == 0 || input == geth.HEX_PREFIX {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	receipt, err := r.client.GetTransactionReceipt(hash)
 	if err != nil {
-		return nil, fmt.Errorf("get receipt by hash :%s faield, %v", hash, err)
+		return nil, nil, fmt.Errorf("get receipt by hash :%s faield, %v", hash, err)
 	}
 
 	status, _ := jsonparser.GetString(receipt, "status")
 	// The 'status' field may be null in some etc transactions.
 	if status != geth.RECEIPT_STATUS_SUCCESS {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	mts, err := r.parseTokenTx(address, hash, receipt)
 	if err != nil {
-		return nil, fmt.Errorf("parse token tx failed, %v", err)
+		return nil, nil, fmt.Errorf("parse token tx failed, %v", err)
 	}
 
 	if len(mts) != 0 {
@@ -194,13 +193,13 @@ func (r *RPC) ParseTx(tx interface{}) ([]*models.Tx, error) {
 
 	mt, err := r.parseInternalTx(address, hash, input)
 	if err != nil {
-		return nil, fmt.Errorf("parse internal tx failed, %v", err)
+		return nil, nil, fmt.Errorf("parse internal tx failed, %v", err)
 	}
 
 	if mt != nil {
 		txs = append(txs, mt)
 	}
-	return txs, nil
+	return txs, nil, nil
 }
 
 func (r *RPC) parseTokenTx(contractAddress, hash string, receipt []byte) ([]*models.Tx, error) {

@@ -92,3 +92,17 @@ func CalculateConfirm(txHeight, currentHeight int64) uint16 {
 
 	return uint16(confirm)
 }
+
+// StoreUTXOs stores utxos into db.
+func StoreUTXOs(utxos []*models.UTXO) error {
+	var err error
+	for _, u := range utxos {
+		err = u.FirstOrCreate()
+		if err != nil {
+			return fmt.Errorf("db insert utxo (symbol: %s, txHash: %s) at index %d failed, %v",
+				u.Symbol, u.TxHash, u.OutIndex, err)
+		}
+	}
+
+	return nil
+}

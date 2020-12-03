@@ -27,8 +27,8 @@ func init() {
 	})
 }
 
-func registerBTCLike(prefixs map[string][]byte) {
-	for c, prefix := range prefixs {
+func registerBTCLike(prefixes map[string][]byte) {
+	for c, prefix := range prefixes {
 		registerCommon(c, key.NewSecp256k1, signer.NewSecp256k1(), addrprovider.NewBTC(prefix))
 	}
 }

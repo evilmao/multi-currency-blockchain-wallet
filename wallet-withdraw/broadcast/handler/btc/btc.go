@@ -62,9 +62,7 @@ func init() {
 
 type btcHandler struct {
 	handler.BaseHandler
-
-	initer func(*btcHandler) error
-
+	initer    func(*btcHandler) error
 	rsaKey    string
 	rpcClient gbtc.RPC
 	extRPCURL string

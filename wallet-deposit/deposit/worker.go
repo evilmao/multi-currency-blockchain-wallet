@@ -86,9 +86,17 @@ func (w *Worker) tryProcessForceTxs() error {
 
 	log.Warnf("%s, try force process txs: %v", workerTag, w.cfg.ForceTxs)
 
-	txs, err := w.rpcClient.GetTxs(w.cfg.ForceTxs)
+	txs, utxos, err := w.rpcClient.GetTxs(w.cfg.ForceTxs)
 	if err != nil {
 		return fmt.Errorf("rpc get txs failed, %v", err)
+	}
+
+	for _, u := range utxos {
+		err = u.FirstOrCreate()
+		if err != nil {
+			return fmt.Errorf("db insert utxo (symbol: %s, txHash: %s) at index %d failed, %v",
+				u.Symbol, u.TxHash, u.OutIndex, err)
+		}
 	}
 
 	for _, tx := range txs {
@@ -137,6 +145,12 @@ func (w *Worker) Work() {
 	defer monitor.DeferFinishDDSpan(span, func() (monitor.SpanTags, error) {
 		return nil, err
 	})()
+
+	err = StoreUTXOs(w.currentBlock.UTXOs)
+	if err != nil {
+		log.Error(err)
+		return
+	}
 
 	for _, tx := range w.currentBlock.Txs {
 		err = w.processTx(tx)

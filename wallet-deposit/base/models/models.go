@@ -17,6 +17,7 @@ func InitDB() error {
 		&models.Currency{},
 		&models.BlockInfo{},
 		&models.Address{},
+		&models.UTXO{},
 	).Error
 	if err != nil {
 		log.Errorf("db auto migrate failed, %v", err)

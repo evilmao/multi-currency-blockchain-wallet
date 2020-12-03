@@ -12,13 +12,14 @@ type Block struct {
 	Height uint64
 	Hash   string
 	Txs    []*models.Tx
+	UTXOs  []*models.UTXO
 }
 
 type HandleRollbackBlock func(*models.BlockInfo) (*models.BlockInfo, error)
 
 type RPC interface {
 	NextBlock(handleRollback HandleRollbackBlock) (*Block, error)
-	GetTxs(hashes []string) ([]*models.Tx, error)
+	GetTxs(hashes []string) ([]*models.Tx, []*models.UTXO, error)
 	GetTxConfirmations(hash string) (uint64, error)
 	ReuseAddress() bool
 }

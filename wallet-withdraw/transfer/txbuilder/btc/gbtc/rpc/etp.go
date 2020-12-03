@@ -28,7 +28,7 @@ func (r *ETPRPC) GetBestblockhash() (string, error) {
 	return hash, err
 }
 
-// GetBlockByHash returns block infomations by hash.
+// GetBlockByHash returns block information by hash.
 func (r *ETPRPC) GetBlockByHash(hash string) ([]byte, error) {
 	var (
 		blockData []byte

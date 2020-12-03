@@ -20,7 +20,7 @@ const (
 // UTXO represents unspent tx out.
 type UTXO struct {
 	gorm.Model
-	SymbolID   uint            `gorm:"column:symbol_id;index"`
+	Symbol     string          `gorm:"column:symbol;"`
 	TxHash     string          `gorm:"column:tx_hash;size:90;index"`
 	BlockHash  string          `gorm:"column:block_hash;size:256"`
 	Amount     decimal.Decimal `gorm:"type:decimal(32,20);default:0"`
@@ -36,15 +36,15 @@ func (*UTXO) TableName() string { return "utxo" }
 
 // FirstOrCreate find first matched record or create a new one.
 func (u *UTXO) FirstOrCreate() error {
-	if u.SymbolID == 0 {
-		return fmt.Errorf("can't insert utxo with symbol id 0")
+	if u.Symbol == "" {
+		return fmt.Errorf("can't insert utxo with symbol empty")
 	}
 
 	if u.Status == UTXOStatusNotRecord {
 		u.Status = UTXOStatusRecord
 	}
-	return db.Default().FirstOrCreate(u, "symbol_id = ? and tx_hash = ? and out_index = ?",
-		u.SymbolID, u.TxHash, u.OutIndex).Error
+	return db.Default().FirstOrCreate(u, "symbol = ? and tx_hash = ? and out_index = ?",
+		u.Symbol, u.TxHash, u.OutIndex).Error
 }
 
 // Spend spends the utxo.
@@ -55,8 +55,8 @@ func (u *UTXO) Spend(spentID string) error {
 	}).Error
 }
 
-// Unspend unspends the utxo.
-func (u *UTXO) Unspend() error {
+// UnSpend unSpends the UTXO.
+func (u *UTXO) UnSpend() error {
 	return db.Default().Model(u).Updates(map[string]interface{}{
 		"status":   UTXOStatusRecord,
 		"spent_id": "",
@@ -64,10 +64,10 @@ func (u *UTXO) Unspend() error {
 }
 
 // GetUTXO gets utxo by tx hash and index.
-func GetUTXO(symbolID uint, txHash string, index int) (*UTXO, error) {
+func GetUTXO(symbol uint, txHash string, index int) (*UTXO, error) {
 	var utxo UTXO
-	err := db.Default().Where("symbol_id = ? and tx_hash = ? and out_index = ?",
-		symbolID, txHash, index).First(&utxo).Error
+	err := db.Default().Where("symbol = ? and tx_hash = ? and out_index = ?",
+		symbol, txHash, index).First(&utxo).Error
 	return &utxo, err
 }
 
@@ -102,10 +102,10 @@ func (u *UTXO) SpendWithDB(db *gorm.DB, spentID string) error {
 	}).Error
 }
 
-func GetUTXOsByAddressWithDB(db *gorm.DB, symbolID uint, address string) []*UTXO {
+func GetUTXOsByAddressWithDB(db *gorm.DB, symbol string, address string) []*UTXO {
 	var utxos []*UTXO
-	db.Where("symbol_id = ? and address = ? and status = ?",
-		symbolID, address, UTXOStatusRecord).Find(&utxos)
+	db.Where("symbol = ? and address = ? and status = ?",
+		symbol, address, UTXOStatusRecord).Find(&utxos)
 	return utxos
 }
 

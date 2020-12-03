@@ -9,7 +9,9 @@ import (
 	"upex-wallet/wallet-base/newbitx/misclib/crypto"
 	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-base/newbitx/misclib/utils"
+	"upex-wallet/wallet-base/util"
 	"upex-wallet/wallet-config/deposit/config"
+	"upex-wallet/wallet-deposit/deposit"
 	"upex-wallet/wallet-deposit/syncer"
 	"upex-wallet/wallet-deposit/syncer/bitcoin/gbtc"
 
@@ -71,45 +73,101 @@ func (f *Fetcher) GenSequenceID(data interface{}, addr string) string {
 
 func (f *Fetcher) parseTx(data []byte) error {
 	var (
-		account = make(map[string]decimal.Decimal)
+		account  = make(map[string]decimal.Decimal)
+		outIndex = -1
+		utxos    []*models.UTXO
+		rawTx    *gbtc.Transaction
 	)
-	_, err := jsonparser.ArrayEach(data,
-		func(vo []byte,
-			dataType jsonparser.ValueType,
-			offset int, err error) {
 
+	txid, err := jsonparser.GetString(data, "txid")
+	if err != nil {
+		return fmt.Errorf("json parser txid failed, %v", err)
+	}
+
+	err = util.JSONParserArrayEach(data, func(vo []byte, _ jsonparser.ValueType) error {
+		outIndex++
+
+		var addresses []string
+		err := util.JSONParserArrayEach(vo, func(addr []byte, _ jsonparser.ValueType) error {
+			address, err := jsonparser.ParseString(addr)
 			if err != nil {
-				return
+				return fmt.Errorf("json parser address failed, %v", err)
 			}
 
-			var addresses []string
-			jsonparser.ArrayEach(vo,
-				func(addr []byte,
-					dataType jsonparser.ValueType,
-					offset int, err error) {
-					if err != nil {
-						return
-					}
-					address, _ := jsonparser.ParseString(addr)
-					addresses = append(addresses, address)
-				}, "scriptPubKey", "addresses")
+			addresses = append(addresses, address)
+			return nil
+		}, "scriptPubKey", "addresses")
+		if err != nil && err != jsonparser.KeyPathNotFoundError {
+			return err
+		}
 
-			if len(addresses) == 1 {
-				amount, _ := jsonparser.GetFloat(vo, "value")
-				var ok bool
-				ok, err = models.HasAddress(addresses[0])
-				if ok && err == nil {
-					account[addresses[0]] = account[addresses[0]].Add(decimal.NewFromFloat(amount))
+		if len(addresses) != 1 {
+			return nil
+		}
+
+		ok, err := models.HasAddress(addresses[0])
+		if err != nil {
+			return err
+		}
+
+		if !ok {
+			return nil
+		}
+
+		amount, err := jsonparser.GetFloat(vo, "value")
+		if err != nil {
+			return fmt.Errorf("json parser amount failed, %v", err)
+		}
+
+		var script string
+		switch {
+		case strings.EqualFold(f.Cfg.Currency, "ABBC"):
+			if rawTx == nil {
+				deserCfg := gbtc.DeserializeConfig{
+					WithTime: true,
+				}
+
+				rawTx, err = f.rpcClient.GetRawTransactionData(txid, deserCfg)
+				if err != nil {
+					return fmt.Errorf("get raw tx hash = %s failed, %v", txid, err)
 				}
 			}
-		}, "vout")
 
+			if outIndex >= len(rawTx.Outputs) {
+				return fmt.Errorf("tx hash = %s outputs not match, %d vs %d",
+					txid, len(rawTx.Outputs), outIndex+1)
+			}
+
+			script = rawTx.Outputs[outIndex].Script
+		default:
+			script, err = jsonparser.GetString(vo, "scriptPubKey", "hex")
+			if err != nil {
+				return fmt.Errorf("json parser output script failed, %v", err)
+			}
+		}
+
+		account[addresses[0]] = account[addresses[0]].Add(decimal.NewFromFloat(amount))
+		utxos = append(utxos, &models.UTXO{
+			Symbol:     f.Cfg.Currency,
+			TxHash:     txid,
+			Amount:     decimal.NewFromFloat(amount),
+			OutIndex:   uint(outIndex),
+			Address:    addresses[0],
+			ScriptData: script,
+		})
+
+		return nil
+	}, "vout")
 	if err != nil {
 		return err
 	}
-	txid, _ := jsonparser.GetString(data, "txid")
-	confirm, _ := jsonparser.GetInt(data, "confirmations")
 
+	err = deposit.StoreUTXOs(utxos)
+	if err != nil {
+		return err
+	}
+
+	confirm := 1
 	if len(account) > 0 {
 		for k, v := range account {
 			tx := &models.Tx{
@@ -143,7 +201,6 @@ func (f *Fetcher) parseTx(data []byte) error {
 	}
 	return nil
 }
-
 func (f *Fetcher) getTxConfirmations(h string) (uint64, error) {
 	var (
 		txData  []byte

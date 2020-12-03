@@ -31,7 +31,7 @@ func (r *BTCRPC) GetBestblockhash() (string, error) {
 	return hash, err
 }
 
-// GetBlockByHash returns block infomations by hash.
+// GetBlockByHash returns block information by hash.
 func (r *BTCRPC) GetBlockByHash(hash string) ([]byte, error) {
 	var (
 		blockData []byte
