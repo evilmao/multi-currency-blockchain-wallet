@@ -58,6 +58,15 @@ func init() {
 			return h.InitDB(bviper.GetString("mona.dsn", ""))
 		},
 	})
+	handler.Register("ltc", &btcHandler{
+		initer: func(h *btcHandler) error {
+			h.rsaKey = bviper.GetString("ltc.rsaKey", "")
+			h.rpcClient = rpc.NewBTCRPC(bviper.GetString("ltc.rpcUrl", ""))
+			h.extRPCURL = bviper.GetString("ltc.extRPCUrl", "")
+			h.SetConfigPrefix("ltc")
+			return h.InitDB(bviper.GetString("ltc.dsn", ""))
+		},
+	})
 }
 
 type btcHandler struct {

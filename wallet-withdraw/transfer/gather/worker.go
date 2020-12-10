@@ -10,6 +10,7 @@ import (
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/base/models"
 	"upex-wallet/wallet-withdraw/transfer"
+	"upex-wallet/wallet-withdraw/transfer/alarm"
 	"upex-wallet/wallet-withdraw/transfer/txbuilder"
 
 	"github.com/jinzhu/gorm"
@@ -74,7 +75,7 @@ func (w *Worker) gather(address, symbol string) {
 	txInfo, err := w.txBuilder.BuildGather(task)
 	if err != nil {
 		switch err := err.(type) {
-		case *txbuilder.ErrBalanceForFeeNotEnough:
+		case *alarm.ErrorAccountBalanceNotEnough:
 			if w.supplementaryFeeBuilder != nil {
 				w.supplementaryFee(task.Symbol, err.Address)
 				return

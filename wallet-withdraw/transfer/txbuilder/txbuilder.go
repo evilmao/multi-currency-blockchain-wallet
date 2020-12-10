@@ -51,14 +51,14 @@ var (
 	builderCreator = make(map[string]BuilderCreator)
 )
 
-func Register(currencyType string, creater BuilderCreator) {
+func Register(currencyType string, creator BuilderCreator) {
 	currencyType = strings.ToUpper(currencyType)
 	if _, ok := Find(currencyType); ok {
 		log.Errorf("tx-builder.Register, duplicate of %s\n", currencyType)
 		return
 	}
 
-	builderCreator[currencyType] = creater
+	builderCreator[currencyType] = creator
 }
 
 func Find(currencyType string) (BuilderCreator, bool) {

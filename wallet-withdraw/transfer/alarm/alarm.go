@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"fmt"
+
 	"net"
 	"net/mail"
 	"net/smtp"
@@ -58,19 +59,19 @@ func sendEmailByHTML(cfg *config.Config, task *models.Tx, errMsg string) (err er
 	body := new(bytes.Buffer)
 
 	err = t.Execute(body, struct {
-		TxType      string
-		ErrorDetail string
-		TimeDate    string
-		Currency    string
-		TxAddress   string
-		TxID        string
+		TxType       string
+		EmailContent string
+		TimeDate     string
+		Currency     string
+		TxAddress    string
+		TxID         string
 	}{
-		TxType:      txType,
-		ErrorDetail: errMsg,
-		TimeDate:    errTime,
-		Currency:    currency,
-		TxAddress:   txAddress,
-		TxID:        txTransID,
+		TxType:       txType,
+		EmailContent: errMsg,
+		TimeDate:     errTime,
+		Currency:     currency,
+		TxAddress:    txAddress,
+		TxID:         txTransID,
 	})
 
 	if err != nil {
@@ -204,4 +205,28 @@ func SendEmailByText(cfg *config.Config, content string) {
 
 	log.Info("send email success!")
 	return
+}
+
+func AlarmWhenBuildTaskFail(cfg *config.Config, task *models.Tx, err error) {
+
+	if err != nil {
+		errMsg := ""
+		switch err.(type) {
+		case *ErrorBalanceLessThanFee:
+			errMsg = err.(*ErrorBalanceLessThanFee).EmailContent
+		case *ErrorBalanceNotEnough:
+			errMsg = err.(*ErrorBalanceNotEnough).EmailContent
+		case *ErrorBalanceLessCost:
+			errMsg = err.(*ErrorBalanceLessCost).EmailContent
+		case *ErrFeeNotEnough:
+			errMsg = err.(*ErrFeeNotEnough).EmailContent
+		case *ErrorAccountBalanceNotEnough:
+			errMsg = err.(*ErrorAccountBalanceNotEnough).EmailContent
+		default:
+		}
+
+		if errMsg != "" {
+			go SendEmail(cfg, task, err, errMsg)
+		}
+	}
 }

@@ -26,18 +26,20 @@ type Address interface {
 }
 
 type AddressParam struct {
-	P2PKHPrefix   []byte
-	P2SHPrefix    []byte
-	Bech32HRP     string
-	Bech32Version byte
+	P2PKHPrefix    []byte
+	P2SHPrefix     []byte
+	LTCP2PKHPrefix []byte
+	Bech32HRP      string
+	Bech32Version  byte
 }
 
 var (
 	AddressParamBTC = &AddressParam{
-		P2PKHPrefix:   []byte{0},
-		P2SHPrefix:    []byte{5},
-		Bech32HRP:     "bc",
-		Bech32Version: 0,
+		P2PKHPrefix:    []byte{0},
+		P2SHPrefix:     []byte{5},
+		LTCP2PKHPrefix: []byte{48},
+		Bech32HRP:      "bc",
+		Bech32Version:  0,
 	}
 )
 
@@ -79,6 +81,8 @@ func ParseAddress(address string, param *AddressParam) (Address, error) {
 		scriptFunc = P2PKHScript
 	case bytes.Equal(prefix, param.P2SHPrefix):
 		scriptFunc = P2SHScript
+	case bytes.Equal(prefix, param.LTCP2PKHPrefix):
+		scriptFunc = P2PKHScript
 	default:
 		return nil, errBase58AddressPrefix
 	}

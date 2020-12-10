@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"reflect"
 	"strings"
@@ -129,10 +128,10 @@ func (sf SuggestFee) UpdateCurrentFee(suggestFee float64) error {
 	return db.Default().Model(&sf).Updates(values).Error
 }
 
-// CalculateTransactionFee calculate average transaction fee
+// GetFeeRateFrom3tdApi calculate average transaction fee
 // transactionFee from db or cfg map
 // txType , three types, `withdraw` and `gather` by from task.Name
-func CalculateTransactionFee(txType string, cfg *config.Config) (transactionFee float64, err error) {
+func GetFeeRateFrom3tdApi(txType string, cfg *config.Config) (transactionFee float64) {
 
 	var (
 		feeType            = ""
@@ -149,12 +148,13 @@ func CalculateTransactionFee(txType string, cfg *config.Config) (transactionFee 
 	case "gather", "cold":
 		feeType = "regular"
 	default:
-		return 0, InvalidTxTypeError
+		return 0
 	}
 
 	sf := FindFeeBySymbolAndFeeType(symbol, feeType)
 	if sf == nil {
-		return 0, fmt.Errorf("%v, symbol:%s, txType:%s", InvalidTxTypeOrSymbolError, symbol, feeType)
+		log.Warnf("%v, symbol:%s, txType:%s", InvalidTxTypeOrSymbolError, symbol, feeType)
+		return 0
 	}
 
 	sfValue := reflect.ValueOf(*sf)
@@ -174,9 +174,9 @@ func CalculateTransactionFee(txType string, cfg *config.Config) (transactionFee 
 	if feeNums == 0 || checkTime.Sub(updateTime) > intervalTime {
 		transactionFee, ok := cfg.SuggestTransactionFees[symbol][feeType]
 		if !ok {
-			err = fmt.Errorf("Get current transaction fee fail ")
+			log.Errorf("Get current transaction fee fail ")
 		}
-		return transactionFee, err
+		return transactionFee
 	}
 
 	// if db store available fees, use average fee
@@ -199,6 +199,7 @@ func CalculateTransactionFee(txType string, cfg *config.Config) (transactionFee 
 		transactionFee = maxTxFee
 	}
 
-	log.Warnf("txType is %s ,use feeType:%s, transactionFee is %f", txType, feeType, transactionFee)
-	return transactionFee, nil
+	log.Info("txType is %s ,use feeType:%s, transactionFee is %f", txType, feeType, transactionFee)
+
+	return transactionFee
 }

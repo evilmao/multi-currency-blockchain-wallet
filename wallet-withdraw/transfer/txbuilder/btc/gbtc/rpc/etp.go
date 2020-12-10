@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"encoding/hex"
+	"fmt"
 	"math"
 	"strconv"
 
@@ -120,4 +121,8 @@ func (r *ETPRPC) SendRawTransaction(tx *gbtc.Transaction) (string, error) {
 
 	err = r.Client.Call("sendrawtx", jsonrpc.Params{hexStr}, &hash)
 	return hash, err
+}
+
+func (r *ETPRPC) EstimateSmartFee(confirmNum int) (float64, error) {
+	return 0, fmt.Errorf("not implement")
 }

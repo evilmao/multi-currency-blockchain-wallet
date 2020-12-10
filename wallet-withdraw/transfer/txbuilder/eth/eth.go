@@ -10,6 +10,7 @@ import (
 	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/base/models"
+	"upex-wallet/wallet-withdraw/transfer/alarm"
 	"upex-wallet/wallet-withdraw/transfer/txbuilder"
 	"upex-wallet/wallet-withdraw/transfer/txbuilder/eth/geth"
 
@@ -172,7 +173,7 @@ func (b *ETHBuilder) DoBuild(info *txbuilder.AccountModelBuildInfo) (*txbuilder.
 
 	needFee := decimal.New(int64(gasLimit), 0).Mul(decimal.NewFromBigInt(gasPrice, -geth.Precision))
 	if needFee.GreaterThan(info.FeeMeta.Fee) {
-		return nil, txbuilder.NewErrFeeNotEnough(info.FeeMeta.Fee, needFee)
+		return nil, alarm.NewErrFeeNotEnough(info.FeeMeta.Fee, needFee)
 	}
 
 	// fix: needFee less than fee, account of balance exchange is incorrect

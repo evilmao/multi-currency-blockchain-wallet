@@ -126,3 +126,9 @@ func (b *BTCBuilder) DoBuild(metaData *txbuilder.MetaData, task *models.Tx, extI
 		TxHex:      hex.EncodeToString(tx.Bytes()),
 	}, nil
 }
+
+func (b *BTCBuilder) SupportEstimateFee() (feeRate float64, ok bool) {
+	feeRate, _ = b.client.EstimateSmartFee(6)
+
+	return feeRate, feeRate != 0
+}

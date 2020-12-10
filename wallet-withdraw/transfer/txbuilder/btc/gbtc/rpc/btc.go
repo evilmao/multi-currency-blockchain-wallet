@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"encoding/hex"
+	"fmt"
 	"math"
 
 	"upex-wallet/wallet-base/jsonrpc"
@@ -116,4 +117,26 @@ func (r *BTCRPC) SendRawTransaction(tx *gbtc.Transaction) (string, error) {
 
 	err = r.Client.Call("sendrawtransaction", jsonrpc.Params{hexStr}, &hash)
 	return hash, err
+}
+
+func (r *BTCRPC) EstimateSmartFee(confirmNum int) (float64, error) {
+	var (
+		result struct {
+			FeeRate float64  `json:"feerate"`
+			Errors  []string `json:"errors"`
+			Blocks  int      `json:"blocks"`
+		}
+		err error
+	)
+
+	err = r.Client.Call("estimatesmartfee", jsonrpc.Params{confirmNum}, &result)
+	if err != nil {
+		return 0, err
+	}
+
+	if len(result.Errors) > 0 {
+		return 0, fmt.Errorf("%v", result.Errors)
+	}
+
+	return result.FeeRate, nil
 }

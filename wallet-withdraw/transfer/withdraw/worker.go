@@ -159,7 +159,7 @@ func (w *Worker) processTask(task *models.Tx) error {
 	if balance == nil || balance.LessThan(total) {
 		// send email
 		e := alarm.NewErrorBalanceNotEnough(balance, total)
-		go alarm.SendEmail(w.cfg, task, e, e.ErrorDetail)
+		go alarm.SendEmail(w.cfg, task, e, e.EmailContent)
 
 		return fmt.Errorf("wallet balance not enough, balance %v need %v", balance, total)
 	}

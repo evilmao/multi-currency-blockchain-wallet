@@ -8,4 +8,5 @@ type RPC interface {
 	GetTransactionDetail(txhash string) ([]byte, error)
 	CreateRawTransaction(version uint32, preOuts []*OutputPoint, outs []*Output) (*Transaction, error)
 	SendRawTransaction(tx *Transaction) (string, error)
+	EstimateSmartFee(confirmNum int) (float64, error)
 }

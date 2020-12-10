@@ -104,7 +104,7 @@ func BuildByFeeMeta(cfg *config.Config, feeMeta FeeMeta, estimateFeeMeta *FeeMet
 
 	txInfo, err := doBuild(feeMeta, task)
 	if err != nil {
-		if err, ok := err.(*ErrFeeNotEnough); ok {
+		if err, ok := err.(*alarm.ErrFeeNotEnough); ok {
 			log.Warnf("%v, try to rebuild by new fee", err)
 			feeMeta := feeMeta.Clone()
 			feeMeta.Fee = err.NeedFee
@@ -125,23 +125,8 @@ func (b *AccountModelBuilder) BuildWithdraw(task *models.Tx) (*TxInfo, error) {
 
 	txInfo, err := BuildByFeeMeta(b.cfg, b.feeMeta, b.builder.EstimateFeeMeta(task.Symbol, task.TxType), task, b.buildWithdraw)
 
-	if err != nil {
-		errMsg := ""
-		switch err.(type) {
-		case *alarm.NotMatchAccount:
-			errMsg = err.(*alarm.NotMatchAccount).ErrorDetail
-		case *ErrFeeNotEnough:
-			fee, needFee := err.(*ErrFeeNotEnough).Fee, err.(*ErrFeeNotEnough).NeedFee
-			err = alarm.NewErrorTxFeeNotEnough(fee, needFee)
-			errMsg = err.(*alarm.NotMatchAccount).ErrorDetail
-		case *alarm.ErrorAccountBalanceNotEnough:
-			errMsg = err.(*alarm.ErrorAccountBalanceNotEnough).ErrorDetail
-		}
+	go alarm.AlarmWhenBuildTaskFail(b.cfg, task, err)
 
-		if errMsg != "" {
-			go alarm.SendEmail(b.cfg, task, err, errMsg)
-		}
-	}
 	return txInfo, err
 }
 
@@ -149,24 +134,7 @@ func (b *AccountModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 
 	txInfo, err := BuildByFeeMeta(b.cfg, b.feeMeta, b.builder.EstimateFeeMeta(task.Symbol, task.TxType), task, b.buildGather)
 
-	if err != nil {
-		errMsg := ""
-		switch err.(type) {
-
-		case *ErrFeeNotEnough:
-			fee, needFee := err.(*ErrFeeNotEnough).Fee, err.(*ErrFeeNotEnough).NeedFee
-			err = alarm.NewErrorTxFeeNotEnough(fee, needFee)
-			errMsg = err.(*alarm.NotMatchAccount).ErrorDetail
-		case *ErrBalanceForFeeNotEnough:
-			address, fee := err.(*ErrBalanceForFeeNotEnough).Address, err.(*ErrBalanceForFeeNotEnough).NeedFee
-			feeAccount := bmodels.GetAccountByAddress(address, b.cfg.Currency)
-			err = alarm.NewErrorAccountBalanceNotEnough(address, b.cfg.Currency, *feeAccount.Balance, fee)
-			errMsg = err.(*alarm.ErrorAccountBalanceNotEnough).ErrorDetail
-		}
-		if errMsg != "" {
-			go alarm.SendEmail(b.cfg, task, err, errMsg)
-		}
-	}
+	go alarm.AlarmWhenBuildTaskFail(b.cfg, task, err)
 
 	return txInfo, err
 }
@@ -176,9 +144,6 @@ func (b *AccountModelBuilder) BuildSupplementaryFee(task *models.Tx) (*TxInfo, e
 }
 
 func (b *AccountModelBuilder) buildWithdraw(feeMeta FeeMeta, task *models.Tx) (*TxInfo, error) {
-	// if !b.builder.Support(task.Symbol) {
-	// 	return nil, NewErrUnsupportedCurrency(task.Symbol)
-	// }
 
 	var (
 		fromAccount *bmodels.Account
