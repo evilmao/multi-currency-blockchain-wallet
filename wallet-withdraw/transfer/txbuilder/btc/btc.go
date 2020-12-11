@@ -20,6 +20,7 @@ func init() {
 	txbuilder.Register("qtum", NewBTC)
 	txbuilder.Register("fab", NewBTC)
 	txbuilder.Register("mona", NewBTC)
+	txbuilder.Register("ltc", NewBTC)
 }
 
 func NewBTC(cfg *config.Config) txbuilder.Builder {
