@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 
+	"upex-wallet/wallet-base/currency"
 	bmodels "upex-wallet/wallet-base/models"
 	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-base/service"
@@ -47,7 +48,7 @@ func (w *Worker) Work() {
 	// 1. use system address as to_address
 	var (
 		sysAddress = bmodels.GetSystemAddress()
-		symbols    = bmodels.GetCurrencies()
+		symbols    = currency.Symbols(w.cfg.Currency)
 	)
 	if len(sysAddress) == 0 {
 		log.Errorf("%s, db get system address failed", w.Name())
@@ -56,7 +57,7 @@ func (w *Worker) Work() {
 
 	sysAddr := sysAddress[rand.Intn(len(sysAddress))]
 	for _, s := range symbols {
-		w.gather(sysAddr.Address, s.Symbol)
+		w.gather(sysAddr.Address, s)
 	}
 
 }
