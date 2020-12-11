@@ -152,7 +152,7 @@ func DefaultConfig() *Config {
 		GetFeeAPI:              map[string]*RequestFeeAPI{"btc": &RequestFeeAPI{ApiFeeURL: "https://api.blockchain.info/mempool/fees"}},
 		UpdateFeeInterval:      time.Second * 30,
 		FeeFloatUp:             0.10,
-		FeeLimitMap:            make(map[string]*LimitFeeRange),
+		FeeLimitMap:            nil,
 
 		// email Config
 		EmailCfg: &Email{},
