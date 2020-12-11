@@ -378,7 +378,7 @@ func createWithdrawExtByFeeRate(b *UTXOModelBuilder, task *models.Tx, feeRate fl
 		}
 
 		// according the address in account table select lowest required utxos
-		utxos, ok := models.SelectUTXOWithTransFee(account.Address, b.metaData.MaxTxInLen-utxoLen, true)
+		utxos, ok := models.SelectUTXOWithTransFee(account.Address, task.Symbol, b.metaData.MaxTxInLen-utxoLen, true)
 		if !ok {
 			return nil, fmt.Errorf("Balance of %s mismatch to utxo, greater ", account.Address)
 		}
