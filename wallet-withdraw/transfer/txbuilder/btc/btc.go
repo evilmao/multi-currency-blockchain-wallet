@@ -127,8 +127,16 @@ func (b *BTCBuilder) DoBuild(metaData *txbuilder.MetaData, task *models.Tx, extI
 	}, nil
 }
 
-func (b *BTCBuilder) SupportEstimateFee() (feeRate float64, ok bool) {
+func (b *BTCBuilder) SupportFeeRate() (feeRate float64, ok bool) {
 	feeRate, _ = b.client.EstimateSmartFee(6)
-
 	return feeRate, feeRate != 0
+}
+
+func (b *BTCBuilder) CalculateFee(nIn, nOut int, feeRate float64, precision int32) (fee decimal.Decimal) {
+	transSize := gbtc.CalculateTxSize(nIn, nOut)
+	if nIn == 0 || nOut == 0 {
+		return
+	}
+
+	return gbtc.CalculateTxFee(transSize, feeRate).Round(precision)
 }

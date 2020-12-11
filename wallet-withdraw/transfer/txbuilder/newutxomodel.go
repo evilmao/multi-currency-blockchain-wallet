@@ -10,8 +10,6 @@ import (
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/base/models"
 	"upex-wallet/wallet-withdraw/transfer/alarm"
-	"upex-wallet/wallet-withdraw/transfer/txbuilder/btc"
-	"upex-wallet/wallet-withdraw/transfer/txbuilder/btc/gbtc"
 )
 
 var (
@@ -71,6 +69,8 @@ func createBuildExtInfo(fromAccounts []*bmodels.Account, selectUTXO utxoSelector
 type UTXOModelTxBuilder interface {
 	Support(string) bool
 	DoBuild(*MetaData, *models.Tx, *BuildExtInfo) (*TxInfo, error)
+	SupportFeeRate() (feeRate float64, ok bool)
+	CalculateFee(nIn, nOut int, feeRate float64, precision int32) (fee decimal.Decimal)
 }
 
 type UTXOModelBuilder struct {
@@ -81,6 +81,7 @@ type UTXOModelBuilder struct {
 
 // NewUTXOModelBuilder factory func to instance a UTXO Builder
 func NewUTXOModelBuilder(cfg *config.Config, builder UTXOModelTxBuilder) Builder {
+
 	metaData, ok := FindMetaData(cfg.Currency)
 	if !ok {
 		panic(fmt.Errorf("can't get meta data of currency %s", cfg.Currency))
@@ -193,7 +194,7 @@ func (b *UTXOModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 			// update metaFee
 			if feeRate > 0 {
 				nIn, nOut := len(extInfo.Inputs), 1
-				fee := b.calculateFee(nIn, nOut, feeRate)
+				fee := b.builder.CalculateFee(nIn, nOut, feeRate, int32(metaData.Precision))
 				b.metaData.UpdateFee(fee)
 			}
 
@@ -214,22 +215,10 @@ func (b *UTXOModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 // OutputsAdder def.
 type OutputsAdder func(string, uint64)
 
-// estimateTransFee according 3rd-path api or rpc api to calculate transfer fee.
-func (b *UTXOModelBuilder) calculateFee(nIn, nOut int, feeRate float64) (Fee decimal.Decimal) {
-	transSize := gbtc.CalculateTxSize(nIn, nOut)
-	if nIn == 0 || nOut == 0 {
-		return
-	}
-
-	return gbtc.CalculateTxFee(transSize, feeRate).Round(int32(b.metaData.Precision))
-
-}
-
 // supportFeeRate according 3rd-path api or rpc api to calculate transfer fee.
 func (b *UTXOModelBuilder) supportFeeRate(txType string) (feeRate float64, ok bool) {
 
-	btcBuilder := b.builder.(*btc.BTCBuilder)
-	feeRate, ok = btcBuilder.SupportEstimateFee()
+	feeRate, ok = b.builder.SupportFeeRate()
 	if !ok {
 		return
 	}
@@ -245,9 +234,10 @@ func (b *UTXOModelBuilder) supportFeeRate(txType string) (feeRate float64, ok bo
 func (b *UTXOModelBuilder) buildExtGather(metaData *MetaData, feeRate float64, task *models.Tx, maxOutAmount decimal.Decimal) (extInfo *BuildExtInfo, err error) {
 
 	symbol := task.Symbol
+	precision := int32(metaData.Precision)
 	feeFilter := func() string {
 		if feeRate > 0 {
-			return b.calculateFee(1, 0, feeRate).String()
+			return b.builder.CalculateFee(1, 0, feeRate, precision).String()
 		} else {
 			return b.metaData.Fee.String()
 		}
@@ -356,9 +346,10 @@ func createWithdrawExtByFeeRate(b *UTXOModelBuilder, task *models.Tx, feeRate fl
 		utxoLen   int
 		nIn       = 0 // init inPuts  number
 		nOut      = 1 // init OutPuts number
-		oneOutFee = b.calculateFee(0, nOut, feeRate)
-		oneInFee  = b.calculateFee(nIn, 0, feeRate)
-		filterFee = b.calculateFee(1, 1, feeRate)
+		precision = int32(b.metaData.Precision)
+		oneOutFee = b.builder.CalculateFee(0, nOut, feeRate, precision)
+		oneInFee  = b.builder.CalculateFee(nIn, 0, feeRate, precision)
+		filterFee = b.builder.CalculateFee(1, 1, feeRate, precision)
 		extInfo   = &BuildExtInfo{
 			MaxOutAmount: maxOutAmount,
 		}
@@ -434,7 +425,7 @@ func createWithdrawExtByFeeRate(b *UTXOModelBuilder, task *models.Tx, feeRate fl
 	}
 
 	//  update metaFee
-	fee := b.calculateFee(nIn, nOut, feeRate)
+	fee := b.builder.CalculateFee(nIn, nOut, feeRate, int32(b.metaData.Precision))
 	b.metaData.UpdateFee(fee)
 
 	// check total cost is less than totalInput

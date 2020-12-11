@@ -99,8 +99,8 @@ func SpendTxIns(cfgCode int, sequenceID string, txIns []*txbuilder.TxIn, txNonce
 				return u.Spend(sequenceID)
 			})
 			if err != nil {
-				log.Errorf("db spend utxo (symbolID: %d, hash: %s, index: %d) failed, %v",
-					u.SymbolID, u.TxHash, u.OutIndex, err)
+				log.Errorf("db spend utxo (symbol: %d, hash: %s, index: %d) failed, %v",
+					u.Symbol, u.TxHash, u.OutIndex, err)
 			}
 		}
 
