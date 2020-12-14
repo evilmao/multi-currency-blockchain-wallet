@@ -42,9 +42,9 @@ type ErrorBalanceLessCost struct {
 	EmailContent string
 }
 
-func NewErrorBalanceLessCost(fee, balance decimal.Decimal) *ErrorBalanceLessCost {
+func NewErrorBalanceLessCost(fee, balance, amount decimal.Decimal) *ErrorBalanceLessCost {
 	return &ErrorBalanceLessCost{
-		EmailContent: fmt.Sprintf("系统地址余额不足: 系统地址余额无法支付交易所需手续费, 当前所需手续费为 %v ;满足账户的资金合计为 %v", fee, balance),
+		EmailContent: fmt.Sprintf("钱包余额(%v)不足: 转账金额为(%v),所需手续费为(%v);", balance, fee, amount),
 	}
 }
 
