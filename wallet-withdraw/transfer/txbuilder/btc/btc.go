@@ -125,6 +125,7 @@ func (b *BTCBuilder) DoBuild(metaData *txbuilder.MetaData, task *models.Tx, extI
 		SigPubKeys: sigPubKeys,
 		SigDigests: sigDigests,
 		TxHex:      hex.EncodeToString(tx.Bytes()),
+		Fee:        metaData.Fee,
 	}, nil
 }
 
