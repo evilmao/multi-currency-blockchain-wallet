@@ -221,7 +221,7 @@ func GetTxByAddress(addr string) (*Tx, error) {
 }
 
 func DeleteTxs() {
-	db.Default().Where("enc_address = '' and address= '' and tx_type = 100").Delete(&Tx{})
+	db.Default().Where("address= '' and tx_type = 100").Delete(&Tx{})
 }
 
 func GetTxsByAddressWithDB(db *gorm.DB, addr string, offset, limit int) []*Tx {

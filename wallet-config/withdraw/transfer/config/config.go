@@ -72,15 +72,16 @@ type Config struct {
 	SignTimeout time.Duration
 
 	// wallet configuration
-	BroadcastURL     string
-	ColdAddress      string
-	MaxFee           float64
-	MinFee           float64
-	MaxGasPrice      float64
-	MaxGasLimit      float64
-	MaxAccountRemain float64
-	MaxBalance       float64
-	MinBalance       float64
+	BroadcastURL      string
+	ColdAddress       string
+	MaxFee            float64
+	MinFee            float64
+	MaxGasPrice       float64
+	MaxGasLimit       float64
+	MaxAccountRemain  float64
+	MaxBalance        float64
+	MinBalance        float64
+	MaxWithdrawAmount float64
 
 	CoolDownTaskInterval       time.Duration
 	BalanceCheckerTaskInterval time.Duration
@@ -135,22 +136,23 @@ func DefaultConfig() *Config {
 		WithdrawInterval:           time.Second * minWithdrawInterval,
 		BalanceCheckerTaskInterval: time.Minute * balanceCheckerTaskInterval,
 
-		MinFee:           0,
-		MaxFee:           0,
-		MaxGasPrice:      0,
-		MaxGasLimit:      0,
-		MaxAccountRemain: 0.005,
-		ColdAddress:      "",
-		ChainID:          "",
-		BroadcastURL:     "",
-		ExitSignal:       make(chan struct{}),
+		MinFee:            0,
+		MaxFee:            0,
+		MaxGasPrice:       0,
+		MaxGasLimit:       0,
+		MaxAccountRemain:  0.005,
+		MaxWithdrawAmount: 0,
+		ColdAddress:       "",
+		ChainID:           "",
+		BroadcastURL:      "",
+		ExitSignal:        make(chan struct{}),
 
 		// btc fee api
 		SuggestTransactionFees: make(map[string]map[string]float64),
 		GetFeeAPI:              map[string]*RequestFeeAPI{"btc": &RequestFeeAPI{ApiFeeURL: "https://api.blockchain.info/mempool/fees"}},
 		UpdateFeeInterval:      time.Second * 30,
 		FeeFloatUp:             0.10,
-		FeeLimitMap:            make(map[string]*LimitFeeRange),
+		FeeLimitMap:            nil,
 
 		// email Config
 		EmailCfg: &Email{},
@@ -223,6 +225,7 @@ func New() *Config {
 	cfg.MaxAccountRemain = bviper.GetFloat64("wallet.maxAccountRemain", cfg.MaxAccountRemain)
 	cfg.MaxBalance = bviper.GetFloat64("wallet.maxBalance", 0)
 	cfg.MinBalance = bviper.GetFloat64("wallet.minBalance", 0)
+	cfg.MaxWithdrawAmount = bviper.GetFloat64("wallet.maxWithdrawAmount", 0)
 	cfg.ColdAddress = bviper.GetString("wallet.coldAddress", cfg.ColdAddress)
 
 	t := bviper.GetInt64("wallet.balanceCheckerTaskInterval", balanceCheckerTaskInterval)

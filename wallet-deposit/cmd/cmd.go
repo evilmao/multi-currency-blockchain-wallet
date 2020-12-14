@@ -6,20 +6,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
 	"upex-wallet/wallet-base/currency"
 	"upex-wallet/wallet-base/db"
-	"upex-wallet/wallet-base/service"
+	"upex-wallet/wallet-base/newbitx/misclib/log"
+	"upex-wallet/wallet-base/newbitx/misclib/utils"
 	"upex-wallet/wallet-base/util"
 	"upex-wallet/wallet-config/deposit/config"
 	"upex-wallet/wallet-deposit/base/models"
-	"upex-wallet/wallet-deposit/deposit"
-	"upex-wallet/wallet-deposit/rpc"
-
-	"upex-wallet/wallet-base/newbitx/misclib/log"
-	"upex-wallet/wallet-base/newbitx/misclib/utils"
-
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -57,25 +53,22 @@ func initConfig() {
 	}
 }
 
-func initLogger() error {
+func initLogger(name string) error {
 	filePath := "./log/"
 	symbol := strings.ToLower(cfg.Currency)
-	return util.InitDefaultRotationLogger(filePath, fmt.Sprintf("wallet-deposit-%s.log", symbol))
+	return util.InitDefaultRotationLogger(filePath, fmt.Sprintf("wallet-%s-%s.log", name, symbol))
 }
 
-// Runnable def.
-type Runnable func(*config.Config, int)
-
 // Execute executes run.
-func Execute(run Runnable) error {
+func Execute(serviceType string) error {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	rootCmd.Run = func(cmd *cobra.Command, args []string) {
-		serviceName := fmt.Sprintf("wallet-deposit-%s", strings.ToLower(cfg.Currency))
+		serviceName := fmt.Sprintf("wallet-%s-%s", serviceType, strings.ToLower(cfg.Currency))
 
 		defer util.DeferRecover(serviceName, nil)()
 
-		err := initLogger()
+		err := initLogger(serviceType)
 		if err != nil {
 			panic(fmt.Errorf("init logger failed, %v", err))
 		}
@@ -83,54 +76,6 @@ func Execute(run Runnable) error {
 		log.Infof("%s %s service start", serviceName, Version())
 
 		go heartbeat()
-
-		// data-dog monitor and tracer.
-		// go monitor.ListenAndServe(cfg.ListenAddress)
-		// statusReporter := monitor.NewStatsdReporter(cfg.StatusAddress, "wallet-deposit", nil)
-		// go statusReporter.Start()
-		//
-		// tracer.Start(tracer.WithServiceName(serviceName))
-		// defer tracer.Stop()
-
-		// initial db
-		dbInstance, err := db.New(cfg.DSN, serviceName)
-		if err != nil {
-			panic(err)
-		}
-		defer dbInstance.Close()
-		err = models.InitDB()
-		if err != nil {
-			panic(err)
-		}
-
-		restartTimes := 0
-		for {
-			util.WithRecover("syncd-run", func() {
-				run(cfg, restartTimes)
-			}, nil)
-
-			time.Sleep(2 * time.Second)
-			restartTimes++
-			log.Errorf("%s Syncer Service Restart %d Times", strings.ToUpper(cfg.Currency), restartTimes)
-		}
-	}
-	return rootCmd.Execute()
-}
-
-// Exec def.
-func Exec(createRPCClient rpc.RPCCreator) error {
-	runtime.GOMAXPROCS(runtime.NumCPU())
-
-	rootCmd.Run = func(cmd *cobra.Command, args []string) {
-		serviceName := fmt.Sprintf("wallet-deposit-%s", strings.ToLower(cfg.Currency))
-		defer util.DeferRecover(serviceName, nil)()
-
-		err := initLogger()
-		if err != nil {
-			panic(fmt.Errorf("init logger failed, %v", err))
-		}
-
-		log.Infof("%s %s service start", serviceName, Version())
 
 		// initial db
 		dbInstance, err := db.New(cfg.DSN, serviceName)
@@ -146,20 +91,45 @@ func Exec(createRPCClient rpc.RPCCreator) error {
 		// init currency
 		currency.Init(cfg)
 
-		rpcClient := createRPCClient(cfg)
-		if rpcClient == nil {
-			panic("failed to create rpc client")
-		}
-
-		go heartbeat()
-
-		depositSrv := service.NewWithInterval(deposit.New(cfg, rpcClient), time.Millisecond)
-		defer depositSrv.Stop()
-		if err = depositSrv.Start(); err != nil {
+		// chose runnable
+		err = choseRunnable(cfg)
+		if err != nil {
 			panic(err)
 		}
 	}
 	return rootCmd.Execute()
+}
+
+func choseRunnable(cfg *config.Config) error {
+
+	runType, ok := Find(cfg.Currency)
+	if !ok {
+		return fmt.Errorf("chose runnable fail, currency %s is not exits", cfg.Currency)
+	}
+
+	runType0 := func(run Runnable) {
+		restartTimes := 0
+		for {
+			util.WithRecover("deposit-run", func() {
+				run(cfg, restartTimes)
+			}, nil)
+
+			time.Sleep(2 * time.Second)
+			restartTimes++
+			log.Errorf("%s deposit Service Restart %d Times", strings.ToUpper(cfg.Currency), restartTimes)
+		}
+	}
+
+	switch runType.Type {
+	case 0:
+		runType0(runType.Runnable)
+	case 1:
+		runType.Runnable(cfg, 1)
+	default:
+		return fmt.Errorf("runnable type is wrong,should 1 or 0")
+	}
+
+	return nil
 }
 
 func heartbeat() {

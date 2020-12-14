@@ -1,32 +1,16 @@
 package main
 
 import (
-    "fmt"
-    "os"
-    "strings"
+	"fmt"
+	"os"
 
-    "upex-wallet/wallet-config/deposit/config"
-    _ "upex-wallet/wallet-deposit/cmd"
-    "upex-wallet/wallet-deposit/rpc"
-    "upex-wallet/wallet-withdraw/cmd"
+	"upex-wallet/wallet-deposit/cmd"
+	_ "upex-wallet/wallet-deposit/cmd/imports"
 )
 
 func main() {
-    if err := cmd.Exec(createRPCClient); err != nil {
-        fmt.Println(err)
-        os.Exit(1)
-    }
-}
-
-func createRPCClient(cfg *config.Config) rpc.RPC {
-    if cfg == nil {
-        return nil
-    }
-
-    creator, ok := rpc.Find(strings.ToUpper(cfg.Currency))
-    if !ok {
-        return nil
-    }
-
-    return creator(cfg)
+	if err := cmd.Execute("syncd"); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }

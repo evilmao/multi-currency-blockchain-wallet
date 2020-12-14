@@ -70,7 +70,7 @@ func GetAccountByAddress(addr string, symbol string) *Account {
 	return &account
 }
 
-// IsContractAddress returns true if matchs contract configuration.
+// IsContractAddress returns true if match contract configuration.
 func IsContractAddress(addr string) (*Currency, error) {
 	var (
 		token Currency
@@ -110,9 +110,9 @@ func GetMatchedAccount(amount, symbol string, addressType uint) *Account {
 }
 
 // GetAllMatchedAccounts gets matched accounts for withdraw.
-func GetAllMatchedAccounts(amount string, addressType uint) []*Account {
+func GetAllMatchedAccounts(amount, symbol string, addressType uint) []*Account {
 	var accounts []*Account
-	db.Default().Where("balance > ?  and `account_type` = ?", amount, addressType).Find(&accounts)
+	db.Default().Where("balance > ? and symbol= ? and `account_type` = ?", amount, symbol, addressType).Find(&accounts)
 	return accounts
 }
 

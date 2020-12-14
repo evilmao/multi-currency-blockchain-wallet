@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"upex-wallet/wallet-base/models"
-	"upex-wallet/wallet-base/util"
 	"upex-wallet/wallet-config/deposit/config"
 )
 
@@ -23,7 +22,7 @@ type BlockScanRPCImp interface {
 	GetTx(hash string) (interface{}, error)
 	GetTxConfirmations(hash string) (uint64, error)
 
-	ParseTx(tx interface{}) ([]*models.Tx, error)
+	ParseTx(tx interface{}) ([]*models.Tx, []*models.UTXO, error)
 }
 
 // BlockScanRPC processes deposit by scanning blocks.
@@ -69,9 +68,6 @@ func (r *BlockScanRPC) NextBlock(handleRollback HandleRollbackBlock) (*Block, er
 
 	blockData, err := r.blockCache.Get(r.currentBlock.Height + 1)
 	if err != nil {
-		if _, ok := err.(*ErrHeightOver); ok {
-			return nil, nil
-		}
 		return nil, fmt.Errorf("get block at height %d failed, %v", r.currentBlock.Height+1, err)
 	}
 
@@ -128,62 +124,68 @@ func (r *BlockScanRPC) parseBlock(height uint64, block interface{}) (*Block, err
 		return nil, fmt.Errorf("parse block hash failed, %v", err)
 	}
 
-	var txs []interface{}
+	var (
+		dbTxs   []*models.Tx
+		dbUTXOs []*models.UTXO
+	)
+
 	err = r.ParseBlockTxs(height, hash, block, func(tx interface{}) error {
-		txs = append(txs, tx)
+		txs, utxos, err := r.ParseTx(tx)
+
+		if err != nil {
+			return fmt.Errorf("parse tx failed, %v", err)
+		}
+
+		if len(txs) > 0 {
+			dbTxs = append(dbTxs, txs...)
+		}
+
+		if len(utxos) > 0 {
+			dbUTXOs = append(dbUTXOs, utxos...)
+		}
 		return nil
 	})
+
 	if err != nil {
 		return nil, fmt.Errorf("parse block txs failed, %v", err)
-	}
-
-	dbTxs := make([]*models.Tx, 0, len(txs))
-	err = util.BatchDo(len(txs), func(i int) (interface{}, error) {
-		partTxs, err := r.ParseTx(txs[i])
-		if err != nil {
-			return nil, fmt.Errorf("parse tx failed, %v", err)
-		}
-
-		return partTxs, nil
-	}, func(i int, partTxs interface{}) error {
-		if partTxs := partTxs.([]*models.Tx); len(partTxs) > 0 {
-			dbTxs = append(dbTxs, partTxs...)
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
 	}
 
 	return &Block{
 		Height: height,
 		Hash:   hash,
 		Txs:    dbTxs,
+		UTXOs:  dbUTXOs,
 	}, nil
 }
 
-func (r *BlockScanRPC) GetTxs(hashes []string) ([]*models.Tx, error) {
+func (r *BlockScanRPC) GetTxs(hashes []string) ([]*models.Tx, []*models.UTXO, error) {
 	if len(hashes) == 0 {
-		return nil, nil
+		return nil, nil, nil
 	}
 
-	dbTxs := make([]*models.Tx, 0, len(hashes))
+	var (
+		dbTxs   = make([]*models.Tx, 0, len(hashes))
+		dbUTXOs = make([]*models.UTXO, 0, len(hashes))
+	)
 	for _, hash := range hashes {
 		tx, err := r.GetTx(hash)
 		if err != nil {
-			return nil, fmt.Errorf("get transaction %s failed, %v", hash, err)
+			return nil, nil, fmt.Errorf("get transaction %s failed, %v", hash, err)
 		}
 
-		dbTx, err := r.ParseTx(tx)
+		txs, utxos, err := r.ParseTx(tx)
 		if err != nil {
-			return nil, fmt.Errorf("parse tx %s failed, %v", hash, err)
+			return nil, nil, fmt.Errorf("parse tx %s failed, %v", hash, err)
 		}
 
-		if len(dbTx) > 0 {
-			dbTxs = append(dbTxs, dbTx...)
+		if len(txs) > 0 {
+			dbTxs = append(dbTxs, txs...)
+		}
+		if len(utxos) > 0 {
+			dbUTXOs = append(dbUTXOs, utxos...)
 		}
 	}
-	return dbTxs, nil
+	return dbTxs, dbUTXOs, nil
 }
 
 func (r *BlockScanRPC) ReuseAddress() bool {

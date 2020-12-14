@@ -19,12 +19,13 @@ import (
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/base/models"
 	lcmd "upex-wallet/wallet-withdraw/cmd"
-	"upex-wallet/wallet-withdraw/transfer/checker"
 	bchecker "upex-wallet/wallet-withdraw/transfer/checker/checker"
+	"upex-wallet/wallet-withdraw/transfer/txbuilder"
+
+	"upex-wallet/wallet-withdraw/transfer/checker"
 	"upex-wallet/wallet-withdraw/transfer/cooldown"
 	"upex-wallet/wallet-withdraw/transfer/gather"
 	"upex-wallet/wallet-withdraw/transfer/rollback"
-	"upex-wallet/wallet-withdraw/transfer/txbuilder"
 	"upex-wallet/wallet-withdraw/transfer/utxofee"
 	"upex-wallet/wallet-withdraw/transfer/withdraw"
 

@@ -18,18 +18,6 @@ func BytesBlockGetter(getter func(uint64) ([]byte, error)) func(uint64) (interfa
 	}
 }
 
-type ErrHeightOver struct {
-	bestHeight uint64
-}
-
-func NewErrHeightOver(bestHeight uint64) *ErrHeightOver {
-	return &ErrHeightOver{bestHeight}
-}
-
-func (e *ErrHeightOver) Error() string {
-	return fmt.Sprintf("height is greater than the best height of %d", e.bestHeight)
-}
-
 type BlockCache struct {
 	sync.RWMutex
 
@@ -88,7 +76,7 @@ func (c *BlockCache) Get(height uint64) (interface{}, error) {
 	}
 
 	if bestHeight < height {
-		return nil, NewErrHeightOver(bestHeight)
+		return nil, fmt.Errorf("height is greater than the best height of %d", bestHeight)
 	}
 
 	count := bestHeight - height + 1

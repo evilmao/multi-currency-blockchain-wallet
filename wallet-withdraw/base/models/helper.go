@@ -14,7 +14,6 @@ func SelectAccount(accounts []*models.Account, amount decimal.Decimal) ([]*model
 	}
 
 	// a1 >= a2 >= a3
-	// account 中按balance 从大到小排序
 	sort.Slice(accounts, func(i, j int) bool {
 		return accounts[i].Balance.GreaterThan(*accounts[j].Balance)
 	})
@@ -26,7 +25,6 @@ func SelectAccount(accounts []*models.Account, amount decimal.Decimal) ([]*model
 			return accounts[:i+1], true
 		}
 	}
-	// if loop result,means sum all of accounts balance is still less than withdraw amount.
 	return accounts, false
 }
 
@@ -67,19 +65,19 @@ func selectUTXO(utxos []*models.UTXO, amount decimal.Decimal, limitLen int, bigO
 }
 
 // SelectUTXO selects utxos to match the amount (if amount > 0) and in the limit length.
-func SelectUTXO(address string, amount decimal.Decimal, limitLen int) ([]*models.UTXO, decimal.Decimal, bool) {
-	utxos := models.GetUTXOsByAddress(address)
+func SelectUTXO(address, symbol string, amount decimal.Decimal, limitLen int) ([]*models.UTXO, decimal.Decimal, bool) {
+	utxos := models.GetUTXOsByAddress(address, symbol)
 	return selectUTXO(utxos, amount, limitLen, true)
 }
 
 // SelectSmallUTXO selects small-utxos in [limitLen/3, limitLen] length.
-func SelectSmallUTXO(address string, maxAmount decimal.Decimal, limitLen int) ([]*models.UTXO, decimal.Decimal, bool) {
+func SelectSmallUTXO(symbol, address string, maxAmount decimal.Decimal, limitLen int) ([]*models.UTXO, decimal.Decimal, bool) {
 	if maxAmount.LessThanOrEqual(decimal.Zero) {
 		return nil, decimal.Zero, false
 	}
 
 	minLen := limitLen / 3
-	utxos := models.GetSmallUTXOsByAddress(address, maxAmount)
+	utxos := models.GetSmallUTXOsByAddress(symbol, address, maxAmount)
 
 	if len(utxos) < minLen {
 		return nil, decimal.Zero, false

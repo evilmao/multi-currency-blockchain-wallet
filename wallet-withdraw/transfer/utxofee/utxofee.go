@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"upex-wallet/wallet-base/newbitx/misclib/log"
-
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/base/models"
 )

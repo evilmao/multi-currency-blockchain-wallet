@@ -38,7 +38,7 @@ func (rpc BitcoinRPC) GetBestBlockHash() (string, error) {
 	return bestBlockHash, err
 }
 
-// GetBlockByHash returns block infomations by hash.
+// GetBlockByHash returns block information by hash.
 func (rpc BitcoinRPC) GetBlockByHash(h string) ([]byte, error) {
 	var (
 		blockData []byte
@@ -48,7 +48,7 @@ func (rpc BitcoinRPC) GetBlockByHash(h string) ([]byte, error) {
 	return blockData, err
 }
 
-// GetFullBlockByHash returns block full infomations by hash.
+// GetFullBlockByHash returns block full information by hash.
 func (rpc BitcoinRPC) GetFullBlockByHash(h string) ([]byte, error) {
 	var (
 		blockData []byte
@@ -58,7 +58,7 @@ func (rpc BitcoinRPC) GetFullBlockByHash(h string) ([]byte, error) {
 	return blockData, err
 }
 
-// GetBlockByHeight returns block infomations by height.
+// GetBlockByHeight returns block information by height.
 func (rpc BitcoinRPC) GetBlockByHeight(h uint64) ([]byte, error) {
 	var (
 		blockHash string
@@ -73,7 +73,7 @@ func (rpc BitcoinRPC) GetBlockByHeight(h uint64) ([]byte, error) {
 	return blockData, err
 }
 
-// GetFullBlockByHeight returns block full infomations by height.
+// GetFullBlockByHeight returns block full information by height.
 func (rpc BitcoinRPC) GetFullBlockByHeight(h uint64) ([]byte, error) {
 	var (
 		blockHash string

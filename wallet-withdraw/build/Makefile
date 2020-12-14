@@ -18,7 +18,7 @@ signer: version libmonero
 
 transfer: version libmonero
 	$(MK_IMPORT) ../transfer/txbuilder upex-wallet/wallet-withdraw/transfer/txbuilder  ../cmd/transfer imports
-	${MK} transfer transfer
+	$(MK) transfer transfer
 
 broadcast: version
 	$(MK_IMPORT) ../broadcast/handler upex-wallet/wallet-withdraw/broadcast/handler ../cmd/broadcast imports
