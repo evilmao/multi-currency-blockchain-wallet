@@ -5,8 +5,8 @@
 upex-wallet钱包, 用于`充值`, `提现`, `热转冷`,`归集` 操作; 批量生成`充值地址`
 
 ### 币种支持
-- ETH,ERC20(ETC,SMT,SMT,IONC...) 
-- BTC, BTC-LIKE(ETP,QTUM,FAB,MONA,LTC)
+- `ETH`, `ERC20(ETC, SMT, SMT, IONC...)` 
+- `BTC`, `BTC-LIKE`(`ETP`, `QTUM`, `FAB`, `MONA`, `LTC`)
 
 ### 一.项目结构
 ```shell
