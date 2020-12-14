@@ -1,10 +1,12 @@
-[toc]
 
 ## upex-wallet new 
 
 
 upex-wallet钱包, 用于`充值`, `提现`, `热转冷`,`归集` 操作; 批量生成`充值地址`
 
+### 币种支持
+- ETH,ERC20(ETC,SMT,SMT,IONC...) 
+- BTC, BTC-LIKE(ETP,QTUM,FAB,MONA,LTC)
 
 ### 一.项目结构
 ```shell
@@ -186,48 +188,32 @@ make
 ### 三. wallet-deposit (充值程序)
 
 #### 上币配置文件修改
+**注意:** 所有币种都使用相同充值程序, 币种支持见[币种支持列表](###币种支持)
 
-1. 在 `build/make/` 目录下添加相应币种的 makefile 文件。
-    ```shll
-    > ls -l
-    total 72
-    -rw-r--r--  1 ubuntu  staff   100B  9 14 16:23 btc.mk
-    -rw-r--r--  1 ubuntu  staff    47B  9 14 16:23 eos.mk
-    -rw-r--r--  1 ubuntu  staff    72B  9 14 16:23 eth.mk
-    -rw-r--r--  1 ubuntu  staff   185B  9 14 16:23 iota.mk
-    -rwxr-xr-x  1 ubuntu  staff   563B  9 14 16:23 make.sh
-    -rw-r--r--  1 ubuntu  staff    62B  9 14 16:23 nodeapi.mk
-    -rw-r--r--  1 ubuntu  staff    51B  9 14 16:23 ripple.mk
-    -rw-r--r--  1 ubuntu  staff    90B  9 13 14:15 tool.mk
-    -rw-r--r--  1 ubuntu  staff    49B  9 14 16:23 usdt.mk
-    ```
-2. 修改 `build/Makefile` 文件。
-
-    ```shell
-    build: btc eth usdt ripple iota eos
-    ```
-
-3. build
+1. build
 
     安装 golang 环境, 1.13版本以上,环境变量,设置好`GOMODULE=on`
     ```shell
-    cd build
+    cd wallet-deposit/build
     make
     ```
-    或直接使用go编译
+
+2. 运行
+    修改配置, 将`wallet-config/deposit/config/app.yml`与主程序`deposit`到同一目录
     ```shell
-    cd ../cmd/deposit
-    go build -o deposit-eth main.go
+    # 1. 主程序重命名命名 
+    mkdir -p deposit/eth &&cp -r wallet-deposit/bin/deposit/upex_eth_deposit ./
+    # 2. 修改配置文件后将配置文件复制到 主程序同一目录
+    cp -r wallet-config/deposit/config/app.yml ./
+    # 3. 启动
+    ./upex_eth_deposit -c app.yml
+    # 4. 可使用后台进程
+    nohup ./upex_eth_deposit -c app.ynl >/dev/null 2>&1 &
+    # 5.查看日志
+    tail -100f log/wallet-deposit-eth.log
     ```
 
-4. 运行
-
-    修改配置, 将`wallet-confi/deposit/config/app.yml`与主程序`eth`到同一目录
-    ```shell
-    ./deposit-eth -c app.yml
-    ```
-
-5. 注意事项
+3. 注意事项
 添加代币功能需要在 配置中手动加入配置后, 重启 deposit服务和 syncd服务
 ```shell script
   ...
@@ -246,8 +232,6 @@ make
 - broadcast 交易广播
 - signer 交易签名
 - transfer (提现, 热转冷, 归集, 资产余额检查, 告警)
-
-
 
 #### 4.1 方式一: 使用make一次性构建服务
 
@@ -295,7 +279,6 @@ make
 
 4. 配置相应文件后, 分别启动服务
 
-   
 
 #### 4.2 方式二: 单独构建
 ##### 1. syncd 区块同步
