@@ -201,7 +201,7 @@ func (b *UTXOModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 			// update task Amount
 			task.Amount = extInfo.TotalInput.Sub(metaData.Fee)
 			if task.Amount.LessThan(decimal.Zero) {
-				return nil, alarm.NewErrorBalanceLessCost(metaData.Fee, extInfo.TotalInput)
+				return nil, alarm.NewErrorBalanceLessCost(metaData.Fee, extInfo.TotalInput, task.Amount)
 			}
 
 			return b.builder.DoBuild(metaData, task, extInfo)
@@ -431,7 +431,7 @@ func createWithdrawExtByFeeRate(b *UTXOModelBuilder, task *models.Tx, feeRate fl
 	// check total cost is less than totalInput
 	totalCost := task.Amount.Add(fee)
 	if extInfo.TotalInput.LessThan(totalCost) {
-		return nil, alarm.NewErrorBalanceLessCost(b.metaData.Fee, extInfo.TotalInput)
+		return nil, alarm.NewErrorBalanceLessCost(b.metaData.Fee, extInfo.TotalInput, task.Amount)
 	}
 
 	return extInfo, nil

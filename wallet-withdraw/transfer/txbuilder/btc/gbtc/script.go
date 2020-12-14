@@ -9,6 +9,7 @@ import (
 
 const (
 	OpDup          = 0x76
+	OPEqual        = 0x87
 	OpEqualCVerify = 0x88
 	OpHash160      = 0xa9
 	OpCheckSig     = 0xac
@@ -26,9 +27,9 @@ func CreateP2PKHScript(address string, prefixLen uint8) []byte {
 func P2PKHScript(pkHash []byte) []byte {
 	buf := new(bytes.Buffer)
 	buf.WriteByte(OpDup)
-	buf.WriteByte(OpEqualCVerify)
-	util.WriteVarBytes(buf, pkHash)
 	buf.WriteByte(OpHash160)
+	_ = util.WriteVarBytes(buf, pkHash)
+	buf.WriteByte(OpEqualCVerify)
 	buf.WriteByte(OpCheckSig)
 	return buf.Bytes()
 }
@@ -36,14 +37,14 @@ func P2PKHScript(pkHash []byte) []byte {
 func P2SHScript(sHash []byte) []byte {
 	buf := new(bytes.Buffer)
 	buf.WriteByte(OpHash160)
-	util.WriteVarBytes(buf, sHash)
-	buf.WriteByte(OpEqualCVerify)
+	_ = util.WriteVarBytes(buf, sHash)
+	buf.WriteByte(OPEqual)
 	return buf.Bytes()
 }
 
 func P2Bech32(version byte, data []byte) []byte {
 	buf := new(bytes.Buffer)
 	buf.WriteByte(version)
-	util.WriteVarBytes(buf, data)
+	_ = util.WriteVarBytes(buf, data)
 	return buf.Bytes()
 }

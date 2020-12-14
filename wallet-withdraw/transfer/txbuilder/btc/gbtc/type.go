@@ -269,7 +269,7 @@ type Input struct {
 	ScriptData []byte
 	Sequence   uint32 `json:"sequence"`
 
-	ScriptWitness ScriptWitness //! Only serialized through Transaction
+	ScriptWitness ScriptWitness // Only serialized through Transaction
 }
 
 func (in *Input) Serialize(writer io.Writer) {
