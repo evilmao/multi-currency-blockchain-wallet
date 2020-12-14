@@ -187,7 +187,7 @@ func (w *Worker) Work() {
 func (w *Worker) process(t *Task) {
 	err := w.doProcess(t)
 	if err != nil {
-		// log.Errorf("process task (%s) failed (retry:%d/%d), %v", &t.args.Task, t.retry, maxRetryTimes, err)
+		log.Errorf("process task (%s) failed (retry:%d/%d), %v", &t.args.Task, t.retry, maxRetryTimes, err)
 		w.retry(t, costRetryTimes(err))
 	}
 }

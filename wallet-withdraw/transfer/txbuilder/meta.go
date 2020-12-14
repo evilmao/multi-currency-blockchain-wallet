@@ -53,5 +53,7 @@ func FindMetaData(currency string) (*MetaData, bool) {
 }
 
 func (m *MetaData) UpdateFee(fee decimal.Decimal) {
-	m.Fee = fee
+	if m.Fee.GreaterThan(fee) {
+		m.Fee = fee
+	}
 }
