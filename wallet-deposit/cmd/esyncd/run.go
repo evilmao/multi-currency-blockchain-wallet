@@ -13,6 +13,7 @@ import (
 
 func init() {
 	cmd.Register("eth", cmd.NewRunType(1, run))
+	cmd.Register("trx", cmd.NewRunType(1, run))
 }
 
 func createRPCClient(cfg *config.Config) rpc.RPC {
