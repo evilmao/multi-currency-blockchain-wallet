@@ -10,7 +10,9 @@ import (
 func init() {
 	registerSecp256k1Recoverable(map[string]addrprovider.AddrProvider{
 		"PTNdeprecated": addrprovider.NewPTNdeprecated(),
+		"TRX":           addrprovider.NewTRX(),
 	})
+
 }
 
 func registerCommon(class string, kc func() key.Key, s signer.Signer, ap addrprovider.AddrProvider) {
