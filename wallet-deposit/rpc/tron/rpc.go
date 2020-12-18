@@ -188,7 +188,6 @@ func ParseSingleTx(transaction []byte, symbol, trxTokenAirDropAddress string) ([
 		index++
 
 		txType, err := jsonparser.GetString(contract, "type")
-		log.Println("11111, txType==%s", txType)
 		if err != nil {
 			return fmt.Errorf("parse type failed, %v", err)
 		}
@@ -230,6 +229,7 @@ func ParseSingleTx(transaction []byte, symbol, trxTokenAirDropAddress string) ([
 
 			// check contract address
 			ca := crypto.Base58Check(addressBuf, nil, false)
+			fmt.Println("1111------ca=", ca)
 			if c, ok := currency.CurrencyDetailByAddress(ca); ok {
 				symbol = c.Symbol
 			} else {
