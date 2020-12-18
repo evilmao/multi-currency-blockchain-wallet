@@ -106,6 +106,8 @@ func (w *notifier) notifyAndAudit(tx *models.Tx) {
 
 		// for request broker
 		txInfo := tx.DepositNotifyFormat()
+		coverToTRC2OUSDT(w.cfg, tx)
+
 		txInfo["app_id"] = w.cfg.BrokerAccessKey
 		txInfo["symbol"] = tx.Symbol
 
@@ -143,4 +145,10 @@ func (w *notifier) notifyAndAudit(tx *models.Tx) {
 
 func (w *notifier) Destroy() {
 	//
+}
+
+func coverToTRC2OUSDT(cfg *config.Config, tx *models.Tx) {
+	if cfg.Currency == "trx" && tx.Symbol == "usdt" {
+		tx.Symbol = strings.Join([]string{"trx", tx.Symbol}, "_")
+	}
 }

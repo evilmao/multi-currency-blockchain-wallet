@@ -107,7 +107,6 @@ func New() *Config {
 		cfg.Symbols = make([]*SymbolDetail, 0)
 		for symbol := range symbols {
 			contractAddress := bviper.GetString(fmt.Sprintf("symbols.%s.address", symbol), "")
-			fmt.Println("111---", contractAddress)
 			cfg.Symbols = append(cfg.Symbols,
 				&SymbolDetail{
 					Symbol:           strings.ToLower(symbol),
