@@ -113,7 +113,6 @@ func (w *notifier) notifyAndAudit(tx *models.Tx) {
 
 		// for update db
 		data := make(map[string]interface{})
-		data["confirm"] = tx.Confirm
 
 		// request broker to notify deposit
 		_, notifyRetryCount, err = w.exAPI.DepositNotify(txInfo)
@@ -134,6 +133,7 @@ func (w *notifier) notifyAndAudit(tx *models.Tx) {
 		if int(tx.Confirm) >= w.cfg.MaxConfirm {
 			notifyStatus = 1
 			data["notify_status"] = notifyStatus
+			data["confirm"] = tx.Confirm
 		}
 
 		err = tx.Update(data)
