@@ -32,7 +32,7 @@ const (
 type Tx struct {
 	SequenceID       string          `gorm:"primary_key;size:32" json:"sequence_id"`
 	Hash             string          `gorm:"column:txid;size:90;index" json:"hash"`
-	Address          string          `gorm:"size:256;index" json:"address"`
+	Address          string          `gorm:"index" json:"address"`
 	Extra            string          `gorm:"size:100" json:"extra"`
 	Confirm          uint16          `gorm:"type:int" json:"confirm_times"`
 	Symbol           string          `gorm:"size:10" json:"symbol"`
