@@ -149,6 +149,6 @@ func (w *notifier) Destroy() {
 
 func coverToTRC2OUSDT(cfg *config.Config, tx *models.Tx) {
 	if cfg.Currency == "trx" && tx.Symbol == "usdt" {
-		tx.Symbol = strings.Join([]string{"trc20", tx.Symbol}, "-")
+		tx.Symbol = strings.Join([]string{"trc", tx.Symbol}, "_")
 	}
 }
