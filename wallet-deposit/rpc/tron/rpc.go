@@ -188,10 +188,11 @@ func ParseSingleTx(transaction []byte, symbol, trxTokenAirDropAddress string) ([
 		index++
 
 		txType, err := jsonparser.GetString(contract, "type")
+		log.Println("11111, txType==%s", txType)
 		if err != nil {
 			return fmt.Errorf("parse type failed, %v", err)
 		}
-		//判断交易类型
+		// 判断交易类型
 		if !AcceptTxType(txType) {
 			return nil
 		}
