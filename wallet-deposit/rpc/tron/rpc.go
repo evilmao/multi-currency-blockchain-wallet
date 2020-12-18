@@ -229,7 +229,6 @@ func ParseSingleTx(transaction []byte, symbol, trxTokenAirDropAddress string) ([
 
 			// check contract address
 			ca := crypto.Base58Check(addressBuf, nil, false)
-			fmt.Println("1111------ca=", ca)
 			if c, ok := currency.CurrencyDetailByAddress(ca); ok {
 				symbol = c.Symbol
 			} else {
