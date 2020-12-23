@@ -10,7 +10,7 @@ import (
 // TxIn represents tx input.
 type TxIn struct {
 	gorm.Model
-	TxSequenceID string          `gorm:"index"`
+	TxSequenceID string          `gorm:"type:varchar(255);index"`
 	Address      string          `gorm:"size:100;default:''"`
 	Symbol       string          `gorm:"size:32;default:''"`
 	Amount       decimal.Decimal `gorm:"type:decimal(32,20);default:0"`
