@@ -52,7 +52,7 @@ func (h *trxHandler) BroadcastTransaction(tx handler.Tx, txHash string) (string,
 	trxTx := tx.(*gtrx.Transaction)
 	_, err := h.rpcClient.BroadcastTransaction(trxTx)
 	if err != nil {
-		if h.VerifyTxBroadcasted(trxTx.TxID) {
+		if h.VerifyTxBroadCasted(trxTx.TxID) {
 			return trxTx.TxID, nil
 		}
 
@@ -62,7 +62,7 @@ func (h *trxHandler) BroadcastTransaction(tx handler.Tx, txHash string) (string,
 	return trxTx.TxID, nil
 }
 
-func (h *trxHandler) VerifyTxBroadcasted(txHash string) bool {
+func (h *trxHandler) VerifyTxBroadCasted(txHash string) bool {
 	var id string
 	util.TryWithInterval(3, time.Second, func(int) error {
 		txData, err := h.rpcClient.GetTransactionInfoByID(txHash)
