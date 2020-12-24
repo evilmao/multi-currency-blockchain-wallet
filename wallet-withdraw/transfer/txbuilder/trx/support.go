@@ -49,7 +49,7 @@ func InitSupportAssets(cfg *config.Config) error {
 				supportAssets[c] = &AssetInfo{
 					Precision:       detail.Decimal,
 					Type:            TRC20,
-					ContractAddress: detail.Address,
+					ContractAddress: strings.ToUpper(detail.Address),
 				}
 			} else {
 				// 合约为数字ID类型是TRC10币种
