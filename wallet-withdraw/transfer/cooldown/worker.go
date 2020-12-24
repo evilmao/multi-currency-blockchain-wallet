@@ -100,6 +100,7 @@ func (w *Worker) coolDown(symbol string) error {
 	// build cold down transfer task
 	task := &models.Tx{}
 	task.Symbol = symbol
+	task.BlockchainName = w.cfg.Currency
 	task.TxType = models.TxTypeCold
 	task.Address = info.ColdAddress
 	task.Amount = balance.Sub(info.MaxBalance)

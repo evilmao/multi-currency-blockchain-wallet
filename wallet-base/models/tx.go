@@ -229,3 +229,12 @@ func GetTxsByAddressWithDB(db *gorm.DB, addr string, offset, limit int) []*Tx {
 	db.Limit(limit).Offset(offset).Order("created_at desc").Find(&txs, "address = ? and amount > 0", addr)
 	return txs
 }
+
+// TODO: 平台支持后,需修改
+// TRC20 USDT should cover
+func TaskSymbolCover(chainName string, tx *Tx) string {
+	if chainName == "trx" && tx.Symbol == "usdt" {
+		tx.Symbol = strings.Join([]string{"trc", tx.Symbol}, "_")
+	}
+	return tx.Symbol
+}

@@ -118,7 +118,7 @@ func (wtx *Tx) WithdrawNotifyFormat() map[string]interface{} {
 	data["trans_id"] = wtx.TransID
 	data["address_to"] = wtx.Address
 	data["amount"] = wtx.Amount.String()
-	data["symbol"] = strings.ToLower(wtx.Symbol)
+	data["symbol"] = TaskSymbolCover(wtx.BlockchainName, strings.ToLower(wtx.Symbol)) // TODO: 平台支持TRC20 USDT后修改
 	data["txid"] = wtx.Hash
 	data["confirm"] = wtx.Confirm
 	data["real_fee"] = wtx.Fees
@@ -254,4 +254,13 @@ func SelectUTXOWithTransFee(address, symbol string, limitLen int, bigOrder bool)
 		utxos = utxos[:limitLen]
 	}
 	return utxos, true
+}
+
+// TODO: 平台支持后,需修改
+// TRC20 USDT should cover
+func TaskSymbolCover(chainName string, taskSymbol string) string {
+	if chainName == "trx" && taskSymbol == "usdt" {
+		taskSymbol = strings.Join([]string{"trc", taskSymbol}, "_")
+	}
+	return taskSymbol
 }
