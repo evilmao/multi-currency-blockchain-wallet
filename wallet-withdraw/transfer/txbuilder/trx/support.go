@@ -39,7 +39,7 @@ func InitSupportAssets(cfg *config.Config) error {
 	for _, s := range symbols {
 		detail := currency.CurrencyDetail(s.Symbol)
 		if detail == nil {
-			return fmt.Errorf("trx init support assets, can't find currency detail of %s", c)
+			return fmt.Errorf("trx init support assets, can't find currency detail of %s", s.Symbol)
 		}
 
 		c := strings.ToUpper(s.Symbol)
