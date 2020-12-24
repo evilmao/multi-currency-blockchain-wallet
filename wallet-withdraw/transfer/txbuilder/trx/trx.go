@@ -125,6 +125,7 @@ func (b *TRXBuilder) DoBuild(info *txbuilder.AccountModelBuildInfo) (*txbuilder.
 		SigPubKeys: []string{hex.EncodeToString(info.FromPubKey)},
 		SigDigests: []string{tx.TxID},
 		TxHex:      string(rawData),
+		Fee:        info.FeeMeta.Fee,
 	}, nil
 
 }
