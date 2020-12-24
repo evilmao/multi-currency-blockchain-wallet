@@ -37,7 +37,7 @@ func InitSupportAssets(cfg *config.Config) error {
 	symbols := models.GetCurrencies()
 
 	for _, s := range symbols {
-		c := s.Symbol
+		c := strings.ToUpper(s.Symbol)
 		detail := currency.CurrencyDetail(c)
 		if detail == nil {
 			return fmt.Errorf("trx init support assets, can't find currency detail of %s", c)
