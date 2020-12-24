@@ -37,12 +37,12 @@ func InitSupportAssets(cfg *config.Config) error {
 	symbols := models.GetCurrencies()
 
 	for _, s := range symbols {
-		c := strings.ToUpper(s.Symbol)
-		detail := currency.CurrencyDetail(c)
+		detail := currency.CurrencyDetail(s.Symbol)
 		if detail == nil {
 			return fmt.Errorf("trx init support assets, can't find currency detail of %s", c)
 		}
 
+		c := strings.ToUpper(s.Symbol)
 		if detail.IsToken() && detail.ChainBelongTo(cfg.Currency) {
 			if strings.HasPrefix(strings.ToUpper(detail.Address), "T") {
 				// 合约地址T开头是TRC20币种
