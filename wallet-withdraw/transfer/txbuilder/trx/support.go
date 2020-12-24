@@ -44,7 +44,7 @@ func InitSupportAssets(cfg *config.Config) error {
 		}
 
 		if detail.IsToken() && detail.ChainBelongTo(cfg.Currency) {
-			if strings.HasPrefix(detail.Address, "T") {
+			if strings.HasPrefix(strings.ToUpper(detail.Address), "T") {
 				// 合约地址T开头是TRC20币种
 				supportAssets[c] = &AssetInfo{
 					Precision:       detail.Decimal,
