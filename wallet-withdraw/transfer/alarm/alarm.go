@@ -222,6 +222,8 @@ func AlarmWhenBuildTaskFail(cfg *config.Config, task *models.Tx, err error) {
 			errMsg = err.(*ErrFeeNotEnough).EmailContent
 		case *ErrorAccountBalanceNotEnough:
 			errMsg = err.(*ErrorAccountBalanceNotEnough).EmailContent
+		case *NotMatchAccount:
+			errMsg = err.(*NotMatchAccount).EmailContent
 		default:
 		}
 
