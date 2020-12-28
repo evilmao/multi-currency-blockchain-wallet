@@ -3,9 +3,8 @@ package checker
 import (
 	"strings"
 
-	"upex-wallet/wallet-config/withdraw/transfer/config"
-
 	"upex-wallet/wallet-base/newbitx/misclib/log"
+	"upex-wallet/wallet-config/withdraw/transfer/config"
 )
 
 var (
