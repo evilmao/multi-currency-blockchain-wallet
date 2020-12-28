@@ -117,6 +117,10 @@ func BuildByFeeMeta(cfg *config.Config, feeMeta FeeMeta, estimateFeeMeta *FeeMet
 	return txInfo, nil
 }
 
+func (b *AccountModelBuilder) FeeMeta() FeeMeta {
+	return b.feeMeta
+}
+
 func (b *AccountModelBuilder) Model() Model {
 	return AccountModel
 }

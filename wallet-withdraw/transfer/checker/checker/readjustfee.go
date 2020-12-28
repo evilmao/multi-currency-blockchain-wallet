@@ -67,30 +67,28 @@ func (a *FeeReadJuster) readjustFee(tx *models.Tx) error {
 		return nil
 	}
 
-	if info.RemainFee.GreaterThan(decimal.Zero) {
-		txIns, err := models.GetTxInsBySequenceID(tx.SequenceID)
-		if err != nil {
-			return fmt.Errorf("db get txins by sequence_id (%s) failed, %v", tx.SequenceID, err)
-		}
+	txIns, err := models.GetTxInsBySequenceID(tx.SequenceID)
+	if err != nil {
+		return fmt.Errorf("db get txins by sequence_id (%s) failed, %v", tx.SequenceID, err)
+	}
 
-		for _, in := range txIns {
-			if in.Symbol == info.FeeSymbol {
-				acc := &bmodels.Account{
-					Address: in.Address,
-					Symbol:  in.Symbol,
-				}
-				err = acc.ForUpdate(bmodels.M{
-					"op":      "add",
-					"balance": info.RemainFee,
-				})
-				if err != nil {
-					return fmt.Errorf("db update account (%s, %s) balance failed, %v", acc.Address, acc.Symbol, err)
-				}
-
-				log.Infof("checker, readjust tx fee, hash: %s, remainFee: %s, fromAddress: %s",
-					tx.Hash, info.RemainFee, in.Address)
-				break
+	for _, in := range txIns {
+		if in.Symbol == info.FeeSymbol {
+			acc := &bmodels.Account{
+				Address: in.Address,
+				Symbol:  in.Symbol,
 			}
+			err = acc.ForUpdate(bmodels.M{
+				"op":      "add",
+				"balance": info.RemainFee,
+			})
+			if err != nil {
+				return fmt.Errorf("db update account (%s, %s) balance failed, %v", acc.Address, acc.Symbol, err)
+			}
+
+			log.Infof("checker, readjust tx fee, hash: %s, remainFee: %s, fromAddress: %s",
+				tx.Hash, info.RemainFee, in.Address)
+			break
 		}
 	}
 

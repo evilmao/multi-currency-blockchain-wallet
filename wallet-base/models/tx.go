@@ -32,7 +32,7 @@ const (
 type Tx struct {
 	SequenceID       string          `gorm:"primary_key;size:32" json:"sequence_id"`
 	Hash             string          `gorm:"column:txid;size:90;index" json:"hash"`
-	Address          string          `gorm:"size:256;index" json:"address"`
+	Address          string          `gorm:"index" json:"address"`
 	Extra            string          `gorm:"size:100" json:"extra"`
 	Confirm          uint16          `gorm:"type:int" json:"confirm_times"`
 	Symbol           string          `gorm:"size:10" json:"symbol"`
@@ -228,4 +228,13 @@ func GetTxsByAddressWithDB(db *gorm.DB, addr string, offset, limit int) []*Tx {
 	var txs []*Tx
 	db.Limit(limit).Offset(offset).Order("created_at desc").Find(&txs, "address = ? and amount > 0", addr)
 	return txs
+}
+
+// TODO: 平台支持后,需修改
+// TRC20 USDT should cover
+func TaskSymbolCover(chainName string, tx *Tx) string {
+	if chainName == "trx" && tx.Symbol == "usdt" {
+		tx.Symbol = strings.Join([]string{"trc", tx.Symbol}, "_")
+	}
+	return tx.Symbol
 }

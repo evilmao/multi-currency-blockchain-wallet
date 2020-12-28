@@ -13,7 +13,7 @@ type Currency struct {
 	Decimals   uint   `gorm:"type:int;default:18" json:"decimals"`
 	Blockchain string `gorm:"index"`
 	Symbol     string `gorm:"index;" json:"symbol"`
-	Address    string `gorm:"size:100;" json:"address"`
+	Address    string `gorm:"size:100" json:"address"`
 	MinBalance string `gorm:"size:32;"`
 	MaxBalance string `gorm:"size:32;"`
 }

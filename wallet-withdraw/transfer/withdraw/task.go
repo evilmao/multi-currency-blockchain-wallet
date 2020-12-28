@@ -88,7 +88,7 @@ func (p *taskProducer) produceFromAPIs() {
 func (p *taskProducer) produceFromAPI(symbol string) {
 
 	var data = make(map[string]interface{})
-	data["symbol"] = symbol
+	data["symbol"] = models.TaskSymbolCover(p.cfg.Currency, symbol) // todo: 平台支持trc20 USTD 后需要修改
 	data["app_id"] = p.cfg.BrokerAccessKey
 	data["timestamp"] = time.Now().Unix()
 
@@ -120,6 +120,7 @@ func (p *taskProducer) produceFromAPI(symbol string) {
 
 		var task models.Tx
 		task.TransID = fmt.Sprintf("%.f", id) // from broker
+		task.BlockchainName = p.cfg.Currency
 		task.SequenceID = util.HashString32([]byte(task.TransID))
 		task.Address = addressTo
 		task.Symbol = symbol

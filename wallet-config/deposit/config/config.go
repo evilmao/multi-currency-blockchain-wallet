@@ -66,7 +66,7 @@ func DefaultConfig() *Config {
 		IgnoreNotifyAudit:     false,
 		IgnoreBlockStuckCheck: false,
 		IsNeedTag:             false,
-		UseBlockTable:         true,
+		UseBlockTable:         false,
 		ListenAddress:         ":8051",
 		StatusAddress:         "127.0.0.1:8125",
 	}
@@ -106,11 +106,12 @@ func New() *Config {
 	if symbols != nil {
 		cfg.Symbols = make([]*SymbolDetail, 0)
 		for symbol := range symbols {
+			contractAddress := bviper.GetString(fmt.Sprintf("symbols.%s.address", symbol), "")
 			cfg.Symbols = append(cfg.Symbols,
 				&SymbolDetail{
 					Symbol:           strings.ToLower(symbol),
 					Precision:        uint(bviper.GetInt64(fmt.Sprintf("symbols.%s.precision", symbol), 0)),
-					Address:          bviper.GetString(fmt.Sprintf("symbols.%s.address", symbol), ""),
+					Address:          strings.ToLower(contractAddress),
 					MinDepositAmount: bviper.GetFloat64(fmt.Sprintf("symbols.%s.minDepositAmount", symbol), 0),
 					MinBalanceRemain: bviper.GetFloat64(fmt.Sprintf("symbols.%s.minBalanceRemain", symbol), 0),
 					MaxBalanceRemain: bviper.GetFloat64(fmt.Sprintf("symbols.%s.maxBalanceRemain", symbol), 0),

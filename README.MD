@@ -7,6 +7,7 @@ upex-wallet钱包, 用于`充值`, `提现`, `热转冷`,`归集` 操作; 批量
 ### 币种支持
 - `ETH`, `ERC20(ETC, SMT, SMT, IONC...)` 
 - `BTC`, `BTC-LIKE`(`ETP`, `QTUM`, `FAB`, `MONA`, `LTC`)
+- `TRX`, `TRC20`(`USDT`, `BTT`...)
 
 ### 一.项目结构
 ```shell

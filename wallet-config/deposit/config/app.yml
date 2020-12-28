@@ -15,6 +15,10 @@ minAmount: 0.001                                        # Main currency , less t
 maxConfirmations: 30                                    # Block broadcast confirmation node number
 startHeight: 11313537                                   # scan block starting height
 # ignoreNotifyAudit: true                               # in withdraw program,just need store deposit record, but not request broker notify
+useBlockTable: false
+trxAirDropAddress: TNnXPw91DJxUtTsmNVHmkH8ntw1GEfs3fr,TVVbX1SaKDXsHa5WPECLBBNZuRbrK9YZFy,THZqPUuxur6sbxmCBPDswehXFfqeGNtmnJ,THa1dn2Q5XwgKAJetXQ5wiZyL8Eqf6mawq,TS9iT6JbUL5yzUSJoxvEe4VCRUn8UaA5wg,TMBPEvbBJskiXPQ2icoMEfqkt3kZipWwzG,TLVi5Gcji9x7exDAMxZAHaXbGjhUsg1EGa,TXrat39xskWoUcHoQ9Y5ggxHAXqgXn84Yu,TETa4ctzMWyUKbvtg276gTwM1zqma888BU,TNGFJpprrfyPTKSTBtZjTpJuiGspNodeFG,TFG5LywGz2nXA2qCxwZoxjPJz7wVEQwCku
+
+
 
 # erc20 or trc20 settings
 symbols:

@@ -22,10 +22,10 @@ type UTXO struct {
 	gorm.Model
 	Symbol     string          `gorm:"column:symbol;"`
 	TxHash     string          `gorm:"column:tx_hash;size:90;index"`
-	BlockHash  string          `gorm:"column:block_hash;size:256"`
+	BlockHash  string          `gorm:"column:block_hash;size:255"`
 	Amount     decimal.Decimal `gorm:"type:decimal(32,20);default:0"`
 	OutIndex   uint            `gorm:"type:int"`
-	Address    string          `gorm:"size:256;index"`
+	Address    string          `gorm:"size:255;index"`
 	ScriptData string          `gorm:"size:500"`
 	Status     uint            `gorm:"type:tinyint;index"`
 	SpentID    string          `gorm:"column:spent_id;index"`
