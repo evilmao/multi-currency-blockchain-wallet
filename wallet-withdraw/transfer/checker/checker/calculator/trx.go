@@ -3,8 +3,6 @@ package calculator
 import (
 	"fmt"
 
-	log "github.com/sirupsen/logrus"
-
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/transfer/checker/checker"
 	"upex-wallet/wallet-withdraw/transfer/txbuilder"
@@ -22,13 +20,11 @@ func TRC20Calc(cfg *config.Config, txHash string) (*checker.ReadjustFeeInfo, err
 	client := gtrx.NewClient(cfg.RPCUrl)
 
 	tx, err := client.GetTransactionInfoByID(txHash)
-	log.Warnf("tx detail, %s", string(tx))
 	if err != nil {
 		return nil, fmt.Errorf("get tx %s failed, %v", txHash, err)
 	}
 
-	blockNumber, err := gtrx.JSONHexToDecimal(tx, "blockNumber")
-	log.Errorf("paras blockNumber error, %v", err)
+	blockNumber, _ := gtrx.JSONHexToDecimal(tx, "blockNumber")
 	if blockNumber.Equal(decimal.Zero) { // pending
 		return nil, nil
 	}
@@ -39,13 +35,14 @@ func TRC20Calc(cfg *config.Config, txHash string) (*checker.ReadjustFeeInfo, err
 		return nil, fmt.Errorf("parse tx %s fee used failed, %v", txHash, err)
 	}
 
+	// 获取预估手续费
 	usedFee, err := feeMeta(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("get currency %s fee used failed, %v", usedFee, err)
 	}
 
 	info := &checker.ReadjustFeeInfo{
-		RemainFee: fee.Mul(decimal.New(1, -gtrx.Precision)).Add(usedFee),
+		RemainFee: fee.Mul(decimal.New(-1, -gtrx.Precision)).Add(usedFee),
 		FeeSymbol: cfg.Currency,
 	}
 	return info, nil
