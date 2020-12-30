@@ -201,6 +201,7 @@ func (f *Fetcher) parseTx(data []byte) error {
 	}
 	return nil
 }
+
 func (f *Fetcher) getTxConfirmations(h string) (uint64, error) {
 	var (
 		txData  []byte

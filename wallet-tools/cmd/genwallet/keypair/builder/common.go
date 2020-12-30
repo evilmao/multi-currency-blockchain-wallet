@@ -13,6 +13,14 @@ func init() {
 		"TRX":           addrprovider.NewTRX(),
 	})
 
+	registerSecp256k1Canonical(map[string]addrprovider.AddrProvider{
+		"EOS":  addrprovider.NewEOS(),
+		"BTS":  addrprovider.NewBTS(),
+		"ABBC": addrprovider.NewABBC(),
+		"WSEC": addrprovider.NewEOS(),
+		"DCCY": addrprovider.NewEOS(),
+	})
+
 }
 
 func registerCommon(class string, kc func() key.Key, s signer.Signer, ap addrprovider.AddrProvider) {
