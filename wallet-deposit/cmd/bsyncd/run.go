@@ -14,7 +14,6 @@ import (
 func init() {
 	cmd.Register("btc", cmd.NewRunType(0, run))
 	cmd.Register("ltc", cmd.NewRunType(0, run))
-
 }
 
 func run(cfg *config.Config, restartTimes int) {
