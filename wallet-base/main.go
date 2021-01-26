@@ -2,7 +2,6 @@ package main
 
 import (
 	_ "upex-wallet/wallet-base/api"
-	_ "upex-wallet/wallet-base/blockchain"
 	_ "upex-wallet/wallet-base/cmd"
 	_ "upex-wallet/wallet-base/currency"
 	_ "upex-wallet/wallet-base/db"
