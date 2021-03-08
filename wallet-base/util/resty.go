@@ -15,7 +15,7 @@ import (
 const (
 	// StatusOK represents the api response status.
 	StatusOK          = iota
-	StatusOKForBroker = "000"
+	StatusOKForBroker = 1
 	// RestyMaxRetryCount is the max retry times.
 	RestyMaxRetryCount = 3
 )
@@ -37,8 +37,8 @@ func restyStatusError(resp *resty.Response) error {
 
 // Response represents the server response message.
 type ResponseForBroker struct {
-	Status string      `json:"errno"`
-	Msg    string      `json:"errmsg"`
+	Status int32      `json:"status"`
+	Msg    string      `json:"message"`
 	Data   interface{} `json:"data"`
 }
 
@@ -62,8 +62,8 @@ func RestPostToBroker(data interface{}, url string) (interface{}, int, error) {
 	if err != nil {
 		return nil, RestyMaxRetryCount, fmt.Errorf("decode response from broker api fail, request url:%s, detail %v", url, err)
 	}
-
-	if resp.Status == StatusOKForBroker && !strings.Contains(strings.ToLower(resp.Msg), "error") {
+	// success status:1
+	if resp.Status == StatusOKForBroker {
 		return resp.Data, 1, nil
 	}
 

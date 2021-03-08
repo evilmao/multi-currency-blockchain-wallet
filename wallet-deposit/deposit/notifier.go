@@ -107,8 +107,8 @@ func (w *notifier) notifyAndAudit(tx *models.Tx) {
 		// for request broker
 		txInfo := tx.DepositNotifyFormat()
 
-		txInfo["app_id"] = w.cfg.BrokerAccessKey
-		txInfo["symbol"] = models.TaskSymbolCover(w.cfg.Currency, tx)
+		// txInfo["app_id"] = w.cfg.BrokerAccessKey
+		txInfo["coinName"] = models.TaskSymbolCover(w.cfg.Currency, tx)
 
 		// for update db
 		data := make(map[string]interface{})

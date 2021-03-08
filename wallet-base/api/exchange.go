@@ -52,10 +52,10 @@ func (api *ExAPI) GetBrokerAppID() string {
 
 // DepositNotify notify deposit.
 func (api *ExAPI) DepositNotify(data map[string]interface{}) (interface{}, int, error) {
-    // 签名
-    signStr := api.Sign(data)
+    // todo: 签名暂时不用
+    // signStr := api.Sign(data)
     //  更新请求
-    data = api.UpdateRequestSign(data, signStr)
+    // data = api.UpdateRequestSign(data, signStr)
     return util.RestPostToBroker(data, api.url+"depositNotify")
 }
 

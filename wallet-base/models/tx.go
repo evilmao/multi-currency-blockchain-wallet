@@ -136,15 +136,16 @@ func (tx *Tx) IsFinished() bool {
 
 func (tx *Tx) DepositNotifyFormat() map[string]interface{} {
 	data := make(map[string]interface{})
-	data["address_to"] = tx.Address
-	data["amount"] = tx.Amount
-	data["app_id"] = ""
+	data["address"] = tx.Address
+	data["numbers"] = tx.Amount
 	data["confirm"] = tx.Confirm
-	data["symbol"] = strings.ToLower(tx.Symbol)
-	data["txid"] = tx.Hash
-	data["timestamp"] = time.Now().Unix()
-	data["is_expired"] = 0
-	data["is_mining"] = 0
+	data["chainType"] = "trc20" // trc20
+	data["txId"] = tx.Hash
+	data["fromAddress"] = ""  // 暂时不做解析
+	data["coinName"] = strings.ToLower(tx.Symbol)
+	// data["timestamp"] = time.Now().Unix()
+	// data["app_id"] = ""
+
 	return data
 }
 
