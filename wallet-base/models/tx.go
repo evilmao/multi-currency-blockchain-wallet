@@ -141,7 +141,6 @@ func (tx *Tx) DepositNotifyFormat() map[string]interface{} {
 	data["confirm"] = tx.Confirm
 	data["chainType"] = "trc20" // trc20
 	data["txId"] = tx.Hash
-	data["fromAddress"] = ""  // 暂时不做解析
 	data["coinName"] = strings.ToLower(tx.Symbol)
 	// data["timestamp"] = time.Now().Unix()
 	// data["app_id"] = ""
