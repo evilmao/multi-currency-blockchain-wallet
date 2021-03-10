@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -115,13 +116,15 @@ func (wtx *Tx) Update(values M, dbInst *gorm.DB) error {
 // WithdrawNotifyFormat returns a data structure for withdraw notify.
 func (wtx *Tx) WithdrawNotifyFormat() map[string]interface{} {
 	data := make(map[string]interface{})
-	data["trans_id"] = wtx.TransID
-	data["address_to"] = wtx.Address
+	id, _ := strconv.ParseInt(wtx.TransID, 10, 64)
+	data["id"] = id
+	data["address"] = wtx.Address
 	data["amount"] = wtx.Amount.String()
 	data["symbol"] = TaskSymbolCover(wtx.BlockchainName, strings.ToLower(wtx.Symbol)) // TODO: 平台支持TRC20 USDT后修改
-	data["txid"] = wtx.Hash
+	data["txId"] = wtx.Hash
 	data["confirm"] = wtx.Confirm
 	data["real_fee"] = wtx.Fees
+	data["chainType"]=""
 	data["app_id"] = ""
 	data["timestamp"] = time.Now().Unix()
 	return data
