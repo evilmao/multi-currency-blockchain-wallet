@@ -56,7 +56,7 @@ func (api *ExAPI) DepositNotify(data map[string]interface{}) (interface{}, int, 
     // signStr := api.Sign(data)
     //  更新请求
     // data = api.UpdateRequestSign(data, signStr)
-    return util.RestPostToBroker(data, api.url+"depositNotify")
+    return util.RestPostToBroker(data, api.url+"rechargeNotify")
 }
 
 // BalanceChangeNotify, response deposit result
