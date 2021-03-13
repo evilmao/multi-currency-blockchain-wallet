@@ -88,7 +88,7 @@ func (p *taskProducer) produceFromAPIs() {
 func (p *taskProducer) produceFromAPI(symbol string) {
 
 	var data = make(map[string]interface{})
-	data["symbol"] = models.TaskSymbolCover(p.cfg.Currency, symbol) // todo: 平台支持trc20 USTD 后需要修改
+	data["coinName"] = symbol
 	data["app_id"] = p.cfg.BrokerAccessKey
 	data["timestamp"] = time.Now().Unix()
 
@@ -109,9 +109,9 @@ func (p *taskProducer) produceFromAPI(symbol string) {
 	for _, data := range datas {
 		var (
 			d         = data.(map[string]interface{})
-			id        = d["trans_id"].(float64)
-			amount    = d["amount"].(float64)
-			addressTo = d["address_to"].(string)
+			id        = d["id"].(float64)
+			amount    = d["numbers"].(float64)
+			addressTo = d["address"].(string)
 		)
 
 		if addressTo == "" || amount <= 0 {

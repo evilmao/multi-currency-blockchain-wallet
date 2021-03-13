@@ -68,8 +68,9 @@ func (api *ExAPI) DepositBalanceChangeNotify(data map[string]interface{}) (inter
 
 // WithdrawNotify updates the withdraw task status.
 func (api *ExAPI) WithdrawNotify(data map[string]interface{}) (interface{}, int, error) {
-    signStr := api.Sign(data)
-    data = api.UpdateRequestSign(data, signStr)
+    // todo: 暂时不签名
+    // signStr := api.Sign(data)
+    // data = api.UpdateRequestSign(data, signStr)
     return util.RestPostToBroker(data, api.url+"withdrawNotify/")
 }
 
@@ -83,8 +84,9 @@ func (api *ExAPI) WithdrawBalanceChangeNotify(data map[string]interface{}) (inte
 // GetWithdraws gets withdraw list by currency.
 // request args: {"symbol":"eth","count":100}
 func (api *ExAPI) GetWithdraws(data map[string]interface{}) (interface{}, int, error) {
-    signStr := api.Sign(data)
-    data = api.UpdateRequestSign(data, signStr)
+    // todo:暂时不签名
+    // signStr := api.Sign(data)
+    // data = api.UpdateRequestSign(data, signStr)
     return util.RestPostToBroker(data, api.url+"withdrawConsume")
 }
 
@@ -102,8 +104,8 @@ func (api *ExAPI) DangerousAPIForUpdateTxHash(transID, newTxHash string, data ma
         return fmt.Errorf("invalid new tx hash")
     }
 
-    data["trans_id"] = transID
-    data["txid"] = newTxHash
+    data["id"] = transID
+    data["txId"] = newTxHash
 
     _, _, err := api.WithdrawNotify(data)
 

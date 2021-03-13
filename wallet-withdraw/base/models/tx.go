@@ -119,12 +119,12 @@ func (wtx *Tx) WithdrawNotifyFormat() map[string]interface{} {
 	id, _ := strconv.ParseInt(wtx.TransID, 10, 64)
 	data["id"] = id
 	data["address"] = wtx.Address
-	data["amount"] = wtx.Amount.String()
-	data["symbol"] = TaskSymbolCover(wtx.BlockchainName, strings.ToLower(wtx.Symbol)) // TODO: 平台支持TRC20 USDT后修改
+	data["numbers"] = wtx.Amount.String()
+	data["coinName"] = strings.ToLower(wtx.Symbol)
 	data["txId"] = wtx.Hash
 	data["confirm"] = wtx.Confirm
 	data["real_fee"] = wtx.Fees
-	data["chainType"]=""
+	data["chainType"]= wtx.BlockchainName
 	data["app_id"] = ""
 	data["timestamp"] = time.Now().Unix()
 	return data
