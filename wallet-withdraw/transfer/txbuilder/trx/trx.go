@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"upex-wallet/wallet-base/newbitx/misclib/log"
 	"upex-wallet/wallet-config/withdraw/transfer/config"
 	"upex-wallet/wallet-withdraw/transfer/txbuilder"
 	"upex-wallet/wallet-withdraw/transfer/txbuilder/trx/gtrx"
@@ -70,6 +71,7 @@ func (b *TRXBuilder) DoBuild(info *txbuilder.AccountModelBuildInfo) (*txbuilder.
 	} else if assetInfo.Type == TRC20 {
 		transferReq, err := gtrx.CreateTrc20TransferReq(info.FromAccount.Address, info.Task.Address, assetInfo.ContractAddress, info.Task.Amount, int32(assetInfo.Precision))
 		if err != nil {
+			log.Errorf("444----info:%#v,assetInfo:%#v",info,assetInfo)
 			return nil, fmt.Errorf("create trc20 transfer req falied,%v", err)
 		}
 
