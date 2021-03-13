@@ -254,7 +254,8 @@ func insertOrUpdateCurrencyTable(cfg *config.Config) {
 		}
 
 		// update existed symbol
-		c.Address = strings.ToLower(symbolDetail.Address)
+		// c.Address = strings.ToLower(symbolDetail.Address)
+		c.Address = symbolDetail.Address  // fix trc20
 		c.Decimals = symbolDetail.Precision
 		c.MinBalance = fmt.Sprintf("%"+fmt.Sprintf(".%d", symbolDetail.Precision)+"f", symbolDetail.MinBalanceRemain)
 		c.MaxBalance = fmt.Sprintf("%"+fmt.Sprintf(".%d", symbolDetail.Precision)+"f", symbolDetail.MaxBalanceRemain)
