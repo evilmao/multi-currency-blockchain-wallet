@@ -14,13 +14,14 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// todo: 关闭BTC功能
 func init() {
-	txbuilder.Register("btc", NewBTC)
-	txbuilder.Register("etp", NewETP)
-	txbuilder.Register("qtum", NewBTC)
-	txbuilder.Register("fab", NewBTC)
-	txbuilder.Register("mona", NewBTC)
-	txbuilder.Register("ltc", NewBTC)
+	// txbuilder.Register("btc", NewBTC)
+	// txbuilder.Register("etp", NewETP)
+	// txbuilder.Register("qtum", NewBTC)
+	// txbuilder.Register("fab", NewBTC)
+	// txbuilder.Register("mona", NewBTC)
+	// txbuilder.Register("ltc", NewBTC)
 }
 
 func NewBTC(cfg *config.Config) txbuilder.Builder {

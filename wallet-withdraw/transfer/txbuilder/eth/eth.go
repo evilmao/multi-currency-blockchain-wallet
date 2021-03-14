@@ -21,11 +21,12 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// todo: 关闭 eth/erc20功能
 func init() {
-	txbuilder.Register("ETH", New)
-	txbuilder.Register("ETC", New)
-	txbuilder.Register("SMT", New)
-	txbuilder.Register("IONC", New)
+	// txbuilder.Register("ETH", New)
+	// txbuilder.Register("ETC", New)
+	// txbuilder.Register("SMT", New)
+	// txbuilder.Register("IONC", New)
 }
 
 type ETHBuilder struct {
