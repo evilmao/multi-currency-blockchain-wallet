@@ -88,7 +88,6 @@ func (p *taskProducer) produceFromAPIs() {
 func (p *taskProducer) produceFromAPI(symbol string) {
 
 	var data = make(map[string]interface{})
-	data["coinName"] = symbol
 	data["app_id"] = p.cfg.BrokerAccessKey
 	data["timestamp"] = time.Now().Unix()
 
@@ -107,11 +106,13 @@ func (p *taskProducer) produceFromAPI(symbol string) {
 	}
 
 	for _, data := range datas {
+		log.Warnf("1111----withdraw info:%v",data)
 		var (
 			d         = data.(map[string]interface{})
 			id        = d["id"].(float64)
 			amount    = d["numbers"].(float64)
 			addressTo = d["address"].(string)
+			withdrawSymbol = d["coinName"].(string)
 		)
 
 		if addressTo == "" || amount <= 0 {
@@ -123,7 +124,7 @@ func (p *taskProducer) produceFromAPI(symbol string) {
 		task.BlockchainName = p.cfg.Currency
 		task.SequenceID = util.HashString32([]byte(task.TransID))
 		task.Address = addressTo
-		task.Symbol = symbol
+		task.Symbol = strings.ToLower(withdrawSymbol)
 		task.TxType = models.TxTypeWithdraw
 		task.Amount = decimal.NewFromFloat(amount)
 		task.Fees = decimal.NewFromFloat(d["fee"].(float64))
