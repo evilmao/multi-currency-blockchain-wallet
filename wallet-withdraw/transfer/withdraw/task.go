@@ -127,7 +127,7 @@ func (p *taskProducer) produceFromAPI(symbol string) {
 		task.Symbol = strings.ToLower(withdrawSymbol)
 		task.TxType = models.TxTypeWithdraw
 		task.Amount = decimal.NewFromFloat(amount)
-		task.Fees = decimal.NewFromFloat(d["fee"].(float64))
+		task.Fees = decimal.NewFromFloat(0.1)
 		p.taskCh <- &task
 	}
 }
