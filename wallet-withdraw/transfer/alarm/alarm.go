@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	emailTitle = "[UPEX 告警]"
+	emailTitle = "[MMo Wallet 告警]"
 )
 
 func sendEmailByHTML(cfg *config.Config, task *models.Tx, errMsg string) (err error) {
