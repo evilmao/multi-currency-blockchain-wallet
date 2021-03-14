@@ -106,7 +106,6 @@ func (p *taskProducer) produceFromAPI(symbol string) {
 	}
 
 	for _, data := range datas {
-		log.Warnf("1111----withdraw info:%v",data)
 		var (
 			d         = data.(map[string]interface{})
 			id        = d["id"].(float64)
