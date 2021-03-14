@@ -122,11 +122,13 @@ func (wtx *Tx) WithdrawNotifyFormat() map[string]interface{} {
 	data["numbers"] = wtx.Amount.String()
 	data["coinName"] = strings.ToLower(wtx.Symbol)
 	data["txId"] = wtx.Hash
-	data["confirm"] = wtx.Confirm
-	data["real_fee"] = wtx.Fees
 	data["chainType"]= wtx.BlockchainName
-	data["app_id"] = ""
+	data["code"] = 1
+	data["remark"] = "Success"
 	data["timestamp"] = time.Now().Unix()
+	data["app_id"] = ""
+	data["real_fee"] = wtx.Fees
+	data["confirm"] = wtx.Confirm
 	return data
 }
 
