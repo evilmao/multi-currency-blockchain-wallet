@@ -150,8 +150,6 @@ func CurrencyDetail(symbol string) *CurrencyInfo {
 }
 
 func CurrencyDetailByAddress(address string) (*CurrencyInfo, bool) {
-
-	address = strings.ToLower(address)
 	c := models.GetCurrencyByContractAddress(address)
 	if c == nil {
 		return nil, false
