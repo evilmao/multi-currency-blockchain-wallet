@@ -108,7 +108,6 @@ func (w *notifier) notifyAndAudit(tx *models.Tx) {
 		txInfo := tx.DepositNotifyFormat()
 
 		// txInfo["app_id"] = w.cfg.BrokerAccessKey
-		txInfo["coinName"] = w.cfg.Currency
 
 		// for update db
 		data := make(map[string]interface{})

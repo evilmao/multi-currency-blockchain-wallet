@@ -196,14 +196,20 @@ func (b *AccountModelBuilder) buildGather(feeMeta FeeMeta, task *models.Tx) (*Tx
 		maxRemainWithFee := maxRemain.Add(feeMeta.Fee)
 		task.Amount = fromAccount.Balance.Sub(maxRemainWithFee)
 	} else {
+		systemAccount := bmodels.GetMatchedAccount("0", task.Symbol, bmodels.AddressTypeSystem)
 		fromAccount = bmodels.GetMatchedAccount("0", task.Symbol, bmodels.AddressTypeNormal)
-		if fromAccount.Address == "" {
+		if fromAccount.Address == "" ||  systemAccount.Address == ""{
 			return nil, nil
 		}
 		// main blockChain balance -- for pay transaction fees
 		feeAccount = bmodels.GetAccountByAddress(fromAccount.Address, b.cfg.Currency)
-		if feeAccount.Address == "" || feeAccount.Balance == nil || feeAccount.Balance.LessThan(feeMeta.Fee) {
-			return nil, alarm.NewErrorAccountBalanceNotEnough(task.Address, b.cfg.Currency, *feeAccount.Balance, feeMeta.Fee)
+		systemFeeAccount := bmodels.GetAccountByAddress(systemAccount.Address, b.cfg.Currency)
+		if feeAccount.Address == "" || feeAccount.Balance == nil || feeAccount.Balance.LessThan(feeMeta.Fee){
+			if systemFeeAccount.Balance.LessThan(feeMeta.Fee){
+				return nil, alarm.NewErrorAccountBalanceNotEnough(task.Address, b.cfg.Currency, *feeAccount.Balance, feeMeta.Fee)
+			}else{
+				feeAccount = systemFeeAccount
+			}
 		}
 
 		task.Amount = *fromAccount.Balance
