@@ -167,8 +167,8 @@ func (b *AccountModelBuilder) buildWithdraw(feeMeta FeeMeta, task *models.Tx) (*
     }
 
     if feeAccount != nil && len(feeAccount.Address) == 0 {
-        account := bmodels.GetMaxBalanceAccount(b.cfg.Currency, bmodels.AddressTypeSystem)
-        return nil, alarm.NewErrorAccountBalanceNotEnough(task.Address, b.cfg.Currency, *account.Balance, feeMeta.Fee)
+        // account := bmodels.GetMaxBalanceAccount(b.cfg.Currency, bmodels.AddressTypeSystem)
+        return nil, alarm.NewErrorAccountBalanceNotEnough(task.Address, b.cfg.Currency, feeMeta.Fee)
     }
 
     return b.doBuild(fromAccount, feeMeta, task, feeAccount)
@@ -202,9 +202,9 @@ func (b *AccountModelBuilder) buildGather(feeMeta FeeMeta, task *models.Tx) (*Tx
         }
         // main blockChain balance -- for pay transaction fees
         feeAccount = bmodels.GetAccountByAddress(fromAccount.Address, b.cfg.Currency)
+
         if feeAccount.Address == "" || feeAccount.Balance == nil || feeAccount.Balance.LessThan(feeMeta.Fee) {
-            log.Warnf("0000--------%v",feeAccount)
-            return nil, alarm.NewErrorAccountBalanceNotEnough(task.Address, b.cfg.Currency, *feeAccount.Balance, feeMeta.Fee)
+            return nil, alarm.NewErrorAccountBalanceNotEnough(task.Address, b.cfg.Currency, feeMeta.Fee)
         }
 
         task.Amount = *fromAccount.Balance
