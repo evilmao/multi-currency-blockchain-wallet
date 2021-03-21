@@ -203,6 +203,7 @@ func (b *AccountModelBuilder) buildGather(feeMeta FeeMeta, task *models.Tx) (*Tx
         // main blockChain balance -- for pay transaction fees
         feeAccount = bmodels.GetAccountByAddress(fromAccount.Address, b.cfg.Currency)
         if feeAccount.Address == "" || feeAccount.Balance == nil || feeAccount.Balance.LessThan(feeMeta.Fee) {
+            log.Warnf("0000--------%v",feeAccount)
             return nil, alarm.NewErrorAccountBalanceNotEnough(task.Address, b.cfg.Currency, *feeAccount.Balance, feeMeta.Fee)
         }
 
