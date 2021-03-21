@@ -38,7 +38,7 @@ type Tx struct {
 	Symbol           string          `gorm:"size:10" json:"symbol"`
 	Type             uint16          `gorm:"column:tx_type;type:tinyint" json:"tx_type"`
 	NotifyRetryCount uint16          `gorm:"type:int" json:"notify_retry_count"`
-	NotifyStatus     uint16          `gorm:"type:tinyint;default:0" json:"notify_status"`
+	NotifyStatus     uint16          `gorm:"type:tinyint" json:"notify_status"`
 	Version          uint16          `gorm:"type:bigint;default:0" json:"version"`
 	InnerIndex       uint16          `gorm:"type:int" json:"inner_index"`
 	Amount           decimal.Decimal `gorm:"type:decimal(32,20);default:0" json:"amount"`
