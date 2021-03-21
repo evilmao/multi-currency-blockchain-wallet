@@ -100,14 +100,11 @@ func (w *notifier) notifyAndAudit(tx *models.Tx) {
 	util.Go("notify-audit", func() {
 		var (
 			notifyRetryCount int
-			notifyStatus     int
 			err              error
 		)
 
 		// for request broker
 		txInfo := tx.DepositNotifyFormat()
-
-		// txInfo["app_id"] = w.cfg.BrokerAccessKey
 
 		// for update db
 		data := make(map[string]interface{})
@@ -117,7 +114,7 @@ func (w *notifier) notifyAndAudit(tx *models.Tx) {
 		data["notify_retry_count"] = gorm.Expr("`notify_retry_count` + ?", notifyRetryCount)
 		monitor.MetricsCount("deposit_notify", 1, monitor.MetricsTags{"currency": tx.Symbol})
 
-		if err != nil {
+		if err != nil || notifyRetryCount != 1{
 			log.Errorf("%s, deposit notify failed, %v, retry %d times, txinfo: %v", notifierTag, err, notifyRetryCount, txInfo)
 
 			err = tx.Update(data)
@@ -129,11 +126,10 @@ func (w *notifier) notifyAndAudit(tx *models.Tx) {
 
 		// request broker success
 		if int(tx.Confirm) >= w.cfg.MaxConfirm {
-			notifyStatus = 1
-			data["notify_status"] = notifyStatus
-			data["confirm"] = tx.Confirm
+			data["notify_status"] = 1
 		}
 
+		data["confirm"] = tx.Confirm
 		err = tx.Update(data)
 		if err != nil {
 			log.Errorf("%s, update tx data %v failed, %v", notifierTag, data, err)
