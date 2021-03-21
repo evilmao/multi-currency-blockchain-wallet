@@ -144,7 +144,7 @@ func (b *AccountModelBuilder) BuildGather(task *models.Tx) (*TxInfo, error) {
 }
 
 func (b *AccountModelBuilder) BuildSupplementaryFee(task *models.Tx) (*TxInfo, error) {
-    return BuildByFeeMeta(b.cfg, b.feeMeta, b.builder.EstimateFeeMeta(task.Symbol, task.TxType), task, b.buildWithdraw)
+    return BuildByFeeMeta(b.cfg, b.feeMeta, b.builder.EstimateFeeMeta(task.Symbol, task.TxType), task, b.buildSupplementaryFee)
 }
 
 func (b *AccountModelBuilder) buildWithdraw(feeMeta FeeMeta, task *models.Tx) (*TxInfo, error) {
@@ -204,7 +204,7 @@ func (b *AccountModelBuilder) buildGather(feeMeta FeeMeta, task *models.Tx) (*Tx
         feeAccount = bmodels.GetAccountByAddress(fromAccount.Address, b.cfg.Currency)
 
         if feeAccount.Address == "" || feeAccount.Balance == nil || feeAccount.Balance.LessThan(feeMeta.Fee) {
-            return nil, alarm.NewErrorAccountBalanceNotEnough(task.Address, b.cfg.Currency, feeMeta.Fee)
+            return nil, alarm.NewErrorAccountBalanceNotEnough(fromAccount.Address, b.cfg.Currency, feeMeta.Fee)
         }
 
         task.Amount = *fromAccount.Balance
