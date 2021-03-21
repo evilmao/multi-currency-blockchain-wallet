@@ -101,10 +101,10 @@ func updateCurrencyDetails(cfg *config.Config) error {
 
 	// token details
 	for _, s := range symbols {
-		symbol := strings.ToUpper(s.Symbol)
+		symbol := s.Symbol
 		tmpC = &CurrencyInfo{
 			BlockchainName:   mainCurrency,
-			Symbol:           s.Symbol,
+			Symbol:           symbol,
 			Address:          s.Address,
 			Confirm:          cfg.MaxConfirm,
 			Decimal:          int(s.Precision),
