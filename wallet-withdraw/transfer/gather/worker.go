@@ -75,15 +75,17 @@ func (w *Worker) gather(address, symbol string) {
 	// 2. build gather
 	txInfo, err := w.txBuilder.BuildGather(task)
 	if err != nil {
+		log.Warnf("1111------%s",err.Error())
 		switch err := err.(type) {
 		case *alarm.ErrorAccountBalanceNotEnough:
 			if w.supplementaryFeeBuilder != nil {
+				log.Warnf("2222------")
 				w.supplementaryFee(task.Symbol, err.Address)
 				return
 			}
 		}
 
-		log.Errorf("%s, build tx %s failed, %v", w.Name(), task, err)
+		log.Errorf("%s, build tx %v failed, %v", w.Name(), task, err)
 		return
 	}
 

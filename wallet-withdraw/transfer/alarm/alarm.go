@@ -97,6 +97,7 @@ func SendEmail(cfg *config.Config, task *models.Tx, err error, msg string) {
 		err := sendEmailByHTML(cfg, task, msg)
 		if err != nil {
 			log.Errorf("send email error,%v", err)
+			return
 		}
 		log.Infof("send email successfully for %s task", models.TxTypeName(task.TxType))
 	}
