@@ -1,7 +1,6 @@
 package deposit
 
 import (
-	"strings"
 	"time"
 
 	"upex-wallet/wallet-base/api"
@@ -61,8 +60,7 @@ func (w *notifier) Work() {
 		}
 	}
 
-	symbol := strings.ToLower(w.cfg.Currency)
-	txs := models.GetUnfinishedTxs(symbol)
+	txs := models.GetUnfinishedTxs(w.cfg.Currency)
 
 	for i := range txs {
 		tx := &txs[i]
@@ -100,13 +98,11 @@ func (w *notifier) notifyAndAudit(tx *models.Tx) {
 	util.Go("notify-audit", func() {
 		var (
 			notifyRetryCount int
-			notifyStatus     int
 			err              error
 		)
 
 		// for request broker
 		txInfo := tx.DepositNotifyFormat()
-
 		txInfo["app_id"] = w.cfg.BrokerAccessKey
 		txInfo["symbol"] = models.TaskSymbolCover(w.cfg.Currency, tx)
 
@@ -130,11 +126,9 @@ func (w *notifier) notifyAndAudit(tx *models.Tx) {
 
 		// request broker success
 		if int(tx.Confirm) >= w.cfg.MaxConfirm {
-			notifyStatus = 1
-			data["notify_status"] = notifyStatus
-			data["confirm"] = tx.Confirm
+			data["notify_status"] = 1
 		}
-
+		data["confirm"] = tx.Confirm
 		err = tx.Update(data)
 		if err != nil {
 			log.Errorf("%s, update tx data %v failed, %v", notifierTag, data, err)
