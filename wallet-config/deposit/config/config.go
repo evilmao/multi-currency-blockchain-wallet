@@ -111,7 +111,7 @@ func New() *Config {
 				&SymbolDetail{
 					Symbol:           strings.ToLower(symbol),
 					Precision:        uint(bviper.GetInt64(fmt.Sprintf("symbols.%s.precision", symbol), 0)),
-					Address:          strings.ToLower(contractAddress),
+					Address:          contractAddress,
 					MinDepositAmount: bviper.GetFloat64(fmt.Sprintf("symbols.%s.minDepositAmount", symbol), 0),
 					MinBalanceRemain: bviper.GetFloat64(fmt.Sprintf("symbols.%s.minBalanceRemain", symbol), 0),
 					MaxBalanceRemain: bviper.GetFloat64(fmt.Sprintf("symbols.%s.maxBalanceRemain", symbol), 0),
