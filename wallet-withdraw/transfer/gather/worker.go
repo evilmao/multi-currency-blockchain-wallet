@@ -78,12 +78,12 @@ func (w *Worker) gather(address, symbol string) {
 		switch err := err.(type) {
 		case *alarm.ErrorAccountBalanceNotEnough:
 			if w.supplementaryFeeBuilder != nil {
-				w.supplementaryFee(task.Symbol, err.Address)
+				w.supplementaryFee(w.cfg.Currency, err.Address)
 				return
 			}
 		}
 
-		log.Errorf("%s, build tx %s failed, %v", w.Name(), task, err)
+		log.Errorf("%s, build tx %v failed, %v", w.Name(), task, err)
 		return
 	}
 
