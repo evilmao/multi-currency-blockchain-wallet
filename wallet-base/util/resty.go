@@ -64,6 +64,7 @@ func RestPostToBroker(data interface{}, url string) (interface{}, int, error) {
 	}
 
 	if resp.Status == StatusOKForBroker && !strings.Contains(strings.ToLower(resp.Msg), "error") {
+		log.Info("request broker successfully... ")
 		return resp.Data, 1, nil
 	}
 
