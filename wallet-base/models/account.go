@@ -105,7 +105,7 @@ func GetSystemBalance(symbol string) *decimal.Decimal {
 // GetMatchedAccount gets matched account for withdraw.
 func GetMatchedAccount(amount, symbol string, addressType uint) *Account {
 	account := Account{Balance: &decimal.Zero}
-	db.Default().Where("balance >= ? and symbol = ? and `account_type` = ?", amount, symbol, addressType).First(&account)
+	db.Default().Where("balance > ? and symbol = ? and `account_type` = ?", amount, symbol, addressType).First(&account)
 	return &account
 }
 
